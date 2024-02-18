@@ -2,12 +2,12 @@
 #![warn(missing_docs)]
 //! Python-wrappers for the rust gadjid (Graph Adjustment Identification Distance) library.
 
-use ::gadjid::EdgelistIterator;
 use ::gadjid::graph_operations::ancestor_aid as rust_an_aid;
 use ::gadjid::graph_operations::oset_aid as rust_o_aid;
 use ::gadjid::graph_operations::parent_aid as rust_pa_aid;
 use ::gadjid::graph_operations::shd as rust_shd;
 use ::gadjid::graph_operations::sid as rust_sid;
+use ::gadjid::EdgelistIterator;
 use ::gadjid::PDAG;
 use anyhow::bail;
 use pyo3::prelude::*;
