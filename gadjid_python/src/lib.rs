@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 #![warn(missing_docs)]
-//! Python-wrappers for the rust gadjid (Graph Adjustment Incompatibility Distance) library.
+//! Python-wrappers for the rust gadjid (Graph Adjustment Identification Distance) library.
 
 use ::gadjid::graph_loading::constructor::EdgelistIterator;
 use ::gadjid::graph_operations::ancestor_aid as rust_an_aid;
@@ -37,7 +37,7 @@ pub fn shd(true_adjacency: &PyAny, guess_adjacency: &PyAny) -> PyResult<(f64, us
     Ok((normalized_distance, n_errors))
 }
 
-/// Structural Intervention Distance between two DAG adjacency matrices (sparse or dense)
+/// Structural Identification Distance between two DAG adjacency matrices (sparse or dense)
 #[pyfunction]
 pub fn sid(true_adjacency: &PyAny, guess_adjacency: &PyAny) -> anyhow::Result<(f64, usize)> {
     let dag_truth = graph_from_pyobject(true_adjacency)?;
@@ -46,7 +46,7 @@ pub fn sid(true_adjacency: &PyAny, guess_adjacency: &PyAny) -> anyhow::Result<(f
     Ok((normalized_distance, n_errors))
 }
 
-/// Parent Adjustment Intervention Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
+/// Parent Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[pyfunction]
 pub fn parent_aid(true_adjacency: &PyAny, guess_adjacency: &PyAny) -> PyResult<(f64, usize)> {
     let graph_truth = graph_from_pyobject(true_adjacency)?;
@@ -55,7 +55,7 @@ pub fn parent_aid(true_adjacency: &PyAny, guess_adjacency: &PyAny) -> PyResult<(
     Ok((normalized_distance, n_errors))
 }
 
-/// Ancestor Adjustment Intervention Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
+/// Ancestor Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[pyfunction]
 pub fn ancestor_aid(true_adjacency: &PyAny, guess_adjacency: &PyAny) -> PyResult<(f64, usize)> {
     let graph_truth = graph_from_pyobject(true_adjacency)?;
@@ -64,7 +64,7 @@ pub fn ancestor_aid(true_adjacency: &PyAny, guess_adjacency: &PyAny) -> PyResult
     Ok((normalized_distance, n_errors))
 }
 
-/// Optimal Adjustment Intervention Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
+/// Optimal Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[pyfunction]
 pub fn oset_aid(true_adjacency: &PyAny, guess_adjacency: &PyAny) -> PyResult<(f64, usize)> {
     let graph_truth = graph_from_pyobject(true_adjacency)?;
