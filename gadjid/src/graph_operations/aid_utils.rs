@@ -218,4 +218,36 @@ mod tests {
 
         assert!(get_nam(&cpdag, &[0]) == FxHashSet::from_iter([3]));
     }
+
+    use crate::graph_operations::{parent_aid, oset_aid, ancestor_aid};
+
+    #[test]
+    pub fn nam_correctly_counted_as_mistake() {
+        // this tests checks mistakes between the cpdag X - Y and dag X -> Y for all distances.
+
+        let dag = vec![
+            vec![0, 1], //
+            vec![0, 0],
+        ];
+        let cpdag = vec![
+            vec![0, 2], //
+            vec![0, 0],
+        ];
+        let dag = PDAG::from_vecvec(dag);
+        let cpdag = PDAG::from_vecvec(cpdag);
+
+        assert_eq!((1.0, 2), parent_aid(&dag, &cpdag));
+        assert_eq!((1.0, 2), parent_aid(&cpdag, &dag));
+        assert_eq!(
+            (1.0, 2),
+            ancestor_aid(&dag, &cpdag)
+        );
+        assert_eq!(
+            (1.0, 2),
+            ancestor_aid(&cpdag, &dag)
+        );
+        assert_eq!((1.0, 2), oset_aid(&dag, &cpdag));
+        assert_eq!((1.0, 2), oset_aid(&cpdag, &dag));
+    }
 }
+
