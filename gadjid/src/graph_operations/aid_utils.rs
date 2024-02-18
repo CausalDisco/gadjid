@@ -153,7 +153,7 @@ pub fn get_nam_nvas(
 /// nodes and all possible Y.
 ///
 /// Returns set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
-/// 
+///
 /// Follows algorithm 2 from the main article, https://arxiv.org/abs/2402.08616.
 pub fn get_nam(cpdag: &PDAG, t: &[usize]) -> FxHashSet<usize> {
     let mut to_visit_stack: Vec<(Edge, usize)> = Vec::new();
@@ -222,7 +222,7 @@ mod tests {
         assert!(get_nam(&cpdag, &[0]) == FxHashSet::from_iter([3]));
     }
 
-    use crate::graph_operations::{parent_aid, oset_aid, ancestor_aid};
+    use crate::graph_operations::{ancestor_aid, oset_aid, parent_aid};
 
     #[test]
     pub fn nam_correctly_counted_as_mistake() {
@@ -241,16 +241,9 @@ mod tests {
 
         assert_eq!((1.0, 2), parent_aid(&dag, &cpdag));
         assert_eq!((1.0, 2), parent_aid(&cpdag, &dag));
-        assert_eq!(
-            (1.0, 2),
-            ancestor_aid(&dag, &cpdag)
-        );
-        assert_eq!(
-            (1.0, 2),
-            ancestor_aid(&cpdag, &dag)
-        );
+        assert_eq!((1.0, 2), ancestor_aid(&dag, &cpdag));
+        assert_eq!((1.0, 2), ancestor_aid(&cpdag, &dag));
         assert_eq!((1.0, 2), oset_aid(&dag, &cpdag));
         assert_eq!((1.0, 2), oset_aid(&cpdag, &dag));
     }
 }
-

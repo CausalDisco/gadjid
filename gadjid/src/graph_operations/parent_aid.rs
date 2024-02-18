@@ -14,7 +14,6 @@ use crate::{
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
 ///  currently distances between general PDAGs are not implemented)
 /// Returns a tuple of (normalized error (in \[0,1]), total number of errors)
-// TODO: look into sharing code between distances, especially between the "local adjustment strategy distances" parent/ancestor-aid
 pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     assert!(
         guess.n_nodes == truth.n_nodes,
@@ -25,8 +24,6 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     let verifier_mistakes_found = (0..guess.n_nodes)
         .into_par_iter()
         .map(|treatment| {
-            let parent_adjustment = guess.parents_of(treatment).iter().copied().collect();
-
             let nam_in_guess = if matches!(
                 guess.pdag_type,
                 crate::partially_directed_acyclic_graph::Structure::CPDAG
@@ -36,8 +33,8 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                 FxHashSet::<usize>::default()
             };
 
-            // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
-            let (nam_in_true, nvas_in_true) = get_nam_nvas(truth, &[treatment], parent_adjustment);
+            // -- this function differs from ancestor_aid.rs only in the imports and from here
+            let parent_adjustment = guess.parents_of(treatment).iter().copied().collect();
 
             // in line with the original SID, claim all NonParents may be effects
             // (this is a larger set than the NonDescendants in ancestor_aid and oset_aid;
@@ -46,6 +43,10 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             let claim_possible_effect = FxHashSet::from_iter(
                 (0..truth.n_nodes).filter(|v| !guess.parents_of(treatment).contains(v)),
             );
+            // -- to here
+
+            // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
+            let (nam_in_true, nvas_in_true) = get_nam_nvas(truth, &[treatment], parent_adjustment);
             let t_poss_desc_in_truth = possible_descendants(truth, [treatment].iter());
 
             let mut mistakes = 0;

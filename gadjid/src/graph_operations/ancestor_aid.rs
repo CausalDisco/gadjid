@@ -24,15 +24,6 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     let verifier_mistakes_found = (0..guess.n_nodes)
         .into_par_iter()
         .map(|treatment| {
-            let ruletable = crate::graph_operations::ruletables::ancestors::AncestorsRuletable {};
-            // do not yield starting vertices
-            let ancestor_adjustment = crate::graph_operations::gensearch::gensearch(
-                guess,
-                ruletable,
-                [treatment].iter(),
-                false,
-            );
-
             let nam_in_guess = if matches!(
                 guess.pdag_type,
                 crate::partially_directed_acyclic_graph::Structure::CPDAG
@@ -42,11 +33,22 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                 FxHashSet::<usize>::default()
             };
 
+            // -- this function differs from parent_aid.rs only in the imports and from here
+            let ruletable = crate::graph_operations::ruletables::ancestors::AncestorsRuletable {};
+            // do not yield starting vertices
+            let ancestor_adjustment = crate::graph_operations::gensearch::gensearch(
+                guess,
+                ruletable,
+                [treatment].iter(),
+                false,
+            );
+
+            let claim_possible_effect = possible_descendants(guess, [treatment].iter());
+            // -- to here
+
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
             let (nam_in_true, nvas_in_true) =
                 get_nam_nvas(truth, &[treatment], ancestor_adjustment);
-
-            let claim_possible_effect = possible_descendants(guess, [treatment].iter());
             let t_poss_desc_in_truth = possible_descendants(truth, [treatment].iter());
 
             let mut mistakes = 0;
