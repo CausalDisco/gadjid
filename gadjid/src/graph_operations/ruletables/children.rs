@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-//! Ruletable for getting all children of a set of nodes
+//! Ruletable for getting all children of a set of nodes. Unused for now, but kept in the codebase for convenience.
 
 use rustc_hash::FxHashSet;
 
@@ -26,6 +26,7 @@ impl RuleTable for ChildrenRuletable {
 }
 
 /// Gets the union of children of each node. This is more efficient than calling `children_of` for each node and then joining the results.
+#[allow(dead_code)]
 pub fn children<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
