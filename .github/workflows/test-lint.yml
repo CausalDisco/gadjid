@@ -1,0 +1,61 @@
+name: test & lint
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_call:
+  workflow_dispatch:
+
+# Make sure CI fails on all clippy lints
+env:
+  RUSTFLAGS: "-Dwarnings"
+
+jobs:
+  clippy_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # The runner image may lag behind https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2204-Readme.md#rust-tools
+      # so we update explicitly
+      # (this is e.g. also seen in the cargo workflows; we additionally skip self-update)
+      - name: Update rust
+        run: |
+            rustup update --no-self-update stable
+            rustup default stable
+            rustc --version
+            cargo --version
+            cargo clippy --version
+            cargo fmt --version
+
+      - name: Run clippy and rustfmt on gadjid
+        run: |
+          cargo clippy --all-targets --all-features --manifest-path gadjid/Cargo.toml
+          cargo clippy --all-targets --all-features --manifest-path gadjid/Cargo.toml --tests
+          cargo fmt --check --manifest-path gadjid/Cargo.toml
+
+      - name: Run clippy and rustfmt on gadjid_python
+        run: |
+          cargo clippy --all-targets --all-features --manifest-path gadjid_python/Cargo.toml
+          cargo fmt --check --manifest-path gadjid_python/Cargo.toml
+
+      - name: Install and run ruff on gadjid_python and python_tests
+        run: |
+          pip install ruff
+          ruff --version
+          ruff gadjid_python python_tests run_python_tests.py
+
+      - name: Run rust tests
+        run: |
+          cargo test --manifest-path gadjid/Cargo.toml
+
+      - name: Run python tests
+        run: |
+          sha256sum --check testgraphs/checksums.sha256
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install maturin
+          maturin develop --manifest-path ./gadjid_python/Cargo.toml --extras=test
+          python ./run_python_tests.py

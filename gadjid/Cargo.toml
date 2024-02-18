@@ -1,0 +1,18 @@
+[package]
+name = "gadjid"
+authors = ["Theo Würtzen", "Sebastian Weichwald", "Leonard Henckel"]
+version = "0.0.1-rc.0"
+description = "Adjustment Identification Distance: A gadjid for Causal Structure Learning"
+repository = "https://github.com/CausalDisco/gadjid"
+license = "MPL-2.0"
+edition = "2021"
+
+[dependencies]
+rand = "0.8"
+rayon = "1.8"
+rustc-hash = "1.1"
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+opt-level = 3

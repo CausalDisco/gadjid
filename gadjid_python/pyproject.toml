@@ -1,0 +1,39 @@
+[build-system]
+requires = ["maturin>=1.2,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "gadjid"
+authors =  [{name = "Theo Würtzen"}, {name = "Sebastian Weichwald"}, {name = "Leonard Henckel"}]
+description = "Adjustment Identification Distance: A gadjid for Causal Structure Learning"
+dependencies = ["numpy"]
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+keywords = ["causality", "causal structure learning", "metric", "adjustment"]
+
+[project.urls]
+# Homepage = "https://example.com"
+# Documentation = "TODO"
+Repository = "https://github.com/CausalDisco/gadjid"
+Issues = "https://github.com/CausalDisco/gadjid/issues"
+
+[project.optional-dependencies]
+test = ["scipy"]
+
+[tool.maturin]
+exclude = ["**/.gitignore"]
+features = ["pyo3/extension-module"]
+locked = true
+module-name = "gadjid"
+python-source = "python"
+
+[tool.ruff]
+exclude = ["./python/gadjid/__init__.py"]
+
+[tool.ruff.lint]
+# allow non-lowercase variable names in functions (e.g. Gtrue or DAGa)
+ignore = ["N806"]

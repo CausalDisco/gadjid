@@ -1,0 +1,11 @@
+## Custom
+
+# ignore vs code config
+.vscode
+
+# ignore macOS folder attributes
+.DS_Store
+
+# ignore custom local-only folders
+sketch
+venv
