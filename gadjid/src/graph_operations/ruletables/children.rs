@@ -31,6 +31,7 @@ pub fn children<'a>(
     starting_vertices: impl Iterator<Item = &'a usize>,
 ) -> FxHashSet<usize> {
     let ruletable = crate::graph_operations::ruletables::children::ChildrenRuletable {};
+    // gensearch yield_starting_vertices 'false' because $a \notin Children(a)$
     super::super::gensearch::gensearch(dag, ruletable, starting_vertices, false)
 }
 
