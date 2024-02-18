@@ -2,7 +2,7 @@
 #![warn(missing_docs)]
 //! Python-wrappers for the rust gadjid (Graph Adjustment Identification Distance) library.
 
-use ::gadjid::graph_loading::constructor::EdgelistIterator;
+use ::gadjid::EdgelistIterator;
 use ::gadjid::graph_operations::ancestor_aid as rust_an_aid;
 use ::gadjid::graph_operations::oset_aid as rust_o_aid;
 use ::gadjid::graph_operations::parent_aid as rust_pa_aid;
@@ -108,7 +108,7 @@ pub(crate) fn graph_from_iterator(
         )) {
             Ok(pdag) => Ok(pdag),
             Err(err) => match err {
-                ::gadjid::partially_directed_acyclic_graph::LoadError::NotAcyclic => bail!(err),
+                ::gadjid::LoadError::NotAcyclic => bail!(err),
             },
         },
         false => match PDAG::try_from_col_major(EdgelistIterator::into_column_major_edgelist(
@@ -116,7 +116,7 @@ pub(crate) fn graph_from_iterator(
         )) {
             Ok(pdag) => Ok(pdag),
             Err(err) => match err {
-                ::gadjid::partially_directed_acyclic_graph::LoadError::NotAcyclic => bail!(err),
+                ::gadjid::LoadError::NotAcyclic => bail!(err),
             },
         },
     }
