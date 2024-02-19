@@ -22,7 +22,7 @@ Repository = "https://github.com/CausalDisco/gadjid"
 Issues = "https://github.com/CausalDisco/gadjid/issues"
 
 [project.optional-dependencies]
-test = ["scipy"]
+test = ["pytest", "scipy"]
 
 [tool.maturin]
 exclude = ["**/.gitignore"]
