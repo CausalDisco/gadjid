@@ -131,12 +131,12 @@ __Average runtime__
     and all DAG/CPDAG distances discussed in the accompanying article
 * [gadjid_python/](./gadjid_python/) –
     python wrapper that accepts numpy and scipy int8 matrices as graph adjacency matrices
+    * [gadjid_python/tests/](./gadjid_python/tests/) – runs tests of and via the python 𝚐𝚊𝚍𝚓𝚒𝚍 wrapper:
+        1. tests the loading of numpy arrays and views as well as scipy sparse csr/csc matrices
+        2. tests `parent_aid` against the R implementation of the SID on pairs of testgraphs;
+        since in the special case of DAG inputs the Parent-AID coincides with the SID,
+        this end-to-end tests the check for validity of adjustment sets implemented via a new reachability algorithm
 * [gadjid_r/](./gadjid_r/) – placeholder for the R wrapper to come!
-* [python_tests/](./python_tests/) and [run_python_tests.py](./run_python_tests.py) – runs tests of and via the python 𝚐𝚊𝚍𝚓𝚒𝚍 wrapper:
-    1. tests the loading of numpy arrays and views as well as scipy sparse csr/csc matrices
-    2. tests `parent_aid` against the R implementation of the SID on pairs of testgraphs;
-    since in the special case of DAG inputs the Parent-AID coincides with the SID,
-    this end-to-end tests the check for validity of adjustment sets implemented via a new reachability algorithm
 * [testgraphs/](./testgraphs/) – testgraphs in .mtx files (Matrix Market Exchange Format), a csv file with the SHD/SID between the testgraphs to test against, checksums
 
 
