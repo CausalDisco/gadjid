@@ -6,7 +6,7 @@ use crate::{
 };
 use rustc_hash::FxHashSet;
 
-/// General reachability graph search algorithm, as in https://arxiv.org/pdf/2211.16468.pdf appendix C.
+/// General reachability graph search algorithm, Algorithm 6 in https://doi.org/10.48550/arXiv.2211.16468
 pub fn gensearch<'a>(
     dag: &PDAG,
     ruletable: impl RuleTable,

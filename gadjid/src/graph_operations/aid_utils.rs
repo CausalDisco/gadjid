@@ -24,7 +24,7 @@ enum WalkStatus {
 /// Validate Z as adjustment set relative to (T, Y) for a given set T of treatment
 /// nodes and all possible Y in G.
 ///
-/// Follows algorithm 3 from the main artilce, https://arxiv.org/abs/2402.08616.
+/// Follows Algorithm 3 in https://doi.org/10.48550/arXiv.2402.08616
 ///
 /// Returns tuple of:<br>
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
@@ -154,7 +154,7 @@ pub fn get_nam_nvas(
 ///
 /// Returns set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 ///
-/// Follows algorithm 2 from the main article, https://arxiv.org/abs/2402.08616.
+/// Follows Algorithm 2 in https://doi.org/10.48550/arXiv.2402.08616
 pub fn get_nam(cpdag: &PDAG, t: &[usize]) -> FxHashSet<usize> {
     let mut to_visit_stack: Vec<(Edge, usize)> = Vec::new();
     t.iter().for_each(|v| to_visit_stack.push((Edge::Init, *v)));
