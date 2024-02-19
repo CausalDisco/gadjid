@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 #![warn(missing_docs)]
-//! gadjid -  Graph Adjustment Incompatibility Distance library
+//! gadjid -  Graph Adjustment Identification Distance library
 mod ascending_list_utils;
 mod graph_loading;
 pub mod graph_operations;
