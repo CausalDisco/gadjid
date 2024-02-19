@@ -42,7 +42,15 @@ include = [
 
 [tool.ruff]
 exclude = ["./gadjid_python/python/gadjid/__init__.py"]
+line-length = 79  # PEP8 (pycodestyle E501)
+output-format = "grouped"
+preview = true    # pycodestyle E rules are still preview
 
 [tool.ruff.lint]
+# flake8 (pyflakes, pycodestyle, mccabe) and isort
+select = ["F", "E", "W", "C90", "I"]
 # allow non-lowercase variable names in functions (e.g. Gtrue or DAGa)
 ignore = ["N806"]
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
