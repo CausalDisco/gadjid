@@ -45,7 +45,7 @@ jobs:
         run: |
           pip install ruff
           ruff --version
-          ruff gadjid_python
+          ruff check
 
       - name: Run rust tests
         run: |

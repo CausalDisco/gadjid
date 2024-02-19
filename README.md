@@ -142,7 +142,7 @@ __Average runtime__
 
 ## LICENSE
 
-gadjid is available in source code form at <https://github.com/CausalDisco/gadjid>.
+𝚐𝚊𝚍𝚓𝚒𝚍 is available in source code form at <https://github.com/CausalDisco/gadjid>.
 
 This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
