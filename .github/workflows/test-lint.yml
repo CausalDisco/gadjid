@@ -58,4 +58,4 @@ jobs:
           source .venv/bin/activate
           pip install maturin
           maturin develop --manifest-path ./gadjid_python/Cargo.toml --extras=test
-          (cd gadjid_python && pytest)
+          pytest

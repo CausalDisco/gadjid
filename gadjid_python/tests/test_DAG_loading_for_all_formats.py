@@ -6,19 +6,17 @@ import gadjid as aid
 
 
 def make_dag(size, density) -> np.ndarray:
-    dense: np.ndarray = np.random.binomial(1, density, size=(size, size)).astype(
-        np.int8,
-    )
+    dense: np.ndarray = np.random.binomial(
+        1, density, size=(size, size)).astype(np.int8)
     # fill lower triangle+diagonal with zeros
     dense = np.triu(dense, 1)
     perm = np.random.permutation(size)
-    dense = dense[perm, :][:, perm]
-    return dense
+    return dense[perm, :][:, perm]
 
 
 def test_DAG_loading_for_all_formats():
     exps = 10
-    for exp in range(exps):
+    for _exp in range(exps):
         size = 10
 
         # make random dag:
