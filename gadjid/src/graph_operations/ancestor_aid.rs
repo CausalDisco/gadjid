@@ -35,7 +35,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 
             // -- this function differs from parent_aid.rs only in the imports and from here
             let ruletable = crate::graph_operations::ruletables::ancestors::AncestorsRuletable {};
-            // do not yield starting vertices
+            // gensearch yield_starting_vertices 'false' because Ancestors(T)\T is the adjustment set
             let ancestor_adjustment = crate::graph_operations::gensearch::gensearch(
                 guess,
                 ruletable,
