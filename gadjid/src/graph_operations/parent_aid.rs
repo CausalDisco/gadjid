@@ -14,6 +14,7 @@ use crate::{
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
 ///  currently distances between general PDAGs are not implemented)
 /// Returns a tuple of (normalized error (in \[0,1]), total number of errors)
+// This function largely overlaps with ancestor_aid in ancestor_aid.rs; differences ---highlighted--- below
 pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     assert!(
         guess.n_nodes == truth.n_nodes,
@@ -33,7 +34,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                 FxHashSet::<usize>::default()
             };
 
-            // -- this function differs from ancestor_aid.rs only in the imports and from here
+            // --- this function differs from ancestor_aid.rs only in the imports and from here
             let parent_adjustment = guess.parents_of(treatment).iter().copied().collect();
 
             // in line with the original SID, claim all NonParents may be effects
@@ -43,10 +44,10 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             let claim_possible_effect = FxHashSet::from_iter(
                 (0..truth.n_nodes).filter(|v| !guess.parents_of(treatment).contains(v)),
             );
-            // -- to here
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
             let (nam_in_true, nvas_in_true) = get_nam_nvas(truth, &[treatment], parent_adjustment);
+            // --- to here
             let t_poss_desc_in_truth = possible_descendants(truth, [treatment].iter());
 
             let mut mistakes = 0;
@@ -73,7 +74,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     }
                     // if we reach this point, y has a VAS in guess
                     // now, if the adjustment set is not valid in truth
-                    // (either because the pair (t,y) is not amenable or because the VAS is not valid
+                    // (either because the pair (t,y) is not amenable or because the VAS is not valid)
                     else if nvas_in_true.contains(&y) {
                         // we count a mistake
                         mistakes += 1;

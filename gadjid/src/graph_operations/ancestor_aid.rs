@@ -14,6 +14,7 @@ use crate::{
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
 ///  currently distances between general PDAGs are not implemented)
 /// Returns a tuple of (normalized error (in \[0,1]), total number of errors)
+// This function largely overlaps with parent_aid in parent_aid.rs; differences ---highlighted--- below
 pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     assert!(
         guess.n_nodes == truth.n_nodes,
@@ -33,7 +34,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                 FxHashSet::<usize>::default()
             };
 
-            // -- this function differs from parent_aid.rs only in the imports and from here
+            // --- this function differs from parent_aid.rs only in the imports and from here
             let ruletable = crate::graph_operations::ruletables::ancestors::AncestorsRuletable {};
             // gensearch yield_starting_vertices 'false' because Ancestors(T)\T is the adjustment set
             let ancestor_adjustment = crate::graph_operations::gensearch::gensearch(
@@ -44,11 +45,10 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             );
 
             let claim_possible_effect = possible_descendants(guess, [treatment].iter());
-            // -- to here
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
-            let (nam_in_true, nvas_in_true) =
-                get_nam_nvas(truth, &[treatment], ancestor_adjustment);
+            let (nam_in_true, nvas_in_true) = get_nam_nvas(truth, &[treatment], ancestor_adjustment);
+            // --- to here
             let t_poss_desc_in_truth = possible_descendants(truth, [treatment].iter());
 
             let mut mistakes = 0;
