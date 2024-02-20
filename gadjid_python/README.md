@@ -1,13 +1,21 @@
 # Adjustment Identification Distance: A 𝚐𝚊𝚍𝚓𝚒𝚍 for Causal Structure Learning
 
-This is an early release candidate 𝚐𝚊𝚍𝚓𝚒𝚍 0.0.1-rc.0 🐥 and feedback is very welcome!
+This is an early release of 𝚐𝚊𝚍𝚓𝚒𝚍 🐥 and feedback is very welcome!
+Just [open an issue](https://github.com/CausalDisco/gadjid/issues/new/choose) on our github repository.
 
 
 ## Get Started Real Quick 🚀 – Introductory Example
 
+Just `pip install gadjid` to install the latest release of 𝚐𝚊𝚍𝚓𝚒𝚍
+and run `python -c "import gadjid; help(gadjid)"` to get started
+(or see [install alternatives](https://github.com/CausalDisco/gadjid#installation--python)).
+
 ```python
-from gadjid import example, parent_aid, ancestor_aid, oset_aid, shd
+import gadjid
+from gadjid import example, ancestor_aid, oset_aid, parent_aid, shd
 import numpy as np
+
+help(gadjid)
 
 example.run_parent_aid()
 
@@ -44,9 +52,9 @@ structural intervention distance for directed acyclic graphs as a special case. 
 
 ## Implemented Distances
 
-* `parent_aid(Gtrue, Gguess)`
 * `ancestor_aid(Gtrue, Gguess)`
 * `oset_aid(Gtrue, Gguess)`
+* `parent_aid(Gtrue, Gguess)`
 * for convenience, the following distances are implemented, too
     * `shd(Gtrue, Gguess)`
     * `sid(Gtrue, Gguess)` – only for DAGs!
