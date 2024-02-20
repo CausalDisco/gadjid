@@ -36,7 +36,7 @@ pub fn get_nam_nvas(
     z: FxHashSet<usize>,
 ) -> (FxHashSet<usize>, FxHashSet<usize>) {
     let mut not_amenable = FxHashSet::<usize>::default();
-    let mut not_vas = FxHashSet::<usize>::default();
+    let mut not_vas = z.clone();
 
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
     let mut to_visit_stack = Vec::<(Edge, usize, WalkStatus)>::new();
