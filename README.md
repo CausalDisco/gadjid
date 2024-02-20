@@ -12,7 +12,7 @@
 
 ### Installation – Python
 
-Just `pip install gadjid` to install the latest release of 𝚐𝚊𝚍𝚓𝚒𝚍 from [PyPI](https://pypi.org/project/gadjid/)
+Just `pip install gadjid` to install the latest release of 𝚐𝚊𝚍𝚓𝚒𝚍 from [PyPI](https://pypi.org/project/gadjid/) \
 and run `python -c "import gadjid; help(gadjid)"` to get started.
 
 Pip tries to find a matching wheel and install that.
@@ -25,11 +25,11 @@ If there is no matching wheel
 pip will download the source distribution and compile a wheel for the current platform,
 which requires the [rust toolchain to be installed](https://rustup.rs/).
 
-The current development version can be compiled and installed via
-`pip install "git+https://github.com/CausalDisco/gadjid.git"`
-or by cloning this repository and calling either
+The current development version can be compiled and installed via \
+`pip install "git+https://github.com/CausalDisco/gadjid.git"` \
+or by cloning this repository and calling either \
 `maturin develop --manifest-path ./gadjid_python/Cargo.toml` (unoptimized dev compile)
-or
+or \
 `maturin develop --manifest-path ./gadjid_python/Cargo.toml --release` (optimized release compile).
 
 

@@ -6,7 +6,7 @@ Just [open an issue](https://github.com/CausalDisco/gadjid/issues/new/choose) on
 
 ## Get Started Real Quick 🚀 – Introductory Example
 
-Just `pip install gadjid` to install the latest release of 𝚐𝚊𝚍𝚓𝚒𝚍
+Just `pip install gadjid` to install the latest release of 𝚐𝚊𝚍𝚓𝚒𝚍 \
 and run `python -c "import gadjid; help(gadjid)"` to get started
 (or see [install alternatives](https://github.com/CausalDisco/gadjid#installation--python)).
 
