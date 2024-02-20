@@ -37,7 +37,7 @@ impl Iterator for CSMatrix<'_> {
     }
 }
 
-/// Load a PDAG from a scipy sparse matrix in csr, csc or coo format.
+/// Load a PDAG from a scipy sparse matrix in csr or csc format.
 pub fn try_from(ob: &PyAny) -> anyhow::Result<PDAG> {
     // get the encoding format
     let format = ob.getattr(intern!(ob.py(), "format"))?;
