@@ -3,6 +3,18 @@
 This is an early release of 𝚐𝚊𝚍𝚓𝚒𝚍 🐥 and feedback is very welcome!
 Just [open an issue](https://github.com/CausalDisco/gadjid/issues/new/choose) on our github repository.
 
+If you publish research using 𝚐𝚊𝚍𝚓𝚒𝚍, please cite
+[our article](https://doi.org/10.48550/arXiv.2402.08616)
+```bibtex
+@article{henckel2024adjustment,
+    title = {{Adjustment Identification Distance: A gadjid for Causal Structure Learning}},
+    author = {Leonard Henckel and Theo Würtzen and Sebastian Weichwald},
+    journal = {{arXiv preprint arXiv:2402.08616}},
+    year = {2024},
+    doi = {10.48550/arXiv.2402.08616},
+}
+```
+
 
 ## Get Started Real Quick 🚀 – Introductory Example
 
