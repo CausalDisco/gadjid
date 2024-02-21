@@ -6,6 +6,7 @@ license = "MPL-2.0"
 authors = ["Theo Würtzen", "Sebastian Weichwald", "Leonard Henckel"]
 description = "Adjustment Identification Distance: A 𝚐𝚊𝚍𝚓𝚒𝚍 for Causal Structure Learning"
 repository = "https://github.com/CausalDisco/gadjid"
+publish = false
 
 [dependencies]
 rand = "0.8"

@@ -3,6 +3,7 @@ name = "gadjid_python"
 version = "0.0.1-rc.1"
 edition = "2021"
 license = "MPL-2.0"
+publish = false
 
 [lib]
 name = "gadjid"
