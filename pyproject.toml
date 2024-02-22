@@ -1,0 +1,57 @@
+[build-system]
+requires = ["maturin>=1.3,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "gadjid"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+authors =  [{name = "Theo Würtzen"}, {name = "Sebastian Weichwald"}, {name = "Leonard Henckel"}]
+description = "Adjustment Identification Distance: A 𝚐𝚊𝚍𝚓𝚒𝚍 for Causal Structure Learning"
+keywords = ["causality", "causal structure learning", "graph distance", "adjustment"]
+dependencies = ["numpy"]
+
+[project.urls]
+"Bug Tracker" = "https://github.com/CausalDisco/gadjid/issues"
+# Documentation = "TODO"
+# Homepage = "TODO"
+"Source Code" = "https://github.com/CausalDisco/gadjid"
+arXiv = "https://doi.org/10.48550/arXiv.2402.08616"
+
+[project.optional-dependencies]
+test = ["pytest", "scipy"]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+locked = true
+module-name = "gadjid"
+manifest-path = "gadjid_python/Cargo.toml"
+python-source = "gadjid_python/python"
+exclude = [
+    "**/.gitignore",
+    "gadjid_python/tests/**/*",
+    "gadjid_python/README.md",
+]
+include = [
+    "COPYRIGHT",
+    "LICENSE",
+]
+
+[tool.ruff]
+exclude = ["./gadjid_python/python/gadjid/__init__.py"]
+line-length = 79  # PEP8 (pycodestyle E501)
+output-format = "grouped"
+preview = true    # pycodestyle E rules are still preview
+
+[tool.ruff.lint]
+# flake8 (pyflakes, pycodestyle, mccabe) and isort
+select = ["F", "E", "W", "C90", "I"]
+# allow non-lowercase variable names in functions (e.g. Gtrue or DAGa)
+ignore = ["N806"]
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2

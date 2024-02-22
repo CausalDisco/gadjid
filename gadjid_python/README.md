@@ -1,13 +1,33 @@
 # Adjustment Identification Distance: A 𝚐𝚊𝚍𝚓𝚒𝚍 for Causal Structure Learning
 
-This is an early release candidate 𝚐𝚊𝚍𝚓𝚒𝚍 0.0.1-rc.0 🐥 and feedback is very welcome!
+This is an early release of 𝚐𝚊𝚍𝚓𝚒𝚍 🐥 and feedback is very welcome!
+Just [open an issue](https://github.com/CausalDisco/gadjid/issues/new/choose) on our github repository.
+
+If you publish research using 𝚐𝚊𝚍𝚓𝚒𝚍, please cite
+[our article](https://doi.org/10.48550/arXiv.2402.08616)
+```bibtex
+@article{henckel2024adjustment,
+    title = {{Adjustment Identification Distance: A gadjid for Causal Structure Learning}},
+    author = {Leonard Henckel and Theo Würtzen and Sebastian Weichwald},
+    journal = {{arXiv preprint arXiv:2402.08616}},
+    year = {2024},
+    doi = {10.48550/arXiv.2402.08616},
+}
+```
 
 
 ## Get Started Real Quick 🚀 – Introductory Example
 
+Just `pip install gadjid` to install the latest release of 𝚐𝚊𝚍𝚓𝚒𝚍 \
+and run `python -c "import gadjid; help(gadjid)"` to get started
+(or see [install alternatives](https://github.com/CausalDisco/gadjid#installation--python)).
+
 ```python
-from gadjid import example, parent_aid, ancestor_aid, oset_aid, shd
+import gadjid
+from gadjid import example, ancestor_aid, oset_aid, parent_aid, shd
 import numpy as np
+
+help(gadjid)
 
 example.run_parent_aid()
 
@@ -44,9 +64,9 @@ structural intervention distance for directed acyclic graphs as a special case. 
 
 ## Implemented Distances
 
-* `parent_aid(Gtrue, Gguess)`
 * `ancestor_aid(Gtrue, Gguess)`
 * `oset_aid(Gtrue, Gguess)`
+* `parent_aid(Gtrue, Gguess)`
 * for convenience, the following distances are implemented, too
     * `shd(Gtrue, Gguess)`
     * `sid(Gtrue, Gguess)` – only for DAGs!
@@ -104,7 +124,7 @@ __Average runtime__
 
 ## LICENSE
 
-gadjid is available in source code form at <https://github.com/CausalDisco/gadjid>.
+𝚐𝚊𝚍𝚓𝚒𝚍 is available in source code form at <https://github.com/CausalDisco/gadjid>.
 
 This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.

@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: MPL-2.0
 #![warn(missing_docs)]
-//! gadjid -  Graph Adjustment Incompatibility Distance library
+//! gadjid -  Graph Adjustment Identification Distance library
 mod ascending_list_utils;
-pub mod graph_loading;
+mod graph_loading;
 pub mod graph_operations;
-pub mod partially_directed_acyclic_graph;
+mod partially_directed_acyclic_graph;
+
+pub use graph_loading::constructor::EdgelistIterator;
+pub use partially_directed_acyclic_graph::LoadError;
 pub use partially_directed_acyclic_graph::PDAG;

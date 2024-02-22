@@ -66,8 +66,10 @@ pub struct PDAG {
 /// The type that the PDAG has been determined to be.
 pub enum Structure {
     /// The PDAG contains no undirected edges and is acyclic, so it is a DAG.
+    #[allow(clippy::upper_case_acronyms)]
     DAG,
     /// The PDAG contains undirected edges. It is however not guaranteed to be a CPDAG.
+    #[allow(clippy::upper_case_acronyms)]
     CPDAG,
 }
 

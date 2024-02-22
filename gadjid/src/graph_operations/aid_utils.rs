@@ -24,18 +24,19 @@ enum WalkStatus {
 /// Validate Z as adjustment set relative to (T, Y) for a given set T of treatment
 /// nodes and all possible Y in G.
 ///
-/// Follows algorithm 3 from the paper.
+/// Follows Algorithm 3 in https://doi.org/10.48550/arXiv.2402.08616
 ///
 /// Returns tuple of:<br>
-/// - Set NAM of nodes Y  \notin T in G such that G is not amenable relative to (T, Y)
-/// - Set NVA of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G
+/// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
+/// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
+/// This includes all NAM, so NAM is a subset NVAS.
 pub fn get_nam_nvas(
     truth_dag: &PDAG,
     t: &[usize],
     z: FxHashSet<usize>,
 ) -> (FxHashSet<usize>, FxHashSet<usize>) {
     let mut not_amenable = FxHashSet::<usize>::default();
-    let mut not_vas = FxHashSet::<usize>::default();
+    let mut not_vas = z.clone();
 
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
     let mut to_visit_stack = Vec::<(Edge, usize, WalkStatus)>::new();
@@ -151,7 +152,9 @@ pub fn get_nam_nvas(
 /// Check amenability of a CPDAG relative to (T, Y) for a given set T of treatment
 /// nodes and all possible Y.
 ///
-/// Follows algorithm 2 from the paper.
+/// Returns set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
+///
+/// Follows Algorithm 2 in https://doi.org/10.48550/arXiv.2402.08616
 pub fn get_nam(cpdag: &PDAG, t: &[usize]) -> FxHashSet<usize> {
     let mut to_visit_stack: Vec<(Edge, usize)> = Vec::new();
     t.iter().for_each(|v| to_visit_stack.push((Edge::Init, *v)));
@@ -217,5 +220,30 @@ mod tests {
         let cpdag = PDAG::from_vecvec(cpdag);
 
         assert!(get_nam(&cpdag, &[0]) == FxHashSet::from_iter([3]));
+    }
+
+    use crate::graph_operations::{ancestor_aid, oset_aid, parent_aid};
+
+    #[test]
+    pub fn nam_correctly_counted_as_mistake() {
+        // this tests checks mistakes between the cpdag X - Y and dag X -> Y for all distances.
+
+        let dag = vec![
+            vec![0, 1], //
+            vec![0, 0],
+        ];
+        let cpdag = vec![
+            vec![0, 2], //
+            vec![0, 0],
+        ];
+        let dag = PDAG::from_vecvec(dag);
+        let cpdag = PDAG::from_vecvec(cpdag);
+
+        assert_eq!((1.0, 2), parent_aid(&dag, &cpdag));
+        assert_eq!((1.0, 2), parent_aid(&cpdag, &dag));
+        assert_eq!((1.0, 2), ancestor_aid(&dag, &cpdag));
+        assert_eq!((1.0, 2), ancestor_aid(&cpdag, &dag));
+        assert_eq!((1.0, 2), oset_aid(&dag, &cpdag));
+        assert_eq!((1.0, 2), oset_aid(&cpdag, &dag));
     }
 }

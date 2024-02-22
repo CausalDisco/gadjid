@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-//! Implements the Optimal Adjustment Intervention Distance (O-AID) algorithm
+//! Implements the Optimal Adjustment Intervention Distance (Oset-AID) algorithm
 
 use rayon::prelude::*;
 use rustc_hash::FxHashSet;

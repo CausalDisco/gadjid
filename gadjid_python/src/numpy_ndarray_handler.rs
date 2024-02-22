@@ -6,7 +6,7 @@ use pyo3::PyAny;
 
 use crate::graph_from_iterator;
 
-/// Load a DAG from a numpy ndarray
+/// Load a PDAG from a numpy ndarray
 pub fn try_from(ob: &PyAny) -> anyhow::Result<PDAG> {
     let ndarray = ob.extract::<PyReadonlyArray2<i8>>()?;
     let shape = ndarray.shape();
@@ -29,7 +29,7 @@ pub fn try_from(ob: &PyAny) -> anyhow::Result<PDAG> {
     }
 }
 
-/// Load a DAG from an slice of i8s, by wrapping to [`Edgelist`]
+/// Load a PDAG from an slice of i8s
 fn graph_from_slice(slice: &[i8], row_major: bool, graph_size: usize) -> anyhow::Result<PDAG> {
     let iterator = slice.iter().enumerate().map(move |(ind, val)| {
         (
@@ -42,13 +42,12 @@ fn graph_from_slice(slice: &[i8], row_major: bool, graph_size: usize) -> anyhow:
     graph_from_iterator(iterator, row_major, graph_size)
 }
 
-/// Load a DAG from a numpy ndarray view, by wrapping to [`SquareMatrixIterator`]
+/// Load a PDAG from a numpy ndarray view
 fn graph_from_view(
     view: ArrayView2<i8>,
     row_major: bool,
     graph_size: usize,
 ) -> anyhow::Result<PDAG> {
-    println!("Loading from view");
     let iterator = view
         .indexed_iter()
         .map(move |((row, col), val)| (row, col, *val));

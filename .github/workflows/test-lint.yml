@@ -12,7 +12,7 @@ env:
   RUSTFLAGS: "-Dwarnings"
 
 jobs:
-  clippy_and_test:
+  test_and_lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -41,11 +41,11 @@ jobs:
           cargo clippy --all-targets --all-features --manifest-path gadjid_python/Cargo.toml
           cargo fmt --check --manifest-path gadjid_python/Cargo.toml
 
-      - name: Install and run ruff on gadjid_python and python_tests
+      - name: Install and run ruff on gadjid_python
         run: |
           pip install ruff
           ruff --version
-          ruff gadjid_python python_tests run_python_tests.py
+          ruff check
 
       - name: Run rust tests
         run: |
@@ -58,4 +58,4 @@ jobs:
           source .venv/bin/activate
           pip install maturin
           maturin develop --manifest-path ./gadjid_python/Cargo.toml --extras=test
-          python ./run_python_tests.py
+          pytest

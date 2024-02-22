@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MPL-2.0
 #![warn(missing_docs)]
-//! Python-wrappers for the rust gadjid (Graph Adjustment Incompatibility Distance) library.
+//! Python-wrappers for the rust gadjid (Graph Adjustment Identification Distance) library.
 
-use ::gadjid::graph_loading::constructor::EdgelistIterator;
-use ::gadjid::graph_operations::ancestor_aid as rust_an_aid;
-use ::gadjid::graph_operations::oset_aid as rust_o_aid;
-use ::gadjid::graph_operations::parent_aid as rust_pa_aid;
+use ::gadjid::graph_operations::ancestor_aid as rust_ancestor_aid;
+use ::gadjid::graph_operations::oset_aid as rust_oset_aid;
+use ::gadjid::graph_operations::parent_aid as rust_parent_aid;
 use ::gadjid::graph_operations::shd as rust_shd;
 use ::gadjid::graph_operations::sid as rust_sid;
+use ::gadjid::EdgelistIterator;
 use ::gadjid::PDAG;
 use anyhow::bail;
 use pyo3::prelude::*;
@@ -17,59 +17,93 @@ mod scipy_sparse_handler;
 use numpy_ndarray_handler::try_from as try_from_dense;
 use scipy_sparse_handler::try_from as try_from_sparse;
 
-/// Python module for gadjid
+/// Adjustment Identification Distance: A 𝚐𝚊𝚍𝚓𝚒𝚍 for Causal Structure Learning
+///
+/// For details, see the arXiv preprint at https://doi.org/10.48550/arXiv.2402.08616
+/// The source code is available at https://github.com/CausalDisco/gadjid
+///
+/// Adjacency matrices are accepted as either int8 numpy ndarrays
+/// or int8 scipy sparse matrices in CSR or CSC format.
+/// (The entry in row s and column t codes whether Xₛ → Xₜ.)
+///
+/// Example:
+///
+/// ```python
+/// from gadjid import example, ancestor_aid, oset_aid, parent_aid, shd
+/// import numpy as np
+///
+/// example.run_parent_aid()
+///
+/// Gtrue = np.array([
+///     [0, 1, 1, 1, 1],
+///     [0, 0, 1, 1, 1],
+///     [0, 0, 0, 0, 0],
+///     [0, 0, 0, 0, 0],
+///     [0, 0, 0, 0, 0]
+/// ], dtype=np.int8)
+/// Gguess = np.array([
+///     [0, 0, 1, 1, 1],
+///     [1, 0, 1, 1, 1],
+///     [0, 0, 0, 0, 0],
+///     [0, 0, 0, 0, 0],
+///     [0, 0, 0, 0, 0]
+/// ], dtype=np.int8)
+///
+/// print(ancestor_aid(Gtrue, Gguess))
+/// print(shd(Gtrue, Gguess))
+/// ```
 #[pymodule]
 fn gadjid(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(crate::parent_aid, m)?)?;
     m.add_function(wrap_pyfunction!(crate::ancestor_aid, m)?)?;
     m.add_function(wrap_pyfunction!(crate::oset_aid, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::sid, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::parent_aid, m)?)?;
     m.add_function(wrap_pyfunction!(crate::shd, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::sid, m)?)?;
     Ok(())
 }
 
-/// Structural hamming distance between two adjacency matrices for DAGs (sparse or dense)
+/// Ancestor Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[pyfunction]
-pub fn shd(true_adjacency: &PyAny, guess_adjacency: &PyAny) -> PyResult<(f64, usize)> {
-    let graph_truth = graph_from_pyobject(true_adjacency)?;
-    let graph_guess = graph_from_pyobject(guess_adjacency)?;
+pub fn ancestor_aid(g_true: &PyAny, g_guess: &PyAny) -> PyResult<(f64, usize)> {
+    let graph_truth = graph_from_pyobject(g_true)?;
+    let graph_guess = graph_from_pyobject(g_guess)?;
+    let (normalized_distance, n_errors) = rust_ancestor_aid(&graph_truth, &graph_guess);
+    Ok((normalized_distance, n_errors))
+}
+
+/// Optimal Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
+#[pyfunction]
+pub fn oset_aid(g_true: &PyAny, g_guess: &PyAny) -> PyResult<(f64, usize)> {
+    let graph_truth = graph_from_pyobject(g_true)?;
+    let graph_guess = graph_from_pyobject(g_guess)?;
+    let (normalized_distance, n_errors) = rust_oset_aid(&graph_truth, &graph_guess);
+    Ok((normalized_distance, n_errors))
+}
+
+/// Parent Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
+#[pyfunction]
+pub fn parent_aid(g_true: &PyAny, g_guess: &PyAny) -> PyResult<(f64, usize)> {
+    let graph_truth = graph_from_pyobject(g_true)?;
+    let graph_guess = graph_from_pyobject(g_guess)?;
+    let (normalized_distance, n_errors) = rust_parent_aid(&graph_truth, &graph_guess);
+    Ok((normalized_distance, n_errors))
+}
+
+/// Structural Hamming Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
+#[pyfunction]
+pub fn shd(g_true: &PyAny, g_guess: &PyAny) -> PyResult<(f64, usize)> {
+    let graph_truth = graph_from_pyobject(g_true)?;
+    let graph_guess = graph_from_pyobject(g_guess)?;
     let (normalized_distance, n_errors) = rust_shd(&graph_truth, &graph_guess);
     Ok((normalized_distance, n_errors))
 }
 
-/// Structural Intervention Distance between two DAG adjacency matrices (sparse or dense)
+/// Structural Identification Distance between two DAG adjacency matrices (sparse or dense)
 #[pyfunction]
-pub fn sid(true_adjacency: &PyAny, guess_adjacency: &PyAny) -> anyhow::Result<(f64, usize)> {
-    let dag_truth = graph_from_pyobject(true_adjacency)?;
-    let dag_guess = graph_from_pyobject(guess_adjacency)?;
+pub fn sid(g_true: &PyAny, g_guess: &PyAny) -> anyhow::Result<(f64, usize)> {
+    let dag_truth = graph_from_pyobject(g_true)?;
+    let dag_guess = graph_from_pyobject(g_guess)?;
     let (normalized_distance, n_errors) = rust_sid(&dag_truth, &dag_guess)?;
-    Ok((normalized_distance, n_errors))
-}
-
-/// Parent Adjustment Intervention Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
-#[pyfunction]
-pub fn parent_aid(true_adjacency: &PyAny, guess_adjacency: &PyAny) -> PyResult<(f64, usize)> {
-    let graph_truth = graph_from_pyobject(true_adjacency)?;
-    let graph_guess = graph_from_pyobject(guess_adjacency)?;
-    let (normalized_distance, n_errors) = rust_pa_aid(&graph_truth, &graph_guess);
-    Ok((normalized_distance, n_errors))
-}
-
-/// Ancestor Adjustment Intervention Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
-#[pyfunction]
-pub fn ancestor_aid(true_adjacency: &PyAny, guess_adjacency: &PyAny) -> PyResult<(f64, usize)> {
-    let graph_truth = graph_from_pyobject(true_adjacency)?;
-    let graph_guess = graph_from_pyobject(guess_adjacency)?;
-    let (normalized_distance, n_errors) = rust_an_aid(&graph_truth, &graph_guess);
-    Ok((normalized_distance, n_errors))
-}
-
-/// Optimal Adjustment Intervention Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
-#[pyfunction]
-pub fn oset_aid(true_adjacency: &PyAny, guess_adjacency: &PyAny) -> PyResult<(f64, usize)> {
-    let graph_truth = graph_from_pyobject(true_adjacency)?;
-    let graph_guess = graph_from_pyobject(guess_adjacency)?;
-    let (normalized_distance, n_errors) = rust_o_aid(&graph_truth, &graph_guess);
     Ok((normalized_distance, n_errors))
 }
 
@@ -108,7 +142,7 @@ pub(crate) fn graph_from_iterator(
         )) {
             Ok(pdag) => Ok(pdag),
             Err(err) => match err {
-                ::gadjid::partially_directed_acyclic_graph::LoadError::NotAcyclic => bail!(err),
+                ::gadjid::LoadError::NotAcyclic => bail!(err),
             },
         },
         false => match PDAG::try_from_col_major(EdgelistIterator::into_column_major_edgelist(
@@ -116,7 +150,7 @@ pub(crate) fn graph_from_iterator(
         )) {
             Ok(pdag) => Ok(pdag),
             Err(err) => match err {
-                ::gadjid::partially_directed_acyclic_graph::LoadError::NotAcyclic => bail!(err),
+                ::gadjid::LoadError::NotAcyclic => bail!(err),
             },
         },
     }

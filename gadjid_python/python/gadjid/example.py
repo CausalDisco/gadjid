@@ -21,14 +21,22 @@ def random_dag(size, probability):
 
 def run_parent_aid(size=500, probability=.1):
     """Compare two DAGs using parent_aid."""
-    print(f"parent_aid(random_dag({size}, {probability}),"
-          f"random_dag({size}, {probability}))")
+    print(
+        f"\nCalculating the Parent-AID between {size}-node DAGs "
+        f"with {100 * (probability):.0f}% of all possible edges\n\n"
+        f"    >>> parent_aid(random_dag({size}, {probability}), "
+        f"random_dag({size}, {probability}))")
 
     DAGa = random_dag(size, probability)
     DAGb = random_dag(size, probability)
 
     tic = timer()
-    print(f"> {parent_aid(DAGa, DAGb)}")
+    print(f"    {parent_aid(DAGa, DAGb)}")
     toc = timer() - tic
-    print(f"\ncalculation took {toc:.3f} seconds")
-    print("try comparing this to SID::structIntervDist(...) in R")
+    print(
+        f"\ntook {toc:.3f} seconds.\n\n"
+        "Compare this to the runtime for calculating the SID in R via \n\n    "
+        "R -e \"library(SID); "
+        f"s <- structIntervDist(randomDAG({size}, {probability:.2f}), "
+        f"randomDAG({size}, {probability:.2f}));\"\n"
+        )

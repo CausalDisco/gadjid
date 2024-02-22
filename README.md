@@ -1,24 +1,60 @@
+[![test & lint](https://github.com/CausalDisco/gadjid/actions/workflows/test-lint.yml/badge.svg?branch=main)](https://github.com/CausalDisco/gadjid/actions/workflows/test-lint.yml?query=branch%3Amain)
+[![PyPi](https://badgen.net/pypi/v/gadjid/?icon=pypi&label=PyPI)](https://pypi.org/project/gadjid)
+[![read](https://badgen.net/badge/read/arXiv/b31b1b)](https://doi.org/10.48550/arXiv.2402.08616)
+
+
 # Adjustment Identification Distance: A 𝚐𝚊𝚍𝚓𝚒𝚍 for Causal Structure Learning
 
-[This is an early release candidate 𝚐𝚊𝚍𝚓𝚒𝚍 0.0.1-rc.0 🐥](#this-is-an-early-release-candidate-) and feedback is very welcome!
+[This is an early release of 𝚐𝚊𝚍𝚓𝚒𝚍 🐥](#this-is-an-early-release-) and feedback is very welcome!
+
+If you publish research using 𝚐𝚊𝚍𝚓𝚒𝚍, please cite
+[our article](https://doi.org/10.48550/arXiv.2402.08616)
+```bibtex
+@article{henckel2024adjustment,
+    title = {{Adjustment Identification Distance: A gadjid for Causal Structure Learning}},
+    author = {Leonard Henckel and Theo Würtzen and Sebastian Weichwald},
+    journal = {{arXiv preprint arXiv:2402.08616}},
+    year = {2024},
+    doi = {10.48550/arXiv.2402.08616},
+}
+```
 
 
 ## Get Started Real Quick 🚀
 
 ### Installation – Python
 
-For now, the easiest is to clone the repository and run \
-`pip install gadjid_python/` \
-for a release-mode compile and install or \
-`maturin develop --manifest-path ./gadjid_python/Cargo.toml` \
-for a development-mode compile and install within your active python environment.
-We plan to make precompiled packages of 𝚐𝚊𝚍𝚓𝚒𝚍 available on and installable from PyPI soon.
+Just `pip install gadjid` to install the latest release of 𝚐𝚊𝚍𝚓𝚒𝚍 from [PyPI](https://pypi.org/project/gadjid/) \
+and run `python -c "import gadjid; help(gadjid)"` to get started.
+
+#### Install Alternatives
+
+Pip tries to find a matching wheel and install that.
+Since we offer precompiled wheels
+for most common operating systems, python versions, and CPU architectures,
+the installation will usually be quick.
+If there is no matching wheel
+(or when explicitly installing from source via
+`pip install gadjid --no-binary gadjid`),
+pip will download the source distribution and compile a wheel for the current platform,
+which requires the [rust toolchain to be installed](https://rustup.rs/).
+
+The current development version can be compiled and installed via \
+`pip install "git+https://github.com/CausalDisco/gadjid.git"` \
+or by cloning this repository and calling either \
+`maturin develop --manifest-path ./gadjid_python/Cargo.toml` (unoptimized dev compile)
+or \
+`maturin develop --manifest-path ./gadjid_python/Cargo.toml --release` (optimized release compile).
+
 
 ### Introductory Example – Python
 
 ```python
-from gadjid import example, parent_aid, ancestor_aid, oset_aid, shd
+import gadjid
+from gadjid import example, ancestor_aid, oset_aid, parent_aid, shd
 import numpy as np
+
+help(gadjid)
 
 example.run_parent_aid()
 
@@ -53,20 +89,20 @@ and can conveniently be called from Python via our Python wrapper
 structural intervention distance for directed acyclic graphs as a special case. We use this framework to develop improved adjustment-based distances as well as extensions to completed partially directed acyclic graphs and causal orders. We develop polynomial-time reachability algorithms to compute the distances efficiently. In our package 𝚐𝚊𝚍𝚓𝚒𝚍, we provide implementations of our distances; they are orders of magnitude faster than the structural intervention distance and thereby provide a success metric for causal discovery that scales to graph sizes that were previously prohibitive.
 
 
-## This is an Early Release Candidate 🐥
+## This is an Early Release 🐥
 
-* Feedback is welcome! Either email one of us or open an issue on here. 📨
-* We are working on releasing 𝚐𝚊𝚍𝚓𝚒𝚍 for Python on PyPI. 🐍
+* Feedback is very welcome! Just [open an issue](https://github.com/CausalDisco/gadjid/issues/new/choose) on here.
 * We are working on making 𝚐𝚊𝚍𝚓𝚒𝚍 available also for R.
-* 𝚐𝚊𝚍𝚓𝚒𝚍 is extensively tested (tests at bottom of each `/gadjid/src/**.rs` file) and validated against SID for DAG inputs. We are working on further extending and future-proofing the test suite.
+* 𝚐𝚊𝚍𝚓𝚒𝚍 is extensively tested (tests at bottom of each `/gadjid/src/**.rs` file) and validated against SID for DAG inputs.
+We are working on further extending and future-proofing the test suite.
 * The code is well documented. We plan on making a user and developer documentation available. 📃
 
 
 ## Implemented Distances
 
-* `parent_aid(Gtrue, Gguess)`
 * `ancestor_aid(Gtrue, Gguess)`
 * `oset_aid(Gtrue, Gguess)`
+* `parent_aid(Gtrue, Gguess)`
 * for convenience, the following distances are implemented, too
     * `shd(Gtrue, Gguess)`
     * `sid(Gtrue, Gguess)` – only for DAGs!
@@ -131,18 +167,18 @@ __Average runtime__
     and all DAG/CPDAG distances discussed in the accompanying article
 * [gadjid_python/](./gadjid_python/) –
     python wrapper that accepts numpy and scipy int8 matrices as graph adjacency matrices
+    * [gadjid_python/tests/](./gadjid_python/tests/) – runs tests of and via the python 𝚐𝚊𝚍𝚓𝚒𝚍 wrapper:
+        1. tests the loading of numpy arrays and views as well as scipy sparse csr/csc matrices
+        2. tests `parent_aid` against the R implementation of the SID on pairs of testgraphs;
+        since in the special case of DAG inputs the Parent-AID coincides with the SID,
+        this end-to-end tests the check for validity of adjustment sets implemented via a new reachability algorithm
 * [gadjid_r/](./gadjid_r/) – placeholder for the R wrapper to come!
-* [python_tests/](./python_tests/) and [run_python_tests.py](./run_python_tests.py) – runs tests of and via the python 𝚐𝚊𝚍𝚓𝚒𝚍 wrapper:
-    1. tests the loading of numpy arrays and views as well as scipy sparse csr/csc matrices
-    2. tests `parent_aid` against the R implementation of the SID on pairs of testgraphs;
-    since in the special case of DAG inputs the Parent-AID coincides with the SID,
-    this end-to-end tests the check for validity of adjustment sets implemented via a new reachability algorithm
 * [testgraphs/](./testgraphs/) – testgraphs in .mtx files (Matrix Market Exchange Format), a csv file with the SHD/SID between the testgraphs to test against, checksums
 
 
 ## LICENSE
 
-gadjid is available in source code form at <https://github.com/CausalDisco/gadjid>.
+𝚐𝚊𝚍𝚓𝚒𝚍 is available in source code form at <https://github.com/CausalDisco/gadjid>.
 
 This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
 If a copy of the MPL was not distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
