@@ -96,7 +96,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 
 #[cfg(test)]
 mod tests {
-    use std::{fs::read, io::{BufRead, Write}};
+    use std::{fs::read, io::{BufRead, Read, Write}};
 
     use crate::{graph_operations::parent_aid, PDAG};
 
@@ -167,19 +167,16 @@ mod tests {
         // get the root of the project
         let root = std::env::var("CARGO_MANIFEST_DIR").unwrap();
         // get the parent directory of the project
-        let root = std::path::Path::new(&root).parent().unwrap();
+        let root_parent = std::path::Path::new(&root).parent().unwrap();
         // get the child dir "testgraphs"
-        let root = root.join("testgraphs");
+        let testgraphs = root_parent.join("testgraphs");
 
+        let testcases_file = std::fs::read_to_string(&testgraphs.join("SID.DAG-100.csv")).unwrap();
+        let mut testcases = testcases_file.lines();
+        testcases.next(); // skip header
 
-        let testcases_csv = root.join("SID.DAG-100.csv");
-        let testcases = std::fs::File::open(&testcases_csv).unwrap();
-        let reader = std::io::BufReader::new(testcases);
-        let mut cases = reader.lines();
-        cases.next(); // skip header
-
-        let tests = cases.map(|line| {
-            let line = line.unwrap();
+        // create iterator over testcases to later use in the loop
+        let tests = testcases.map(|line| {
             let mut iter = line.split(",");
             let g_true = iter.next().unwrap().parse::<usize>().unwrap();
             let g_guess = iter.next().unwrap().parse::<usize>().unwrap();
@@ -188,27 +185,25 @@ mod tests {
             (g_true, g_guess, r_sid)
         });
 
+        // defining a function to build a PDAG from mtx file
+        let load_pdag_from_mtx = |name : &str| {
 
-        let load_dag = |name : &str| {
+            let path = testgraphs.join(format!("{}.DAG-100.mtx", name));
 
-            let fullname = format!("{name}.DAG-100.mtx");
+            // read the mtx file
+            let mtx = std::fs::read_to_string(&path).unwrap();
 
-            let path = root.join(fullname);
+            let mut lines = mtx.lines();
 
-            // read the text file
-            let file = std::fs::File::open(&path).unwrap();
-            let reader = std::io::BufReader::new(file);
-
-            let mut lines = reader.lines();
-
-            // skip first two that give dimensions (always 100x100 in this case)
+            // skipping first two lines of mtx format that give metadata like dimensions (always 100x100 in this case)
             lines.next();
             lines.next();
             
-            let mut adj: [[i8; 100]; 100] = [[0; 100]; 100];
+            // allocate a 100x100 matrix for the adjacency matrix
+            let mut adj = vec![vec![0; 100]; 100];
 
+            // and fill it with the edges from the mtx file
             for line in lines {
-                let line = line.unwrap();
                 let mut iter = line.split_whitespace();
                 let i = iter.next().unwrap().parse::<usize>().unwrap();
                 let j = iter.next().unwrap().parse::<usize>().unwrap();
@@ -216,12 +211,13 @@ mod tests {
                 adj[i-1][j-1] = 1;
             }
 
-            PDAG::from_vecvec(adj.iter().map(|x| x.into()).collect())
+            PDAG::from_vecvec(adj)
         };
         
+        // go through all testcases, load the PDAGs from the mtx files and compare the computed SID with the expected SID
         for (gtrue, gguess, rsid) in tests {
-            let g_true = load_dag(&format!("{}", gtrue));
-            let g_guess = load_dag(&format!("{}", gguess));
+            let g_true = load_pdag_from_mtx(&format!("{}", gtrue));
+            let g_guess = load_pdag_from_mtx(&format!("{}", gguess));
 
             let (_, mistakes) = parent_aid(&g_true, &g_guess);
 
