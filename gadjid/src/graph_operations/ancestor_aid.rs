@@ -5,7 +5,7 @@ use rayon::prelude::*;
 use rustc_hash::FxHashSet;
 
 use crate::{
-    graph_operations::{get_nam, get_nam_nva, possible_descendants},
+    graph_operations::{aid_utils::get_pd_nam_nva, get_nam, get_nam_nva, possible_descendants},
     PDAG,
 };
 
@@ -47,9 +47,9 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             let claim_possible_effect = possible_descendants(guess, [treatment].iter());
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
-            let (nam_in_true, nvas_in_true) = get_nam_nva(truth, &[treatment], ancestor_adjustment);
+            let (t_poss_desc_in_truth, nam_in_true, nvas_in_true) = get_pd_nam_nva(truth, &[treatment], ancestor_adjustment);
+
             // --- to here
-            let t_poss_desc_in_truth = possible_descendants(truth, [treatment].iter());
 
             let mut mistakes = 0;
             for y in 0..truth.n_nodes {
