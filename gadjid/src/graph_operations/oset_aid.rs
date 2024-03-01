@@ -6,7 +6,8 @@ use rustc_hash::FxHashSet;
 
 use crate::{
     graph_operations::{
-        descendants, get_nam, get_nam_nva, parents, possible_descendants, proper_ancestors,
+        aid_utils::{get_d_pd_nam, get_invalid_unblocked, get_pd_nam},
+        descendants, get_nam, get_nam_nva, possible_descendants,
     },
     PDAG,
 };
@@ -44,20 +45,12 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     let verifier_mistakes_found = (0..guess.n_nodes)
         .into_par_iter()
         .map(|treatment| {
-            // these two are used for comparing the ancestral relationships between nodes to quickly find mistakes and skip finding the o-set
-            let claim_possible_effect_in_guess = possible_descendants(guess, [treatment].iter());
-            let t_poss_desc_in_truth = possible_descendants(truth, [treatment].iter());
             // precomputed once for each T because we use it for the optimal adjustment set.
-            let t_desc_in_guess = descendants(guess, [treatment].iter());
 
-            let nam_in_guess = if matches!(
-                guess.pdag_type,
-                crate::partially_directed_acyclic_graph::Structure::CPDAG
-            ) {
-                get_nam(guess, &[treatment])
-            } else {
-                FxHashSet::<usize>::default()
-            };
+            let (t_desc_in_guess, claim_possible_effect, nam_in_guess) =
+                get_d_pd_nam(guess, &[treatment]);
+
+            let (t_poss_desc_in_truth, nam_in_true) = get_pd_nam(truth, &[treatment]);
 
             let mut mistakes = 0;
             for y in 0..guess.n_nodes {
@@ -65,7 +58,7 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     continue; // this case is always correct
                 }
                 // if y is not claimed to be effect of t based on the guess graph
-                if !claim_possible_effect_in_guess.contains(&y) {
+                if !claim_possible_effect.contains(&y) {
                     // but possibly a descendant of t in the truth graph.
                     if t_poss_desc_in_truth.contains(&y) {
                         // the causal order might be wrong, so
@@ -73,28 +66,27 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                         mistakes += 1;
                     }
                 } else {
-                    // this oset function uses the precomputed t_desc_in_guess
-                    let o_set_adjustment =
-                        optimal_adjustment_set(guess, &[treatment], &[y], &t_desc_in_guess);
+                    let y_am_in_guess = !nam_in_guess.contains(&y);
+                    let y_am_in_true = !nam_in_true.contains(&y);
 
-                    // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
-                    let (nam_in_true, nva_in_true) =
-                        get_nam_nva(truth, &[treatment], o_set_adjustment);
+                    // if they disagree on amenability:
+                    if y_am_in_guess != y_am_in_true {
+                        mistakes += 1;
+                        continue;
+                    }
 
-                    // if y is not amenable in guess
-                    if nam_in_guess.contains(&y) {
-                        // but it is amenable in truth
-                        if !nam_in_true.contains(&y) {
+                    // if they agree on amenability and y is amenable, we need to find the adjustment set
+                    if y_am_in_guess {
+                        // this oset function uses the precomputed t_desc_in_guess
+                        let o_set_adjustment =
+                            optimal_adjustment_set(guess, &[treatment], &[y], &t_desc_in_guess);
+
+                        // (because the VAS is not valid, by blocking too much or too)
+                        if get_invalid_unblocked(truth, &[treatment], o_set_adjustment).contains(&y)
+                        {
                             // we count a mistake
                             mistakes += 1;
                         }
-                    }
-                    // if we reach this point, y has a VAS in guess
-                    // now, if the adjustment set is not valid in truth
-                    // (either because the pair (t,y) is not amenable or because the VAS is not valid
-                    else if nva_in_true.contains(&y) {
-                        // we count a mistake
-                        mistakes += 1;
                     }
                 }
             }

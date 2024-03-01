@@ -35,7 +35,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             };
 
             // --- this function differs from ancestor_aid.rs only in the imports and from here
-            let parent_adjustment = guess.parents_of(treatment).iter().copied().collect();
+            let adjustment_set = guess.parents_of(treatment).iter().copied().collect();
 
             // in line with the original SID, claim all NonParents may be effects
             // (this is a larger set than the NonDescendants in ancestor_aid and oset_aid;
@@ -44,11 +44,11 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             let claim_possible_effect = FxHashSet::from_iter(
                 (0..truth.n_nodes).filter(|v| !guess.parents_of(treatment).contains(v)),
             );
-
             // --- to here
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
-            let (t_poss_desc_in_truth, nam_in_true, nva_in_true) = get_pd_nam_nva(truth, &[treatment], parent_adjustment);
+            let (t_poss_desc_in_truth, nam_in_true, nva_in_true) =
+                get_pd_nam_nva(truth, &[treatment], adjustment_set);
             
             let mut mistakes = 0;
             for y in 0..truth.n_nodes {
@@ -64,18 +64,19 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                         mistakes += 1;
                     }
                 } else {
-                    // if y is not amenable in guess
-                    if nam_in_guess.contains(&y) {
-                        // but it is amenable in truth
-                        if !nam_in_true.contains(&y) {
-                            // we count a mistake
-                            mistakes += 1;
-                        }
+                    let y_am_in_guess = !nam_in_guess.contains(&y);
+                    let y_am_in_true = !nam_in_true.contains(&y);
+
+                    // if they disagree on amenability:
+                    if y_am_in_guess != y_am_in_true {
+                        mistakes += 1;
+                        continue;
                     }
+
                     // if we reach this point, y has a VAS in guess
                     // now, if the adjustment set is not valid in truth
                     // (either because the pair (t,y) is not amenable or because the VAS is not valid)
-                    else if nva_in_true.contains(&y) {
+                    if y_am_in_guess && nva_in_true.contains(&y) {
                         // we count a mistake
                         mistakes += 1;
                     }
