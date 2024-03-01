@@ -139,7 +139,6 @@ mod test {
         }
     }
 
-
     /// Stores the result of loading the two graphs and computing various graph operations on them.
     #[derive(serde::Serialize)]
     pub struct Testcase {
