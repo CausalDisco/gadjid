@@ -224,7 +224,10 @@ pub fn get_pd_nam_nva(
                 not_vas.insert(node);
                 poss_de.insert(node);
             }
-            WalkStatus::NonCausal | WalkStatus::BlockedAmenable => {
+            WalkStatus::NonCausal => {
+                not_vas.insert(node);
+            }
+            WalkStatus::BlockedAmenable => {
                 not_vas.insert(node);
                 poss_de.insert(node);
             }
