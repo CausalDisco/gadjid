@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Implements the Ancestor Adjustment Intervention Distance (Ancestor-AID) algorithm
 
+use descendants::descendants;
 use rayon::prelude::*;
 use rustc_hash::FxHashSet;
 
 use crate::{
-    graph_operations::{aid_utils::get_pd_nam_nva, get_nam, get_nam_nva, possible_descendants},
+    graph_operations::{
+        aid_utils::{get_pd_nam, get_pd_nam_nva},
+        get_nam, possible_descendants,
+        ruletables::descendants,
+    },
     PDAG,
 };
 
@@ -25,31 +30,33 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     let verifier_mistakes_found = (0..guess.n_nodes)
         .into_par_iter()
         .map(|treatment| {
-            let nam_in_guess = if matches!(
+            let (claim_possible_effect, nam_in_guess) = if matches!(
                 guess.pdag_type,
                 crate::partially_directed_acyclic_graph::Structure::CPDAG
             ) {
-                get_nam(guess, &[treatment])
+                get_pd_nam(guess, &[treatment])
             } else {
-                FxHashSet::<usize>::default()
+                (
+                    descendants(guess, [treatment].iter()),
+                    FxHashSet::<usize>::default(),
+                )
             };
 
             // --- this function differs from parent_aid.rs only in the imports and from here
             let ruletable = crate::graph_operations::ruletables::ancestors::AncestorsRuletable {};
+
             // gensearch yield_starting_vertices 'false' because Ancestors(T)\T is the adjustment set
-            let ancestor_adjustment = crate::graph_operations::gensearch::gensearch(
+            let adjustment_set = crate::graph_operations::gensearch::gensearch(
                 guess,
                 ruletable,
                 [treatment].iter(),
                 false,
             );
-
-            let claim_possible_effect = possible_descendants(guess, [treatment].iter());
+            // --- to here
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
-            let (t_poss_desc_in_truth, nam_in_true, nvas_in_true) = get_pd_nam_nva(truth, &[treatment], ancestor_adjustment);
-
-            // --- to here
+            let (t_poss_desc_in_truth, nam_in_true, nvas_in_true) =
+                get_pd_nam_nva(truth, &[treatment], adjustment_set);
 
             let mut mistakes = 0;
             for y in 0..truth.n_nodes {
@@ -65,18 +72,19 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                         mistakes += 1;
                     }
                 } else {
-                    // if y is not amenable in guess
-                    if nam_in_guess.contains(&y) {
-                        // but it is amenable in truth
-                        if !nam_in_true.contains(&y) {
-                            // we count a mistake
-                            mistakes += 1;
-                        }
+                    let y_am_in_guess = !nam_in_guess.contains(&y);
+                    let y_am_in_true = !nam_in_true.contains(&y);
+
+                    // if they disagree on amenability:
+                    if y_am_in_guess != y_am_in_true {
+                        mistakes += 1;
+                        continue;
                     }
+
                     // if we reach this point, y has a VAS in guess
                     // now, if the adjustment set is not valid in truth
                     // (either because the pair (t,y) is not amenable or because the VAS is not valid)
-                    else if nvas_in_true.contains(&y) {
+                    if y_am_in_guess && nvas_in_true.contains(&y) {
                         // we count a mistake
                         mistakes += 1;
                     }
