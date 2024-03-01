@@ -8,7 +8,7 @@ use crate::{
     graph_operations::{get_nam, get_nam_nvas, possible_descendants},
     PDAG,
 };
- 
+
 /// Computes the parent adjustment intervention distance
 /// between an estimated `guess` DAG or CPDAG and the true `truth` DAG or CPDAG
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
@@ -96,7 +96,6 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 
 #[cfg(test)]
 mod tests {
-    use std::{fs::read, io::{BufRead, Read, Write}};
 
     use crate::{graph_operations::parent_aid, PDAG};
 
@@ -112,7 +111,7 @@ mod tests {
                     dag
                 );
                 print!(".");
-                let _ = std::io::stdout().flush();
+                let _ = std::io::Write::flush(&mut std::io::stdout());
             }
         }
     }
@@ -124,7 +123,7 @@ mod tests {
                 let dag1 = PDAG::random_dag(1.0, n);
                 let dag2 = PDAG::random_dag(1.0, n);
                 parent_aid(&dag1, &dag2);
-                let _ = std::io::stdout().flush();
+                let _ = std::io::Write::flush(&mut std::io::stdout());
             }
         }
     }
@@ -161,7 +160,6 @@ mod tests {
         assert_eq!(parent_aid(&g_dag, &h2_dag), (0.4, 8));
     }
 
-
     #[test]
     fn parent_aid_against_r_sid() {
         // get the root of the project
@@ -171,13 +169,13 @@ mod tests {
         // get the child dir "testgraphs"
         let testgraphs = root_parent.join("testgraphs");
 
-        let testcases_file = std::fs::read_to_string(&testgraphs.join("SID.DAG-100.csv")).unwrap();
+        let testcases_file = std::fs::read_to_string(testgraphs.join("SID.DAG-100.csv")).unwrap();
         let mut testcases = testcases_file.lines();
         testcases.next(); // skip header
 
         // create iterator over testcases to later use in the loop
         let tests = testcases.map(|line| {
-            let mut iter = line.split(",");
+            let mut iter = line.split(',');
             let g_true = iter.next().unwrap().parse::<usize>().unwrap();
             let g_guess = iter.next().unwrap().parse::<usize>().unwrap();
             let _ = iter.next().unwrap().parse::<usize>().unwrap();
@@ -186,19 +184,18 @@ mod tests {
         });
 
         // defining a function to build a PDAG from mtx file
-        let load_pdag_from_mtx = |name : &str| {
-
+        let load_pdag_from_mtx = |name: &str| {
             let path = testgraphs.join(format!("{}.DAG-100.mtx", name));
 
             // read the mtx file
-            let mtx = std::fs::read_to_string(&path).unwrap();
+            let mtx = std::fs::read_to_string(path).unwrap();
 
             let mut lines = mtx.lines();
 
             // skipping first two lines of mtx format that give metadata like dimensions (always 100x100 in this case)
             lines.next();
             lines.next();
-            
+
             // allocate a 100x100 matrix for the adjacency matrix
             let mut adj = vec![vec![0; 100]; 100];
 
@@ -208,12 +205,12 @@ mod tests {
                 let i = iter.next().unwrap().parse::<usize>().unwrap();
                 let j = iter.next().unwrap().parse::<usize>().unwrap();
 
-                adj[i-1][j-1] = 1;
+                adj[i - 1][j - 1] = 1;
             }
 
             PDAG::from_vecvec(adj)
         };
-        
+
         // go through all testcases, load the PDAGs from the mtx files and compare the computed SID with the expected SID
         for (gtrue, gguess, rsid) in tests {
             let g_true = load_pdag_from_mtx(&format!("{}", gtrue));
@@ -223,7 +220,5 @@ mod tests {
 
             assert_eq!(mistakes, rsid);
         }
-
-        ()
     }
 }
