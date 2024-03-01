@@ -8,7 +8,7 @@ use crate::{
     graph_operations::{get_nam, get_nam_nvas, possible_descendants},
     PDAG,
 };
-
+ 
 /// Computes the parent adjustment intervention distance
 /// between an estimated `guess` DAG or CPDAG and the true `truth` DAG or CPDAG
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
@@ -96,7 +96,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Write;
+    use std::{fs::read, io::{BufRead, Write}};
 
     use crate::{graph_operations::parent_aid, PDAG};
 
@@ -159,5 +159,75 @@ mod tests {
 
         assert_eq!(parent_aid(&g_dag, &h1_dag), (0.0, 0));
         assert_eq!(parent_aid(&g_dag, &h2_dag), (0.4, 8));
+    }
+
+
+    #[test]
+    fn parent_aid_against_r_sid() {
+        // get the root of the project
+        let root = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+        // get the parent directory of the project
+        let root = std::path::Path::new(&root).parent().unwrap();
+        // get the child dir "testgraphs"
+        let root = root.join("testgraphs");
+
+
+        let testcases_csv = root.join("SID.DAG-100.csv");
+        let testcases = std::fs::File::open(&testcases_csv).unwrap();
+        let reader = std::io::BufReader::new(testcases);
+        let mut cases = reader.lines();
+        cases.next(); // skip header
+
+        let tests = cases.map(|line| {
+            let line = line.unwrap();
+            let mut iter = line.split(",");
+            let g_true = iter.next().unwrap().parse::<usize>().unwrap();
+            let g_guess = iter.next().unwrap().parse::<usize>().unwrap();
+            let _ = iter.next().unwrap().parse::<usize>().unwrap();
+            let r_sid = iter.next().unwrap().parse::<usize>().unwrap();
+            (g_true, g_guess, r_sid)
+        });
+
+
+        let load_dag = |name : &str| {
+
+            let fullname = format!("{name}.DAG-100.mtx");
+
+            let path = root.join(fullname);
+
+            // read the text file
+            let file = std::fs::File::open(&path).unwrap();
+            let reader = std::io::BufReader::new(file);
+
+            let mut lines = reader.lines();
+
+            // skip first two that give dimensions (always 100x100 in this case)
+            lines.next();
+            lines.next();
+            
+            let mut adj: [[i8; 100]; 100] = [[0; 100]; 100];
+
+            for line in lines {
+                let line = line.unwrap();
+                let mut iter = line.split_whitespace();
+                let i = iter.next().unwrap().parse::<usize>().unwrap();
+                let j = iter.next().unwrap().parse::<usize>().unwrap();
+
+                adj[i-1][j-1] = 1;
+            }
+
+            PDAG::from_vecvec(adj.iter().map(|x| x.into()).collect())
+        };
+        
+        for (gtrue, gguess, rsid) in tests {
+            let g_true = load_dag(&format!("{}", gtrue));
+            let g_guess = load_dag(&format!("{}", gguess));
+
+            let (_, mistakes) = parent_aid(&g_true, &g_guess);
+
+            assert_eq!(mistakes, rsid);
+        }
+
+        ()
     }
 }
