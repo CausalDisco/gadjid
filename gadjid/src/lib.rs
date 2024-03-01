@@ -10,7 +10,6 @@ pub use graph_loading::constructor::EdgelistIterator;
 pub use partially_directed_acyclic_graph::LoadError;
 pub use partially_directed_acyclic_graph::PDAG;
 
-
 #[cfg(test)]
 #[allow(non_snake_case)]
 mod test {
@@ -19,22 +18,27 @@ mod test {
     use rand::{Rng, SeedableRng};
     use rustc_hash::FxHashSet;
 
-    use crate::{graph_operations::{self, parent_aid}, PDAG};
+    use crate::{
+        graph_operations::{self, parent_aid},
+        PDAG,
+    };
 
-
-    fn load_pdag_from_mtx (full_path: &str) -> PDAG {
-
+    fn load_pdag_from_mtx(full_path: &str) -> PDAG {
         // read the mtx file
         let mtx = std::fs::read_to_string(full_path).unwrap();
 
         let mut lines = mtx.lines();
 
-        // skipping first line of mtx format that give metadata like dimensions 
+        // skipping first line of mtx format that give metadata like dimensions
         lines.next();
-        
-        let dims = lines.next().unwrap().split_whitespace().collect::<Vec<&str>>();
+
+        let dims = lines
+            .next()
+            .unwrap()
+            .split_whitespace()
+            .collect::<Vec<&str>>();
         let rows = dims[0].parse::<usize>().unwrap();
-        let cols = dims[1].parse::<usize>().unwrap(); 
+        let cols = dims[1].parse::<usize>().unwrap();
 
         // allocate matrix for the adjacency matrix
         let mut adj = vec![vec![0; cols]; rows];
@@ -44,7 +48,7 @@ mod test {
             let mut iter = line.split_whitespace();
             let i = iter.next().unwrap().parse::<usize>().unwrap();
             let j = iter.next().unwrap().parse::<usize>().unwrap();
-            
+
             // for undirected edges in CPDAGs:
             // let edge_type = iter.next().unwrap().parse::<i8>().unwrap();
 
@@ -53,7 +57,6 @@ mod test {
 
         PDAG::from_vecvec(adj)
     }
-
 
     /// Takes two names, like `g_true="DAG1"` and `g_guess="DAG2"` and returns a Testcase, loading from the corresponding `../testgraphs/{g_true}.mtx` files
     fn test(g_true_name: &str, g_guess_name: &str) -> Testcase {
@@ -64,11 +67,19 @@ mod test {
         // get the child dir "testgraphs"
         let testgraphs = root_parent.join("testgraphs");
 
-
         // load the true and guess graphs
-        let g_true = load_pdag_from_mtx(&testgraphs.join(format!("{}.mtx", g_true_name)).to_str().unwrap());
-        let g_guess = load_pdag_from_mtx(&testgraphs.join(format!("{}.mtx", g_guess_name)).to_str().unwrap());
-
+        let g_true = load_pdag_from_mtx(
+            &testgraphs
+                .join(format!("{}.mtx", g_true_name))
+                .to_str()
+                .unwrap(),
+        );
+        let g_guess = load_pdag_from_mtx(
+            &testgraphs
+                .join(format!("{}.mtx", g_guess_name))
+                .to_str()
+                .unwrap(),
+        );
 
         // get deterministic seed by hashing the two graph names
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
@@ -77,7 +88,7 @@ mod test {
         let seed = hasher.finish();
 
         // using rand_chacha to sample nodes with seed because it is reproducible across platforms
-        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);        
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
 
         let t = rng.gen_range(0..g_true.n_nodes as usize);
         let mut y = rng.gen_range(0..g_true.n_nodes as usize);
@@ -94,7 +105,8 @@ mod test {
 
         let de_guess_Z = graph_operations::descendants(&g_guess, z.iter());
 
-        let (nam, nva) = graph_operations::get_nam_nva(&g_true, &[t], FxHashSet::from_iter(z.iter().copied()));
+        let (nam, nva) =
+            graph_operations::get_nam_nva(&g_true, &[t], FxHashSet::from_iter(z.iter().copied()));
 
         let shd = graph_operations::shd(&g_true, &g_guess);
 
@@ -125,7 +137,6 @@ mod test {
             ancestor_aid,
         }
     }
-
 
     #[derive(serde::Serialize)]
     pub struct Testcase {

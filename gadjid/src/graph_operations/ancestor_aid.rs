@@ -47,8 +47,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             let claim_possible_effect = possible_descendants(guess, [treatment].iter());
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
-            let (nam_in_true, nvas_in_true) =
-                get_nam_nva(truth, &[treatment], ancestor_adjustment);
+            let (nam_in_true, nvas_in_true) = get_nam_nva(truth, &[treatment], ancestor_adjustment);
             // --- to here
             let t_poss_desc_in_truth = possible_descendants(truth, [treatment].iter());
 

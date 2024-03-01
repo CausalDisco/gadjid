@@ -159,6 +159,4 @@ mod tests {
         assert_eq!(parent_aid(&g_dag, &h1_dag), (0.0, 0));
         assert_eq!(parent_aid(&g_dag, &h2_dag), (0.4, 8));
     }
-
-    
 }
