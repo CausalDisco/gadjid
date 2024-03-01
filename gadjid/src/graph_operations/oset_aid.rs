@@ -5,7 +5,7 @@ use rayon::prelude::*;
 use rustc_hash::FxHashSet;
 
 use crate::{
-    graph_operations::{descendants, get_nam, get_nam_nvas, possible_descendants},
+    graph_operations::{descendants, get_nam, get_nam_nva, possible_descendants},
     PDAG,
 };
 
@@ -77,7 +77,7 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 
                     // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
                     let (nam_in_true, nvas_in_true) =
-                        get_nam_nvas(truth, &[treatment], o_set_adjustment);
+                        get_nam_nva(truth, &[treatment], o_set_adjustment);
 
                     // if y is not amenable in guess
                     if nam_in_guess.contains(&y) {

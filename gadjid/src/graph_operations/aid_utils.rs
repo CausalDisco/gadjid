@@ -29,8 +29,8 @@ enum WalkStatus {
 /// Returns tuple of:<br>
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
-/// This includes all NAM, so NAM is a subset NVAS.
-pub fn get_nam_nvas(
+/// This includes all NAM, so NAM is a subset NVA.
+pub fn get_nam_nva(
     truth_dag: &PDAG,
     t: &[usize],
     z: FxHashSet<usize>,

@@ -35,7 +35,7 @@ impl Display for SIDError {
 impl Error for SIDError {}
 
 /// Structural Intervention Distance between DAGs.
-/// Will panic if either graph is not a DAG.
+/// Will return error if either graph is not a DAG.
 pub fn sid(truth: &PDAG, guess: &PDAG) -> Result<(f64, usize), SIDError> {
     if !matches!(
         truth.pdag_type,
