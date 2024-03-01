@@ -97,15 +97,43 @@ mod test {
         }
         let z = g_guess.parents_of(t);
 
-        let pa_true_T = g_true.parents_of(t as usize).iter().copied().collect();
-        let an_true_T = graph_operations::ancestors(&g_true, [t].iter());
-        let ch_true_T = graph_operations::children(&g_true, [t].iter());
-        let de_true_T = graph_operations::descendants(&g_true, [t].iter());
-        let poss_de_true_T = graph_operations::possible_descendants(&g_true, [t].iter());
-        let prop_an_true_Y = graph_operations::proper_ancestors(&g_true, [t].iter(), [y].iter());
+        // throughout below, we sort because the order of the elements in the sets is not deterministic and we want matching snapshots
+
+        let pa_true_T = g_true.parents_of(t as usize).to_vec();
+        let mut an_true_T: Vec<usize> = graph_operations::ancestors(&g_true, [t].iter())
+            .iter()
+            .copied()
+            .collect();
+        an_true_T.sort();
+        let mut ch_true_T: Vec<usize> = graph_operations::children(&g_true, [t].iter())
+            .iter()
+            .copied()
+            .collect();
+        ch_true_T.sort();
+        let mut de_true_T: Vec<usize> = graph_operations::descendants(&g_true, [t].iter())
+            .iter()
+            .copied()
+            .collect();
+        de_true_T.sort();
+        let mut poss_de_true_T: Vec<usize> =
+            graph_operations::possible_descendants(&g_true, [t].iter())
+                .iter()
+                .copied()
+                .collect();
+        poss_de_true_T.sort();
+        let mut prop_an_true_Y: Vec<usize> =
+            graph_operations::proper_ancestors(&g_true, [t].iter(), [y].iter())
+                .iter()
+                .copied()
+                .collect();
+        prop_an_true_Y.sort();
 
         let (nam, nva) =
             graph_operations::get_nam_nva(&g_true, &[t], FxHashSet::from_iter(z.iter().copied()));
+        let (mut nam, mut nva): (Vec<usize>, Vec<usize>) =
+            (nam.iter().copied().collect(), nva.iter().copied().collect());
+        nam.sort();
+        nva.sort();
 
         let shd = graph_operations::shd(&g_true, &g_guess);
 
@@ -147,14 +175,14 @@ mod test {
         t: usize,
         y: usize,
         z: Vec<usize>,
-        pa_true_T: FxHashSet<usize>,
-        an_true_T: FxHashSet<usize>,
-        ch_true_T: FxHashSet<usize>,
-        de_true_T: FxHashSet<usize>,
-        poss_de_true_T: FxHashSet<usize>,
-        prop_an_true_Y: FxHashSet<usize>,
-        nam: FxHashSet<usize>,
-        nva: FxHashSet<usize>,
+        pa_true_T: Vec<usize>,
+        an_true_T: Vec<usize>,
+        ch_true_T: Vec<usize>,
+        de_true_T: Vec<usize>,
+        poss_de_true_T: Vec<usize>,
+        prop_an_true_Y: Vec<usize>,
+        nam: Vec<usize>,
+        nva: Vec<usize>,
         shd: (f64, usize),
         sid: (f64, usize),
         oset_aid: (f64, usize),
