@@ -149,6 +149,141 @@ pub fn get_nam_nva(
     (not_amenable, not_vas)
 }
 
+/// Validate Z as adjustment set relative to (T, Y) for a given set T of treatment
+/// nodes and all possible Y in G.
+///
+/// Follows Algorithm 4 in https://doi.org/10.48550/arXiv.2402.08616
+///
+/// Returns tuple of:<br>
+/// - Set PD of possible descendants of T in G
+/// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
+/// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
+/// This includes all NAM, so NAM is a subset NVA.
+pub fn get_pd_nam_nva(
+    truth_dag: &PDAG,
+    t: &[usize],
+    z: FxHashSet<usize>,
+) -> (FxHashSet<usize>, FxHashSet<usize>, FxHashSet<usize>) {
+    let mut not_amenable = FxHashSet::<usize>::default();
+    let mut not_vas = z.clone();
+    let mut poss_de = FxHashSet::from_iter(t.iter().copied());
+
+    let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    let mut to_visit_stack = Vec::<(Edge, usize, WalkStatus)>::new();
+    t.iter()
+        .for_each(|v| to_visit_stack.push((Edge::Init, *v, WalkStatus::Init)));
+
+    let get_next_steps = |arrived_by: Edge, v: usize, node_is_adjustment: bool| {
+        let mut next = Vec::<(Edge, usize, bool)>::new();
+        match arrived_by {
+            Edge::Incoming => {
+                truth_dag
+                    .parents_of(v)
+                    .iter()
+                    .filter(|p| !t.contains(*p))
+                    .for_each(|p| {
+                        next.push((Edge::Outgoing, *p, !node_is_adjustment));
+                    });
+            }
+            Edge::Init | Edge::Outgoing => {
+                truth_dag
+                    .parents_of(v)
+                    .iter()
+                    .filter(|p| !t.contains(*p))
+                    .for_each(|p| {
+                        next.push((Edge::Outgoing, *p, node_is_adjustment));
+                    });
+            }
+            _ => (),
+        }
+        truth_dag
+            .adjacent_undirected_of(v)
+            .iter()
+            .filter(|u| !t.contains(*u))
+            .for_each(|u| {
+                next.push((Edge::Undirected, *u, node_is_adjustment));
+            });
+        truth_dag
+            .children_of(v)
+            .iter()
+            .filter(|c| !t.contains(*c))
+            .for_each(|c| {
+                next.push((Edge::Incoming, *c, node_is_adjustment));
+            });
+        next
+    };
+
+    while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
+        visited.insert((arrived_by, node, walkstatus));
+
+        match walkstatus {
+            WalkStatus::OpenNonAmenable | WalkStatus::BlockedNonAmenable => {
+                not_amenable.insert(node);
+                // we want the property that not_amenable is a subset of not_vas
+                // so, if we insert a node into not_amenable, we also insert it into not_vas
+                not_vas.insert(node);
+                poss_de.insert(node);
+            }
+            WalkStatus::NonCausal | WalkStatus::BlockedAmenable => {
+                not_vas.insert(node);
+                poss_de.insert(node);
+            }
+            WalkStatus::OpenAmenable => {
+                poss_de.insert(node);
+            }
+            _ => (),
+        }
+        let node_is_adjustment = z.contains(&node);
+
+        for (move_on_by, w, blocked) in get_next_steps(arrived_by, node, node_is_adjustment) {
+            let next = match walkstatus {
+                WalkStatus::Init => match move_on_by {
+                    Edge::Incoming => Some((move_on_by, w, WalkStatus::OpenAmenable)),
+                    Edge::Outgoing => Some((move_on_by, w, WalkStatus::NonCausal)),
+                    Edge::Undirected => Some((move_on_by, w, WalkStatus::OpenNonAmenable)),
+                    _ => None,
+                },
+                WalkStatus::OpenAmenable | WalkStatus::BlockedAmenable => match move_on_by {
+                    Edge::Incoming | Edge::Undirected => match blocked {
+                        false => Some((move_on_by, w, walkstatus)),
+                        true => Some((move_on_by, w, WalkStatus::BlockedAmenable)),
+                    },
+                    Edge::Outgoing
+                        if !blocked && matches!(walkstatus, WalkStatus::OpenAmenable) =>
+                    {
+                        Some((move_on_by, w, WalkStatus::NonCausal))
+                    }
+                    _ => None,
+                },
+                WalkStatus::OpenNonAmenable | WalkStatus::BlockedNonAmenable => match move_on_by {
+                    Edge::Incoming | Edge::Undirected => match blocked {
+                        false => Some((move_on_by, w, walkstatus)),
+                        true => Some((move_on_by, w, WalkStatus::BlockedNonAmenable)),
+                    },
+                    Edge::Outgoing
+                        if !blocked && matches!(walkstatus, WalkStatus::OpenNonAmenable) =>
+                    {
+                        Some((move_on_by, w, WalkStatus::NonCausal))
+                    }
+                    _ => None,
+                },
+                WalkStatus::NonCausal if !blocked => Some((move_on_by, w, WalkStatus::NonCausal)),
+                _ => None,
+            };
+
+            if let Some(next) = next {
+                if !visited.contains(&next) {
+                    to_visit_stack.push(next);
+                }
+            }
+        }
+    }
+
+    assert!(not_amenable.is_subset(&not_vas));
+
+    (poss_de, not_amenable, not_vas)
+}
+
 /// Check amenability of a CPDAG relative to (T, Y) for a given set T of treatment
 /// nodes and all possible Y.
 ///
