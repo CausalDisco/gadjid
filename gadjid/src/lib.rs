@@ -98,12 +98,11 @@ mod test {
         let z = g_guess.parents_of(t);
 
         let pa_true_T = g_true.parents_of(t as usize).iter().copied().collect();
-
-        let pa_true_Y = g_true.parents_of(y as usize).iter().copied().collect();
-
-        let de_true_Z = graph_operations::descendants(&g_true, z.iter());
-
-        let de_guess_Z = graph_operations::descendants(&g_guess, z.iter());
+        let an_true_T = graph_operations::ancestors(&g_true, [t].iter());
+        let ch_true_T = graph_operations::children(&g_true, [t].iter());
+        let de_true_T = graph_operations::descendants(&g_true, [t].iter());
+        let poss_de_true_T = graph_operations::possible_descendants(&g_true, [t].iter());
+        let prop_an_true_Y = graph_operations::proper_ancestors(&g_true, [t].iter(), [y].iter());
 
         let (nam, nva) =
             graph_operations::get_nam_nva(&g_true, &[t], FxHashSet::from_iter(z.iter().copied()));
@@ -121,13 +120,15 @@ mod test {
         Testcase {
             g_true: g_true_name.to_string(),
             g_guess: g_guess_name.to_string(),
-            t: t as u32,
-            y: y as u32,
-            z: z.iter().copied().map(|x| x as u32).collect(),
+            t,
+            y,
+            z: z.to_vec(),
             pa_true_T,
-            pa_true_Y,
-            de_true_Z,
-            de_guess_Z,
+            an_true_T,
+            ch_true_T,
+            de_true_T,
+            poss_de_true_T,
+            prop_an_true_Y,
             nam,
             nva,
             shd,
@@ -138,17 +139,21 @@ mod test {
         }
     }
 
+
+    /// Stores the result of loading the two graphs and computing various graph operations on them.
     #[derive(serde::Serialize)]
     pub struct Testcase {
         g_guess: String,
         g_true: String,
-        t: u32,
-        y: u32,
-        z: Vec<u32>,
+        t: usize,
+        y: usize,
+        z: Vec<usize>,
         pa_true_T: FxHashSet<usize>,
-        pa_true_Y: FxHashSet<usize>,
-        de_true_Z: FxHashSet<usize>,
-        de_guess_Z: FxHashSet<usize>,
+        an_true_T: FxHashSet<usize>,
+        ch_true_T: FxHashSet<usize>,
+        de_true_T: FxHashSet<usize>,
+        poss_de_true_T: FxHashSet<usize>,
+        prop_an_true_Y: FxHashSet<usize>,
         nam: FxHashSet<usize>,
         nva: FxHashSet<usize>,
         shd: (f64, usize),
