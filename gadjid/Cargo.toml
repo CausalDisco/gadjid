@@ -10,6 +10,7 @@ publish = false
 
 [dependencies]
 rand = "0.8"
+rand_chacha = "0.3.1"
 rayon = "1.8"
 rustc-hash = "1.1"
 
@@ -17,3 +18,11 @@ rustc-hash = "1.1"
 codegen-units = 1
 lto = "fat"
 opt-level = 3
+
+[profile.dev.package]
+insta.opt-level = 3
+similar.opt-level = 3
+
+[dev-dependencies]
+insta = { version = "1.35", features = ["yaml"] }
+serde = { version = "1.0", features = ["derive"] }

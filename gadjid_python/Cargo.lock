@@ -62,6 +62,7 @@ name = "gadjid"
 version = "0.0.1"
 dependencies = [
  "rand",
+ "rand_chacha",
  "rayon",
  "rustc-hash",
 ]
