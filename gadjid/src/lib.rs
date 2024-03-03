@@ -46,11 +46,11 @@ pub(crate) mod test {
         // and fill it with the edges from the mtx file
         for line in lines {
             let mut iter = line.split_whitespace();
-            
+
             let i = iter.next().unwrap().parse::<usize>().unwrap();
             let j = iter.next().unwrap().parse::<usize>().unwrap();
             let edgetype = iter.next();
-            match edgetype{
+            match edgetype {
                 // in DAG format, there are only tuples of coordinates, no edge types
                 None => {
                     adj[i - 1][j - 1] = 1;
@@ -66,7 +66,6 @@ pub(crate) mod test {
         PDAG::from_vecvec(adj)
     }
 
-    
     /// Takes two names, like `g_true="DAG1"` and `g_guess="DAG2"` and returns a Testcase, loading from the corresponding `../testgraphs/{g_true}.mtx` files
     fn test(g_true_name: &str, g_guess_name: &str) -> Testcase {
         // get the root of the project
@@ -203,11 +202,26 @@ pub(crate) mod test {
 
     #[test]
     fn small_cpdag_snapshot() {
-        insta::assert_yaml_snapshot!("small-CPDAG1-vs-CPDAG2", test("20001.CPDAG-10", "20002.CPDAG-10"));
-        insta::assert_yaml_snapshot!("small-CPDAG3-vs-CPDAG4", test("20003.CPDAG-10", "20004.CPDAG-10"));
-        insta::assert_yaml_snapshot!("small-CPDAG5-vs-CPDAG6", test("20005.CPDAG-10", "20006.CPDAG-10"));
-        insta::assert_yaml_snapshot!("small-CPDAG7-vs-CPDAG8", test("20007.CPDAG-10", "20008.CPDAG-10"));
-        insta::assert_yaml_snapshot!("small-CPDAG9-vs-CPDAG10", test("20009.CPDAG-10", "20010.CPDAG-10"));
+        insta::assert_yaml_snapshot!(
+            "small-CPDAG1-vs-CPDAG2",
+            test("20001.CPDAG-10", "20002.CPDAG-10")
+        );
+        insta::assert_yaml_snapshot!(
+            "small-CPDAG3-vs-CPDAG4",
+            test("20003.CPDAG-10", "20004.CPDAG-10")
+        );
+        insta::assert_yaml_snapshot!(
+            "small-CPDAG5-vs-CPDAG6",
+            test("20005.CPDAG-10", "20006.CPDAG-10")
+        );
+        insta::assert_yaml_snapshot!(
+            "small-CPDAG7-vs-CPDAG8",
+            test("20007.CPDAG-10", "20008.CPDAG-10")
+        );
+        insta::assert_yaml_snapshot!(
+            "small-CPDAG9-vs-CPDAG10",
+            test("20009.CPDAG-10", "20010.CPDAG-10")
+        );
     }
     #[test]
     fn small_dag_snapshot() {
@@ -228,10 +242,25 @@ pub(crate) mod test {
 
     #[test]
     fn big_cpdag_snapshot() {
-        insta::assert_yaml_snapshot!("big-CPDAG1-vs-CPDAG2", test("10001.CPDAG-100", "10002.CPDAG-100"));
-        insta::assert_yaml_snapshot!("big-CPDAG3-vs-CPDAG4", test("10003.CPDAG-100", "10004.CPDAG-100"));
-        insta::assert_yaml_snapshot!("big-CPDAG5-vs-CPDAG6", test("10005.CPDAG-100", "10006.CPDAG-100"));
-        insta::assert_yaml_snapshot!("big-CPDAG7-vs-CPDAG8", test("10007.CPDAG-100", "10008.CPDAG-100"));
-        insta::assert_yaml_snapshot!("big-CPDAG9-vs-CPDAG10", test("10009.CPDAG-100", "10010.CPDAG-100"));
+        insta::assert_yaml_snapshot!(
+            "big-CPDAG1-vs-CPDAG2",
+            test("10001.CPDAG-100", "10002.CPDAG-100")
+        );
+        insta::assert_yaml_snapshot!(
+            "big-CPDAG3-vs-CPDAG4",
+            test("10003.CPDAG-100", "10004.CPDAG-100")
+        );
+        insta::assert_yaml_snapshot!(
+            "big-CPDAG5-vs-CPDAG6",
+            test("10005.CPDAG-100", "10006.CPDAG-100")
+        );
+        insta::assert_yaml_snapshot!(
+            "big-CPDAG7-vs-CPDAG8",
+            test("10007.CPDAG-100", "10008.CPDAG-100")
+        );
+        insta::assert_yaml_snapshot!(
+            "big-CPDAG9-vs-CPDAG10",
+            test("10009.CPDAG-100", "10010.CPDAG-100")
+        );
     }
 }

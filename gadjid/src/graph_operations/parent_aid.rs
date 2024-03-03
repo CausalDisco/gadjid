@@ -8,7 +8,7 @@ use crate::{
     graph_operations::{get_nam, get_nam_nva, possible_descendants},
     PDAG,
 };
- 
+
 /// Computes the parent adjustment intervention distance
 /// between an estimated `guess` DAG or CPDAG and the true `truth` DAG or CPDAG
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
@@ -157,7 +157,6 @@ mod tests {
         assert_eq!(parent_aid(&g_dag, &h2_dag), (0.4, 8));
     }
 
-
     #[test]
     fn parent_aid_against_r_sid() {
         // get the root of the project
@@ -180,7 +179,7 @@ mod tests {
             let r_sid = iter.next().unwrap().parse::<usize>().unwrap();
             (g_true, g_guess, r_sid)
         });
-        
+
         // go through all testcases, load the PDAGs from the mtx files and compare the computed SID with the expected SID
         for (gtrue, gguess, rsid) in tests {
             let full_path_true = testgraphs.join(format!("{}.DAG-100.mtx", gtrue));
@@ -195,5 +194,4 @@ mod tests {
 
         ()
     }
-    
 }
