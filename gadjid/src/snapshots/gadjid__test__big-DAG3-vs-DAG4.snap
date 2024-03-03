@@ -2,8 +2,8 @@
 source: src/lib.rs
 expression: "test(\"10003.DAG-100\", \"10004.DAG-100\")"
 ---
-g_guess: 10004.DAG-100
 g_true: 10003.DAG-100
+g_guess: 10004.DAG-100
 ts:
   - 99
   - 85
