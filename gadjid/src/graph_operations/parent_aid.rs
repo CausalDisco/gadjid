@@ -8,7 +8,7 @@ use crate::{
     graph_operations::{get_nam, get_nam_nva, possible_descendants},
     PDAG,
 };
-
+ 
 /// Computes the parent adjustment intervention distance
 /// between an estimated `guess` DAG or CPDAG and the true `truth` DAG or CPDAG
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
@@ -110,8 +110,6 @@ mod tests {
                     "parent_aid between same dags of size {n} must be zero, dag: {}",
                     dag
                 );
-                print!(".");
-                let _ = std::io::Write::flush(&mut std::io::stdout());
             }
         }
     }
@@ -123,7 +121,6 @@ mod tests {
                 let dag1 = PDAG::random_dag(1.0, n);
                 let dag2 = PDAG::random_dag(1.0, n);
                 parent_aid(&dag1, &dag2);
-                let _ = std::io::Write::flush(&mut std::io::stdout());
             }
         }
     }
@@ -159,4 +156,44 @@ mod tests {
         assert_eq!(parent_aid(&g_dag, &h1_dag), (0.0, 0));
         assert_eq!(parent_aid(&g_dag, &h2_dag), (0.4, 8));
     }
+
+
+    #[test]
+    fn parent_aid_against_r_sid() {
+        // get the root of the project
+        let root = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+        // get the parent directory of the project
+        let root_parent = std::path::Path::new(&root).parent().unwrap();
+        // get the child dir "testgraphs"
+        let testgraphs = root_parent.join("testgraphs");
+
+        let testcases_file = std::fs::read_to_string(&testgraphs.join("SID.DAG-100.csv")).unwrap();
+        let mut testcases = testcases_file.lines();
+        testcases.next(); // skip header
+
+        // create iterator over testcases to later use in the loop
+        let tests = testcases.map(|line| {
+            let mut iter = line.split(",");
+            let g_true = iter.next().unwrap().parse::<usize>().unwrap();
+            let g_guess = iter.next().unwrap().parse::<usize>().unwrap();
+            let _ = iter.next().unwrap().parse::<usize>().unwrap();
+            let r_sid = iter.next().unwrap().parse::<usize>().unwrap();
+            (g_true, g_guess, r_sid)
+        });
+        
+        // go through all testcases, load the PDAGs from the mtx files and compare the computed SID with the expected SID
+        for (gtrue, gguess, rsid) in tests {
+            let full_path_true = testgraphs.join(format!("{}.DAG-100.mtx", gtrue));
+            let full_path_guess = testgraphs.join(format!("{}.DAG-100.mtx", gguess));
+            let g_true = crate::test::load_pdag_from_mtx(full_path_true.to_str().unwrap());
+            let g_guess = crate::test::load_pdag_from_mtx(full_path_guess.to_str().unwrap());
+
+            let (_, mistakes) = parent_aid(&g_true, &g_guess);
+
+            assert_eq!(mistakes, rsid);
+        }
+
+        ()
+    }
+    
 }

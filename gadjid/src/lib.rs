@@ -12,7 +12,7 @@ pub use partially_directed_acyclic_graph::PDAG;
 
 #[cfg(test)]
 #[allow(non_snake_case)]
-mod test {
+pub(crate) mod test {
     use std::hash::{Hash, Hasher};
 
     use rand::{Rng, SeedableRng};
@@ -23,7 +23,7 @@ mod test {
         PDAG,
     };
 
-    fn load_pdag_from_mtx(full_path: &str) -> PDAG {
+    pub fn load_pdag_from_mtx(full_path: &str) -> PDAG {
         // read the mtx file
         let mtx = std::fs::read_to_string(full_path).unwrap();
 
@@ -66,6 +66,7 @@ mod test {
         PDAG::from_vecvec(adj)
     }
 
+    
     /// Takes two names, like `g_true="DAG1"` and `g_guess="DAG2"` and returns a Testcase, loading from the corresponding `../testgraphs/{g_true}.mtx` files
     fn test(g_true_name: &str, g_guess_name: &str) -> Testcase {
         // get the root of the project
@@ -181,8 +182,8 @@ mod test {
     /// Stores the result of loading the two graphs and computing various graph operations on them.
     #[derive(serde::Serialize)]
     pub struct Testcase {
-        g_guess: String,
         g_true: String,
+        g_guess: String,
         ts: Vec<usize>,
         ys: Vec<usize>,
         zs: Vec<Vec<usize>>,
@@ -202,39 +203,35 @@ mod test {
 
     #[test]
     fn small_cpdag_snapshot() {
-        // will add CPDAGs, too
-        insta::assert_yaml_snapshot!("(small) CPDAG1-vs-CPDAG2", test("20001.CPDAG-10", "20002.CPDAG-10"));
-        insta::assert_yaml_snapshot!("(small) CPDAG3-vs-CPDAG4", test("20003.CPDAG-10", "20004.CPDAG-10"));
-        insta::assert_yaml_snapshot!("(small) CPDAG5-vs-CPDAG6", test("20005.CPDAG-10", "20006.CPDAG-10"));
-        insta::assert_yaml_snapshot!("(small) CPDAG7-vs-CPDAG8", test("20007.CPDAG-10", "20008.CPDAG-10"));
-        insta::assert_yaml_snapshot!("(small) CPDAG9-vs-CPDAG10", test("20009.CPDAG-10", "20010.CPDAG-10"));
+        insta::assert_yaml_snapshot!("small-CPDAG1-vs-CPDAG2", test("20001.CPDAG-10", "20002.CPDAG-10"));
+        insta::assert_yaml_snapshot!("small-CPDAG3-vs-CPDAG4", test("20003.CPDAG-10", "20004.CPDAG-10"));
+        insta::assert_yaml_snapshot!("small-CPDAG5-vs-CPDAG6", test("20005.CPDAG-10", "20006.CPDAG-10"));
+        insta::assert_yaml_snapshot!("small-CPDAG7-vs-CPDAG8", test("20007.CPDAG-10", "20008.CPDAG-10"));
+        insta::assert_yaml_snapshot!("small-CPDAG9-vs-CPDAG10", test("20009.CPDAG-10", "20010.CPDAG-10"));
     }
     #[test]
     fn small_dag_snapshot() {
-        // will add CPDAGs, too
-        insta::assert_yaml_snapshot!("(small) DAG1-vs-DAG2", test("20001.DAG-10", "20002.DAG-10"));
-        insta::assert_yaml_snapshot!("(small) DAG3-vs-DAG4", test("20003.DAG-10", "20004.DAG-10"));
-        insta::assert_yaml_snapshot!("(small) DAG5-vs-DAG6", test("20005.DAG-10", "20006.DAG-10"));
-        insta::assert_yaml_snapshot!("(small) DAG7-vs-DAG8", test("20007.DAG-10", "20008.DAG-10"));
-        insta::assert_yaml_snapshot!("(small) DAG9-vs-DAG10", test("20009.DAG-10", "20010.DAG-10"));
+        insta::assert_yaml_snapshot!("small-DAG1-vs-DAG2", test("20001.DAG-10", "20002.DAG-10"));
+        insta::assert_yaml_snapshot!("small-DAG3-vs-DAG4", test("20003.DAG-10", "20004.DAG-10"));
+        insta::assert_yaml_snapshot!("small-DAG5-vs-DAG6", test("20005.DAG-10", "20006.DAG-10"));
+        insta::assert_yaml_snapshot!("small-DAG7-vs-DAG8", test("20007.DAG-10", "20008.DAG-10"));
+        insta::assert_yaml_snapshot!("small-DAG9-vs-DAG10", test("20009.DAG-10", "20010.DAG-10"));
     }
     #[test]
-    fn dag_snapshot() {
-        // will add CPDAGs, too
-        insta::assert_yaml_snapshot!("DAG1-vs-DAG2", test("10001.DAG-100", "10002.DAG-100"));
-        insta::assert_yaml_snapshot!("DAG3-vs-DAG4", test("10003.DAG-100", "10004.DAG-100"));
-        insta::assert_yaml_snapshot!("DAG5-vs-DAG6", test("10005.DAG-100", "10006.DAG-100"));
-        insta::assert_yaml_snapshot!("DAG7-vs-DAG8", test("10007.DAG-100", "10008.DAG-100"));
-        insta::assert_yaml_snapshot!("DAG9-vs-DAG10", test("10009.DAG-100", "10010.DAG-100"));
+    fn big_dag_snapshot() {
+        insta::assert_yaml_snapshot!("big-DAG1-vs-DAG2", test("10001.DAG-100", "10002.DAG-100"));
+        insta::assert_yaml_snapshot!("big-DAG3-vs-DAG4", test("10003.DAG-100", "10004.DAG-100"));
+        insta::assert_yaml_snapshot!("big-DAG5-vs-DAG6", test("10005.DAG-100", "10006.DAG-100"));
+        insta::assert_yaml_snapshot!("big-DAG7-vs-DAG8", test("10007.DAG-100", "10008.DAG-100"));
+        insta::assert_yaml_snapshot!("big-DAG9-vs-DAG10", test("10009.DAG-100", "10010.DAG-100"));
     }
 
     #[test]
-    fn cpdag_snapshot() {
-        // will add CPDAGs, too
-        insta::assert_yaml_snapshot!("CPDAG1-vs-CPDAG2", test("10001.CPDAG-100", "10002.CPDAG-100"));
-        insta::assert_yaml_snapshot!("CPDAG3-vs-CPDAG4", test("10003.CPDAG-100", "10004.CPDAG-100"));
-        insta::assert_yaml_snapshot!("CPDAG5-vs-CPDAG6", test("10005.CPDAG-100", "10006.CPDAG-100"));
-        insta::assert_yaml_snapshot!("CPDAG7-vs-CPDAG8", test("10007.CPDAG-100", "10008.CPDAG-100"));
-        insta::assert_yaml_snapshot!("CPDAG9-vs-CPDAG10", test("10009.CPDAG-100", "10010.CPDAG-100"));
+    fn big_cpdag_snapshot() {
+        insta::assert_yaml_snapshot!("big-CPDAG1-vs-CPDAG2", test("10001.CPDAG-100", "10002.CPDAG-100"));
+        insta::assert_yaml_snapshot!("big-CPDAG3-vs-CPDAG4", test("10003.CPDAG-100", "10004.CPDAG-100"));
+        insta::assert_yaml_snapshot!("big-CPDAG5-vs-CPDAG6", test("10005.CPDAG-100", "10006.CPDAG-100"));
+        insta::assert_yaml_snapshot!("big-CPDAG7-vs-CPDAG8", test("10007.CPDAG-100", "10008.CPDAG-100"));
+        insta::assert_yaml_snapshot!("big-CPDAG9-vs-CPDAG10", test("10009.CPDAG-100", "10010.CPDAG-100"));
     }
 }
