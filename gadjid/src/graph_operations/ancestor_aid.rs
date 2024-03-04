@@ -55,7 +55,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             // --- to here
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
-            let (t_poss_desc_in_truth, nam_in_true, nvas_in_true) =
+            let (t_poss_desc_in_truth, nam_in_true, nva_in_true) =
                 get_pd_nam_nva(truth, &[treatment], adjustment_set);
 
             let mut mistakes = 0;
@@ -84,7 +84,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     // if we reach this point, y has a VAS in guess
                     // now, if the adjustment set is not valid in truth
                     // (either because the pair (t,y) is not amenable or because the VAS is not valid)
-                    if y_am_in_guess && nvas_in_true.contains(&y) {
+                    if y_am_in_guess && nva_in_true.contains(&y) {
                         // we count a mistake
                         mistakes += 1;
                     }

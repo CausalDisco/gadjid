@@ -8,7 +8,7 @@ use crate::{
     graph_operations::{aid_utils::get_pd_nam_nva, get_nam, get_nam_nva, possible_descendants},
     PDAG,
 };
- 
+
 /// Computes the parent adjustment intervention distance
 /// between an estimated `guess` DAG or CPDAG and the true `truth` DAG or CPDAG
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
@@ -47,7 +47,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             // --- to here
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
-            let (t_poss_desc_in_truth, nam_in_true, nvas_in_true) =
+            let (t_poss_desc_in_truth, nam_in_true, nva_in_true) =
                 get_pd_nam_nva(truth, &[treatment], adjustment_set);
 
             let mut mistakes = 0;
@@ -76,7 +76,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     // if we reach this point, y has a VAS in guess
                     // now, if the adjustment set is not valid in truth
                     // (either because the pair (t,y) is not amenable or because the VAS is not valid)
-                    if y_am_in_guess && nvas_in_true.contains(&y) {
+                    if y_am_in_guess && nva_in_true.contains(&y) {
                         // we count a mistake
                         mistakes += 1;
                     }
@@ -158,7 +158,6 @@ mod tests {
         assert_eq!(parent_aid(&g_dag, &h2_dag), (0.4, 8));
     }
 
-
     #[test]
     fn parent_aid_against_r_sid() {
         // get the root of the project
@@ -168,20 +167,20 @@ mod tests {
         // get the child dir "testgraphs"
         let testgraphs = root_parent.join("testgraphs");
 
-        let testcases_file = std::fs::read_to_string(&testgraphs.join("SID.DAG-100.csv")).unwrap();
+        let testcases_file = std::fs::read_to_string(testgraphs.join("SID.DAG-100.csv")).unwrap();
         let mut testcases = testcases_file.lines();
         testcases.next(); // skip header
 
         // create iterator over testcases to later use in the loop
         let tests = testcases.map(|line| {
-            let mut iter = line.split(",");
+            let mut iter = line.split(',');
             let g_true = iter.next().unwrap().parse::<usize>().unwrap();
             let g_guess = iter.next().unwrap().parse::<usize>().unwrap();
             let _ = iter.next().unwrap().parse::<usize>().unwrap();
             let r_sid = iter.next().unwrap().parse::<usize>().unwrap();
             (g_true, g_guess, r_sid)
         });
-        
+
         // go through all testcases, load the PDAGs from the mtx files and compare the computed SID with the expected SID
         for (gtrue, gguess, rsid) in tests {
             let full_path_true = testgraphs.join(format!("{}.DAG-100.mtx", gtrue));
@@ -193,8 +192,5 @@ mod tests {
 
             assert_eq!(mistakes, rsid);
         }
-
-        ()
     }
-    
 }
