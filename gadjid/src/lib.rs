@@ -153,8 +153,9 @@ pub(crate) mod test {
             })
             .collect();
 
-        // below, we sort results because the order of the elements in the sets is not deterministic and we want matching snapshots
         let pa_true_1st_T = g_true.parents_of(ts[0] as usize).to_vec();
+
+        // below, we sort results because the order of the elements in the hashsets is not defined and we want fully matching snapshots
         let mut an_true_1st_T: Vec<usize> = graph_operations::ancestors(&g_true, [ts[0]].iter())
             .iter()
             .copied()
