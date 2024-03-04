@@ -96,42 +96,86 @@ pub(crate) mod test {
         let seed = hasher.finish();
 
         // using rand_chacha to sample nodes with seed because it is reproducible across platforms
+        // this is recommended by the rand crate for portable reproducibility
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
 
-        let ts: Vec<usize> = (0..5).map(|_| rng.gen_range(0u32..g_true.n_nodes as u32) as usize).collect();
-        let ys: Vec<usize> = (0..5).map(|_| rng.gen_range(0u32..g_true.n_nodes as u32) as usize).collect();
-        let zs: Vec<Vec<usize>> = ts.iter().map(|t| g_guess.parents_of(*t).to_vec()).collect();
+        let ts: Vec<usize> = (0..5)
+            .map(|_| rng.gen_range(0u32..g_true.n_nodes as u32) as usize)
+            .collect();
+        let y: usize = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
+
+        let zs: Vec<Vec<usize>> = ts
+            .iter()
+            .map(|t| {
+                let num = rng.gen_range(0u8..=2u8);
+
+                let ruletable =
+                    crate::graph_operations::ruletables::ancestors::AncestorsRuletable {};
+                let mut ancestor_adjustment = crate::graph_operations::gensearch::gensearch(
+                    &g_guess,
+                    ruletable,
+                    [*t].iter(),
+                    // yield_starting_vertices 'false' because Ancestors(T)\T is the adjustment set
+                    false,
+                )
+                .iter()
+                .copied()
+                .collect::<Vec<usize>>();
+                
+                // returning a random adjustment set uniformly between some choices
+                match num {
+                    0 => g_guess.parents_of(*t).to_vec(),
+                    1 => {
+                        ancestor_adjustment.sort();
+                        ancestor_adjustment
+                    }
+                    2 => {
+                        // fully random adjustment set of size between 2 and n_ancestors
+                        let adj_size = rng.gen_range(2..=ancestor_adjustment.len().max(3) as u32) as usize;
+                        let unif = rand::distributions::uniform::Uniform::new(0, g_guess.n_nodes as u32);
+                        (&mut rng)
+                            .sample_iter(unif)
+                            .filter(|x| *x != *t as u32 && *x != y as u32)
+                            .take(adj_size)
+                            .map(|x| x as usize)
+                            .collect::<Vec<usize>>()
+                    }
+                    _ => unreachable!("num is 0, 1, or 2"),
+                }
+            })
+            .collect();
 
         // below, we sort results because the order of the elements in the sets is not deterministic and we want matching snapshots
-        let pa_true_T = g_true.parents_of(ts[0] as usize).to_vec();
-        let mut an_true_T: Vec<usize> = graph_operations::ancestors(&g_true, [ts[0]].iter())
+        let pa_true_1st_T = g_true.parents_of(ts[0] as usize).to_vec();
+        let mut an_true_1st_T: Vec<usize> = graph_operations::ancestors(&g_true, [ts[0]].iter())
             .iter()
             .copied()
             .collect();
-        an_true_T.sort();
-        let mut ch_true_T: Vec<usize> = graph_operations::children(&g_true, [ts[0]].iter())
+        an_true_1st_T.sort();
+        let mut ch_true_1st_T: Vec<usize> = graph_operations::children(&g_true, [ts[0]].iter())
             .iter()
             .copied()
             .collect();
-        ch_true_T.sort();
-        let mut de_true_T: Vec<usize> = graph_operations::descendants(&g_true, [ts[0]].iter())
+        ch_true_1st_T.sort();
+        let mut de_true_1st_T: Vec<usize> = graph_operations::descendants(&g_true, [ts[0]].iter())
             .iter()
             .copied()
             .collect();
-        de_true_T.sort();
-        let mut poss_de_true_T: Vec<usize> =
+        de_true_1st_T.sort();
+        let mut poss_de_true_1st_T: Vec<usize> =
             graph_operations::possible_descendants(&g_true, [ts[0]].iter())
                 .iter()
                 .copied()
                 .collect();
-        poss_de_true_T.sort();
-        let mut prop_an_true_Y: Vec<usize> =
-            graph_operations::proper_ancestors(&g_true, [ts[0]].iter(), [ys[0]].iter())
+        poss_de_true_1st_T.sort();
+        let mut prop_an_true_1st_T_and_1st_Y: Vec<usize> =
+            graph_operations::proper_ancestors(&g_true, [ts[0]].iter(), [y].iter())
                 .iter()
                 .copied()
                 .collect();
-        prop_an_true_Y.sort();
+        prop_an_true_1st_T_and_1st_Y.sort();
 
+        // for each we pair each t from ts with the random adjustment set z from zs, and compute the NAM and NVA sets.
         let (nams, nvas): (Vec<Vec<usize>>, Vec<Vec<usize>>) = ts
             .iter()
             .zip(zs.iter())
@@ -143,38 +187,36 @@ pub(crate) mod test {
                 );
                 let mut nam: Vec<usize> = nam.iter().copied().collect();
                 let mut nva: Vec<usize> = nva.iter().copied().collect();
+                // we have to sort as we don't know the order of the elements in the sets after .collect()
                 nam.sort();
                 nva.sort();
                 (nam, nva)
             })
             .unzip();
 
-        let shd = graph_operations::shd(&g_true, &g_guess);
-
-        let oset_aid = graph_operations::oset_aid(&g_true, &g_guess);
-
-        let parent_aid = parent_aid(&g_true, &g_guess);
-
         let ancestor_aid = graph_operations::ancestor_aid(&g_true, &g_guess);
+        let oset_aid = graph_operations::oset_aid(&g_true, &g_guess);
+        let parent_aid = parent_aid(&g_true, &g_guess);
+        let shd = graph_operations::shd(&g_true, &g_guess);
 
         Testcase {
             g_true: g_true_name.to_string(),
             g_guess: g_guess_name.to_string(),
             ts,
-            ys,
+            y,
             zs,
-            pa_true_1st_T: pa_true_T,
-            an_true_1st_T: an_true_T,
-            ch_true_1st_T: ch_true_T,
-            de_true_1st_T: de_true_T,
-            poss_de_true_1st_T: poss_de_true_T,
-            prop_an_true_1st_T_and_1st_Y: prop_an_true_Y,
+            pa_true_1st_T,
+            an_true_1st_T,
+            ch_true_1st_T,
+            de_true_1st_T,
+            poss_de_true_1st_T,
+            prop_an_true_1st_T_and_1st_Y,
             nams,
             nvas,
-            shd,
+            ancestor_aid,
             oset_aid,
             parent_aid,
-            ancestor_aid,
+            shd,
         }
     }
 
@@ -184,7 +226,7 @@ pub(crate) mod test {
         g_true: String,
         g_guess: String,
         ts: Vec<usize>,
-        ys: Vec<usize>,
+        y: usize,
         zs: Vec<Vec<usize>>,
         nams: Vec<Vec<usize>>,
         nvas: Vec<Vec<usize>>,
@@ -194,73 +236,49 @@ pub(crate) mod test {
         de_true_1st_T: Vec<usize>,
         poss_de_true_1st_T: Vec<usize>,
         prop_an_true_1st_T_and_1st_Y: Vec<usize>,
-        shd: (f64, usize),
+        ancestor_aid: (f64, usize),
         oset_aid: (f64, usize),
         parent_aid: (f64, usize),
-        ancestor_aid: (f64, usize),
+        shd: (f64, usize),
+    }
+
+    #[test]
+    fn small_dag_snapshot() {
+        for (left, right) in (1..=5).map(|x| (2*x-1, 2*x)) {
+            insta::assert_yaml_snapshot!(
+                format!("small-DAG{}-vs-DAG{}", left, right),
+                test(&format!("200{:0>2}.DAG-10", left), &format!("200{:0>2}.DAG-10", right))
+            );
+        }
     }
 
     #[test]
     fn small_cpdag_snapshot() {
-        insta::assert_yaml_snapshot!(
-            "small-CPDAG1-vs-CPDAG2",
-            test("20001.CPDAG-10", "20002.CPDAG-10")
-        );
-        insta::assert_yaml_snapshot!(
-            "small-CPDAG3-vs-CPDAG4",
-            test("20003.CPDAG-10", "20004.CPDAG-10")
-        );
-        insta::assert_yaml_snapshot!(
-            "small-CPDAG5-vs-CPDAG6",
-            test("20005.CPDAG-10", "20006.CPDAG-10")
-        );
-        insta::assert_yaml_snapshot!(
-            "small-CPDAG7-vs-CPDAG8",
-            test("20007.CPDAG-10", "20008.CPDAG-10")
-        );
-        insta::assert_yaml_snapshot!(
-            "small-CPDAG9-vs-CPDAG10",
-            test("20009.CPDAG-10", "20010.CPDAG-10")
-        );
+        for (left, right) in (1..=5).map(|x| (2*x-1, 2*x)) {
+            insta::assert_yaml_snapshot!(
+                format!("small-CPDAG{}-vs-CPDAG{}", left, right),
+                test(&format!("200{:0>2}.CPDAG-10", left), &format!("200{:0>2}.CPDAG-10", right))
+            );
+        }
     }
-    #[test]
-    fn small_dag_snapshot() {
-        insta::assert_yaml_snapshot!("small-DAG1-vs-DAG2", test("20001.DAG-10", "20002.DAG-10"));
-        insta::assert_yaml_snapshot!("small-DAG3-vs-DAG4", test("20003.DAG-10", "20004.DAG-10"));
-        insta::assert_yaml_snapshot!("small-DAG5-vs-DAG6", test("20005.DAG-10", "20006.DAG-10"));
-        insta::assert_yaml_snapshot!("small-DAG7-vs-DAG8", test("20007.DAG-10", "20008.DAG-10"));
-        insta::assert_yaml_snapshot!("small-DAG9-vs-DAG10", test("20009.DAG-10", "20010.DAG-10"));
-    }
+    
     #[test]
     fn big_dag_snapshot() {
-        insta::assert_yaml_snapshot!("big-DAG1-vs-DAG2", test("10001.DAG-100", "10002.DAG-100"));
-        insta::assert_yaml_snapshot!("big-DAG3-vs-DAG4", test("10003.DAG-100", "10004.DAG-100"));
-        insta::assert_yaml_snapshot!("big-DAG5-vs-DAG6", test("10005.DAG-100", "10006.DAG-100"));
-        insta::assert_yaml_snapshot!("big-DAG7-vs-DAG8", test("10007.DAG-100", "10008.DAG-100"));
-        insta::assert_yaml_snapshot!("big-DAG9-vs-DAG10", test("10009.DAG-100", "10010.DAG-100"));
+        for (left, right) in (1..=5).map(|x| (2*x-1, 2*x)) {
+            insta::assert_yaml_snapshot!(
+                format!("big-DAG{}-vs-DAG{}", left, right),
+                test(&format!("100{:0>2}.DAG-100", left), &format!("100{:0>2}.DAG-100", right))
+            );
+        }
     }
 
     #[test]
     fn big_cpdag_snapshot() {
-        insta::assert_yaml_snapshot!(
-            "big-CPDAG1-vs-CPDAG2",
-            test("10001.CPDAG-100", "10002.CPDAG-100")
-        );
-        insta::assert_yaml_snapshot!(
-            "big-CPDAG3-vs-CPDAG4",
-            test("10003.CPDAG-100", "10004.CPDAG-100")
-        );
-        insta::assert_yaml_snapshot!(
-            "big-CPDAG5-vs-CPDAG6",
-            test("10005.CPDAG-100", "10006.CPDAG-100")
-        );
-        insta::assert_yaml_snapshot!(
-            "big-CPDAG7-vs-CPDAG8",
-            test("10007.CPDAG-100", "10008.CPDAG-100")
-        );
-        insta::assert_yaml_snapshot!(
-            "big-CPDAG9-vs-CPDAG10",
-            test("10009.CPDAG-100", "10010.CPDAG-100")
-        );
+        for (left, right) in (1..=5).map(|x| (2*x-1, 2*x)) {
+            insta::assert_yaml_snapshot!(
+                format!("big-CPDAG{}-vs-CPDAG{}", left, right),
+                test(&format!("100{:0>2}.CPDAG-100", left), &format!("100{:0>2}.CPDAG-100", right))
+            );
+        }
     }
 }

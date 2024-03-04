@@ -2,11 +2,11 @@
 //! Implements functions that take graphs, such as SHD, generalized search, ...
 mod aid_utils;
 mod ancestor_aid;
-mod gensearch;
+pub(crate) mod gensearch;
 mod oset_aid;
 mod parent_aid;
 mod possible_descendants;
-mod ruletables;
+pub(crate) mod ruletables;
 mod shd;
 mod sid;
 
