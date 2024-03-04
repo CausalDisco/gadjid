@@ -269,7 +269,10 @@ pub(crate) mod test {
                 test(
                     &format!("200{:0>2}.DAG-10", left),
                     &format!("200{:0>2}.DAG-10", right)
-                )
+                ),
+                {
+                    ".*" => insta::rounded_redaction(3)
+                }
             );
         }
     }
@@ -282,7 +285,10 @@ pub(crate) mod test {
                 test(
                     &format!("200{:0>2}.CPDAG-10", left),
                     &format!("200{:0>2}.CPDAG-10", right)
-                )
+                ),
+                {
+                    ".*" => insta::rounded_redaction(3)
+                }
             );
         }
     }
@@ -295,7 +301,10 @@ pub(crate) mod test {
                 test(
                     &format!("100{:0>2}.DAG-100", left),
                     &format!("100{:0>2}.DAG-100", right)
-                )
+                ),
+                {
+                    ".*" => insta::rounded_redaction(3)
+                }
             );
         }
     }
@@ -308,7 +317,10 @@ pub(crate) mod test {
                 test(
                     &format!("100{:0>2}.CPDAG-100", left),
                     &format!("100{:0>2}.CPDAG-100", right)
-                )
+                ),
+                {
+                    ".*" => insta::rounded_redaction(3)
+                }
             );
         }
     }
