@@ -166,13 +166,13 @@ mod tests {
         // get the child dir "testgraphs"
         let testgraphs = root_parent.join("testgraphs");
 
-        let testcases_file = std::fs::read_to_string(&testgraphs.join("SID.DAG-100.csv")).unwrap();
+        let testcases_file = std::fs::read_to_string(testgraphs.join("SID.DAG-100.csv")).unwrap();
         let mut testcases = testcases_file.lines();
         testcases.next(); // skip header
 
         // create iterator over testcases to later use in the loop
         let tests = testcases.map(|line| {
-            let mut iter = line.split(",");
+            let mut iter = line.split(',');
             let g_true = iter.next().unwrap().parse::<usize>().unwrap();
             let g_guess = iter.next().unwrap().parse::<usize>().unwrap();
             let _ = iter.next().unwrap().parse::<usize>().unwrap();
@@ -191,7 +191,5 @@ mod tests {
 
             assert_eq!(mistakes, rsid);
         }
-
-        ()
     }
 }

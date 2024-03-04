@@ -77,13 +77,13 @@ pub(crate) mod test {
 
         // load the true and guess graphs
         let g_true = load_pdag_from_mtx(
-            &testgraphs
+            testgraphs
                 .join(format!("{}.mtx", g_true_name))
                 .to_str()
                 .unwrap(),
         );
         let g_guess = load_pdag_from_mtx(
-            &testgraphs
+            testgraphs
                 .join(format!("{}.mtx", g_guess_name))
                 .to_str()
                 .unwrap(),
@@ -153,8 +153,10 @@ pub(crate) mod test {
             })
             .collect();
 
+        
+        // parents_of returns a slice, (defined .iter() order), so we don't need to stabilize with sort.
         let pa_true_1st_T = g_true.parents_of(ts[0] as usize).to_vec();
-
+        
         // below, we sort results because the order of the elements in the hashsets is not defined and we want fully matching snapshots
         let mut an_true_1st_T: Vec<usize> = graph_operations::ancestors(&g_true, [ts[0]].iter())
             .iter()
