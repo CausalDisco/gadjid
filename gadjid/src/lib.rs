@@ -77,13 +77,13 @@ pub(crate) mod test {
 
         // load the true and guess graphs
         let g_true = load_pdag_from_mtx(
-            &testgraphs
+            testgraphs
                 .join(format!("{}.mtx", g_true_name))
                 .to_str()
                 .unwrap(),
         );
         let g_guess = load_pdag_from_mtx(
-            &testgraphs
+            testgraphs
                 .join(format!("{}.mtx", g_guess_name))
                 .to_str()
                 .unwrap(),
@@ -102,8 +102,9 @@ pub(crate) mod test {
         let ys: Vec<usize> = (0..5).map(|_| rng.gen_range(0..g_true.n_nodes)).collect();
         let zs: Vec<Vec<usize>> = ts.iter().map(|t| g_guess.parents_of(*t).to_vec()).collect();
 
+        // parents_of returns nodes in sorted ascending order
+        let pa_true_T = g_true.parents_of(ts[0]).to_vec();
         // below, we sort results because the order of the elements in the sets is not deterministic and we want matching snapshots
-        let pa_true_T = g_true.parents_of(ts[0] as usize).to_vec();
         let mut an_true_T: Vec<usize> = graph_operations::ancestors(&g_true, [ts[0]].iter())
             .iter()
             .copied()
@@ -171,10 +172,10 @@ pub(crate) mod test {
             prop_an_true_1st_T_and_1st_Y: prop_an_true_Y,
             nams,
             nvas,
-            shd,
+            ancestor_aid,
             oset_aid,
             parent_aid,
-            ancestor_aid,
+            shd,
         }
     }
 
@@ -194,10 +195,10 @@ pub(crate) mod test {
         de_true_1st_T: Vec<usize>,
         poss_de_true_1st_T: Vec<usize>,
         prop_an_true_1st_T_and_1st_Y: Vec<usize>,
-        shd: (f64, usize),
+        ancestor_aid: (f64, usize),
         oset_aid: (f64, usize),
         parent_aid: (f64, usize),
-        ancestor_aid: (f64, usize),
+        shd: (f64, usize),
     }
 
     #[test]

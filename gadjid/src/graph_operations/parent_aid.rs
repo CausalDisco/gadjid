@@ -46,7 +46,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             );
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
-            let (nam_in_true, nvas_in_true) = get_nam_nva(truth, &[treatment], parent_adjustment);
+            let (nam_in_true, nva_in_true) = get_nam_nva(truth, &[treatment], parent_adjustment);
             // --- to here
             let t_poss_desc_in_truth = possible_descendants(truth, [treatment].iter());
 
@@ -75,7 +75,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     // if we reach this point, y has a VAS in guess
                     // now, if the adjustment set is not valid in truth
                     // (either because the pair (t,y) is not amenable or because the VAS is not valid)
-                    else if nvas_in_true.contains(&y) {
+                    else if nva_in_true.contains(&y) {
                         // we count a mistake
                         mistakes += 1;
                     }
@@ -166,13 +166,13 @@ mod tests {
         // get the child dir "testgraphs"
         let testgraphs = root_parent.join("testgraphs");
 
-        let testcases_file = std::fs::read_to_string(&testgraphs.join("SID.DAG-100.csv")).unwrap();
+        let testcases_file = std::fs::read_to_string(testgraphs.join("SID.DAG-100.csv")).unwrap();
         let mut testcases = testcases_file.lines();
         testcases.next(); // skip header
 
         // create iterator over testcases to later use in the loop
         let tests = testcases.map(|line| {
-            let mut iter = line.split(",");
+            let mut iter = line.split(',');
             let g_true = iter.next().unwrap().parse::<usize>().unwrap();
             let g_guess = iter.next().unwrap().parse::<usize>().unwrap();
             let _ = iter.next().unwrap().parse::<usize>().unwrap();
@@ -191,7 +191,5 @@ mod tests {
 
             assert_eq!(mistakes, rsid);
         }
-
-        ()
     }
 }
