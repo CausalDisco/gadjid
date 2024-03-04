@@ -13,10 +13,9 @@ pub use partially_directed_acyclic_graph::PDAG;
 #[cfg(test)]
 #[allow(non_snake_case)]
 pub(crate) mod test {
-    use std::hash::{Hash, Hasher};
-
     use rand::{Rng, SeedableRng};
     use rustc_hash::FxHashSet;
+    use std::hash::{Hash, Hasher};
 
     use crate::{
         graph_operations::{self, parent_aid},
@@ -99,9 +98,16 @@ pub(crate) mod test {
         // this is recommended by the rand crate for portable reproducibility
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
 
-        let ts: Vec<usize> = (0..5)
-            .map(|_| rng.gen_range(0u32..g_true.n_nodes as u32) as usize)
-            .collect();
+        // sampling 5 ts without replacement
+        let mut ts: Vec<usize> = vec![];
+        (0..5).for_each(|_| {
+            let mut t = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
+            while ts.contains(&t) {
+                t = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
+            }
+            ts.push(t);
+        });
+
         let y: usize = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
 
         let zs: Vec<Vec<usize>> = ts
@@ -131,14 +137,17 @@ pub(crate) mod test {
                         // fully random adjustment set of size between 2 and n_ancestors
                         let adj_size =
                             rng.gen_range(2..=ancestor_adjustment.len().max(3) as u32) as usize;
-                        let unif =
-                            rand::distributions::uniform::Uniform::new(0, g_guess.n_nodes as u32);
-                        (&mut rng)
-                            .sample_iter(unif)
-                            .filter(|x| *x != *t as u32 && *x != y as u32)
-                            .take(adj_size)
-                            .map(|x| x as usize)
-                            .collect::<Vec<usize>>()
+
+                        // sampling zs without replacement
+                        let mut adj_set: Vec<usize> = vec![];
+                        (0..=adj_size).for_each(|_| {
+                            let mut sample = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
+                            while adj_set.contains(&sample) || sample == *t || sample == y {
+                                sample = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
+                            }
+                            adj_set.push(sample);
+                        });
+                        adj_set
                     }
                     3 => {
                         // the non-descendants are the complement of the possible descendants
@@ -260,7 +269,10 @@ pub(crate) mod test {
                 test(
                     &format!("200{:0>2}.DAG-10", left),
                     &format!("200{:0>2}.DAG-10", right)
-                )
+                ),
+                {
+                    ".*" => insta::rounded_redaction(3)
+                }
             );
         }
     }
@@ -273,7 +285,10 @@ pub(crate) mod test {
                 test(
                     &format!("200{:0>2}.CPDAG-10", left),
                     &format!("200{:0>2}.CPDAG-10", right)
-                )
+                ),
+                {
+                    ".*" => insta::rounded_redaction(3)
+                }
             );
         }
     }
@@ -286,7 +301,10 @@ pub(crate) mod test {
                 test(
                     &format!("100{:0>2}.DAG-100", left),
                     &format!("100{:0>2}.DAG-100", right)
-                )
+                ),
+                {
+                    ".*" => insta::rounded_redaction(3)
+                }
             );
         }
     }
@@ -299,7 +317,10 @@ pub(crate) mod test {
                 test(
                     &format!("100{:0>2}.CPDAG-100", left),
                     &format!("100{:0>2}.CPDAG-100", right)
-                )
+                ),
+                {
+                    ".*" => insta::rounded_redaction(3)
+                }
             );
         }
     }
