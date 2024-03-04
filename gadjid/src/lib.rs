@@ -98,8 +98,8 @@ pub(crate) mod test {
         // using rand_chacha to sample nodes with seed because it is reproducible across platforms
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
 
-        let ts: Vec<usize> = (0..5).map(|_| rng.gen_range(0..g_true.n_nodes)).collect();
-        let ys: Vec<usize> = (0..5).map(|_| rng.gen_range(0..g_true.n_nodes)).collect();
+        let ts: Vec<usize> = (0..5).map(|_| rng.gen_range(0u32..g_true.n_nodes as u32) as usize).collect();
+        let ys: Vec<usize> = (0..5).map(|_| rng.gen_range(0u32..g_true.n_nodes as u32) as usize).collect();
         let zs: Vec<Vec<usize>> = ts.iter().map(|t| g_guess.parents_of(*t).to_vec()).collect();
 
         // below, we sort results because the order of the elements in the sets is not deterministic and we want matching snapshots
