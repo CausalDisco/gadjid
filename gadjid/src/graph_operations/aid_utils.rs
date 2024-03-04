@@ -22,6 +22,7 @@ enum WalkStatus {
     Init,
 }
 
+#[allow(unused)]
 /// Validate Z as adjustment set relative to (T, Y) for a given set T of treatment
 /// nodes and all possible Y in G.
 ///
@@ -352,7 +353,6 @@ pub fn get_pd_nam(truth_dag: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet
                     Edge::Incoming | Edge::Undirected => Some((move_on_by, w, walkstatus)),
                     _ => None,
                 },
-                _ => None,
             };
 
             if let Some(next) = next {
@@ -379,6 +379,7 @@ pub fn get_d_pd_nam(
     t: &[usize],
 ) -> (FxHashSet<usize>, FxHashSet<usize>, FxHashSet<usize>) {
     #[allow(non_camel_case_types)]
+    #[allow(clippy::upper_case_acronyms)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum Alg6WalkStatus {
         /// Descendant, always Amenable
@@ -453,7 +454,6 @@ pub fn get_d_pd_nam(
                     Edge::Undirected => Some((move_on_by, w, Alg6WalkStatus::POSS_DESC_AM)),
                     _ => None,
                 },
-                _ => None,
             };
 
             if let Some(next) = next {
