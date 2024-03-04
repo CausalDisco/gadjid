@@ -107,8 +107,6 @@ pub(crate) mod test {
         let zs: Vec<Vec<usize>> = ts
             .iter()
             .map(|t| {
-                let num = rng.gen_range(0u8..=2u8);
-
                 let ruletable =
                     crate::graph_operations::ruletables::ancestors::AncestorsRuletable {};
                 let mut ancestor_adjustment = crate::graph_operations::gensearch::gensearch(
@@ -121,9 +119,9 @@ pub(crate) mod test {
                 .iter()
                 .copied()
                 .collect::<Vec<usize>>();
-                
+
                 // returning a random adjustment set uniformly between some choices
-                match num {
+                match rng.gen_range(0u8..=3u8) {
                     0 => g_guess.parents_of(*t).to_vec(),
                     1 => {
                         ancestor_adjustment.sort();
@@ -131,13 +129,23 @@ pub(crate) mod test {
                     }
                     2 => {
                         // fully random adjustment set of size between 2 and n_ancestors
-                        let adj_size = rng.gen_range(2..=ancestor_adjustment.len().max(3) as u32) as usize;
-                        let unif = rand::distributions::uniform::Uniform::new(0, g_guess.n_nodes as u32);
+                        let adj_size =
+                            rng.gen_range(2..=ancestor_adjustment.len().max(3) as u32) as usize;
+                        let unif =
+                            rand::distributions::uniform::Uniform::new(0, g_guess.n_nodes as u32);
                         (&mut rng)
                             .sample_iter(unif)
                             .filter(|x| *x != *t as u32 && *x != y as u32)
                             .take(adj_size)
                             .map(|x| x as usize)
+                            .collect::<Vec<usize>>()
+                    }
+                    3 => {
+                        // the non-descendants are the complement of the possible descendants
+                        let possdesc =
+                            graph_operations::possible_descendants(&g_guess, [*t].iter());
+                        (0..g_guess.n_nodes)
+                            .filter(|x| !possdesc.contains(x))
                             .collect::<Vec<usize>>()
                     }
                     _ => unreachable!("num is 0, 1, or 2"),
@@ -244,40 +252,52 @@ pub(crate) mod test {
 
     #[test]
     fn small_dag_snapshot() {
-        for (left, right) in (1..=5).map(|x| (2*x-1, 2*x)) {
+        for (left, right) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
             insta::assert_yaml_snapshot!(
                 format!("small-DAG{}-vs-DAG{}", left, right),
-                test(&format!("200{:0>2}.DAG-10", left), &format!("200{:0>2}.DAG-10", right))
+                test(
+                    &format!("200{:0>2}.DAG-10", left),
+                    &format!("200{:0>2}.DAG-10", right)
+                )
             );
         }
     }
 
     #[test]
     fn small_cpdag_snapshot() {
-        for (left, right) in (1..=5).map(|x| (2*x-1, 2*x)) {
+        for (left, right) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
             insta::assert_yaml_snapshot!(
                 format!("small-CPDAG{}-vs-CPDAG{}", left, right),
-                test(&format!("200{:0>2}.CPDAG-10", left), &format!("200{:0>2}.CPDAG-10", right))
+                test(
+                    &format!("200{:0>2}.CPDAG-10", left),
+                    &format!("200{:0>2}.CPDAG-10", right)
+                )
             );
         }
     }
-    
+
     #[test]
     fn big_dag_snapshot() {
-        for (left, right) in (1..=5).map(|x| (2*x-1, 2*x)) {
+        for (left, right) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
             insta::assert_yaml_snapshot!(
                 format!("big-DAG{}-vs-DAG{}", left, right),
-                test(&format!("100{:0>2}.DAG-100", left), &format!("100{:0>2}.DAG-100", right))
+                test(
+                    &format!("100{:0>2}.DAG-100", left),
+                    &format!("100{:0>2}.DAG-100", right)
+                )
             );
         }
     }
 
     #[test]
     fn big_cpdag_snapshot() {
-        for (left, right) in (1..=5).map(|x| (2*x-1, 2*x)) {
+        for (left, right) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
             insta::assert_yaml_snapshot!(
                 format!("big-CPDAG{}-vs-CPDAG{}", left, right),
-                test(&format!("100{:0>2}.CPDAG-100", left), &format!("100{:0>2}.CPDAG-100", right))
+                test(
+                    &format!("100{:0>2}.CPDAG-100", left),
+                    &format!("100{:0>2}.CPDAG-100", right)
+                )
             );
         }
     }
