@@ -103,7 +103,7 @@ pub(crate) mod test {
 
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
 
-        // sampling 5 ts without replacement
+        // sampling 5 distinct treatment nodes
         let mut ts: [usize; 5]  = [0; 5];
         (0..5).for_each(|i| {
             let mut t = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
@@ -113,18 +113,29 @@ pub(crate) mod test {
             ts[i as usize] = t;
         });
 
-        let y: usize = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
+        let ancestor_aid = graph_operations::ancestor_aid(&g_true, &g_guess);
+        let oset_aid = graph_operations::oset_aid(&g_true, &g_guess);
+        let parent_aid = parent_aid(&g_true, &g_guess);
+        let shd = graph_operations::shd(&g_true, &g_guess);
 
+        // sampling one response node Y distinct from treatments
+        let y: usize = {
+            let mut y = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
+            while ts.contains(&y) {
+                y = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
+            }
+            y
+        };
+        
+        // sampling adjustment set for each treatment node.
         let zs: Vec<Vec<usize>> = ts
             .iter()
             .map(|t| {
-                
-
                 // choosing a random adjustment set uniformly between 4 variants:
                 // 1) the parents of t
                 // 2) the ancestors of t
                 // 3) the non-descendants of t
-                // 4) a random set of size between 1 and |V|-6, disjoint from all T and Y
+                // 4) a random set of size between 1 and |V|-6, disjoint from all 5 Ts and Y
                 match rng.gen_range(1u8..=4u8) {
                     1 => g_guess.parents_of(*t).to_vec(),
                     2 => {
@@ -174,39 +185,7 @@ pub(crate) mod test {
             })
             .collect();
 
-        // parents_of returns a slice, (defined .iter() order), so we don't need to stabilize with sort.
-        let pa_true_1st_T = g_true.parents_of(ts[0]).to_vec();
-
-        // below, we sort results because the order of the elements in the hashsets is not defined and we want fully matching snapshots
-        let mut an_true_1st_T: Vec<usize> = graph_operations::ancestors(&g_true, [ts[0]].iter())
-            .iter()
-            .copied()
-            .collect();
-        an_true_1st_T.sort();
-        let mut ch_true_1st_T: Vec<usize> = graph_operations::children(&g_true, [ts[0]].iter())
-            .iter()
-            .copied()
-            .collect();
-        ch_true_1st_T.sort();
-        let mut de_true_1st_T: Vec<usize> = graph_operations::descendants(&g_true, [ts[0]].iter())
-            .iter()
-            .copied()
-            .collect();
-        de_true_1st_T.sort();
-        let mut poss_de_true_1st_T: Vec<usize> =
-            graph_operations::possible_descendants(&g_true, [ts[0]].iter())
-                .iter()
-                .copied()
-                .collect();
-        poss_de_true_1st_T.sort();
-        let mut prop_an_true_1st_T_and_1st_Y: Vec<usize> =
-            graph_operations::proper_ancestors(&g_true, [ts[0]].iter(), [y].iter())
-                .iter()
-                .copied()
-                .collect();
-        prop_an_true_1st_T_and_1st_Y.sort();
-
-        // for each we pair each t from ts with the random adjustment set z from zs, and compute the NAM and NVA sets.
+        // for all 5 pairings of treatment and adjustment, we compute the NAM and NVA sets.
         let (nams, nvas): (Vec<Vec<usize>>, Vec<Vec<usize>>) = ts
             .iter()
             .zip(zs.iter())
@@ -225,29 +204,56 @@ pub(crate) mod test {
             })
             .unzip();
 
-        let ancestor_aid = graph_operations::ancestor_aid(&g_true, &g_guess);
-        let oset_aid = graph_operations::oset_aid(&g_true, &g_guess);
-        let parent_aid = parent_aid(&g_true, &g_guess);
-        let shd = graph_operations::shd(&g_true, &g_guess);
+        // parents_of returns a slice, (defined .iter() order), so we don't need to stabilize with sort.
+        let pa_in_true_of_1st_T = g_true.parents_of(ts[0]).to_vec();
+
+        // below, we sort results because the order of the elements in the hashsets is not defined and we want fully matching snapshots
+        let mut anc_in_true_of_1st_T: Vec<usize> = graph_operations::ancestors(&g_true, [ts[0]].iter())
+            .iter()
+            .copied()
+            .collect();
+        anc_in_true_of_1st_T.sort();
+        let mut ch_in_true_of_1st_T: Vec<usize> = graph_operations::children(&g_true, [ts[0]].iter())
+            .iter()
+            .copied()
+            .collect();
+        ch_in_true_of_1st_T.sort();
+        let mut desc_in_true_of_1st_T: Vec<usize> = graph_operations::descendants(&g_true, [ts[0]].iter())
+            .iter()
+            .copied()
+            .collect();
+        desc_in_true_of_1st_T.sort();
+        let mut possible_descendants_in_true_of_1st_T: Vec<usize> =
+            graph_operations::possible_descendants(&g_true, [ts[0]].iter())
+                .iter()
+                .copied()
+                .collect();
+        possible_descendants_in_true_of_1st_T.sort();
+        let mut proper_ancestor_in_true_of_1st_T_and_Y: Vec<usize> =
+            graph_operations::proper_ancestors(&g_true, [ts[0]].iter(), [y].iter())
+                .iter()
+                .copied()
+                .collect();
+        proper_ancestor_in_true_of_1st_T_and_Y.sort();
 
         Testcase {
             g_true: g_true_name.to_string(),
             g_guess: g_guess_name.to_string(),
             ts: ts.to_vec(),
-            y,
-            zs,
-            pa_true_1st_T,
-            an_true_1st_T,
-            ch_true_1st_T,
-            de_true_1st_T,
-            poss_de_true_1st_T,
-            prop_an_true_1st_T_and_1st_Y,
-            nams,
-            nvas,
             ancestor_aid,
             oset_aid,
             parent_aid,
             shd,
+            nams,
+            y,
+            zs,
+            nvas,
+            pa_in_true_of_1st_T,
+            anc_in_true_of_1st_T,
+            ch_in_true_of_1st_T,
+            desc_in_true_of_1st_T,
+            possible_descendants_in_true_of_1st_T,
+            proper_ancestor_in_true_of_1st_T_and_Y,
         }
     }
 
@@ -257,20 +263,20 @@ pub(crate) mod test {
         g_true: String,
         g_guess: String,
         ts: Vec<usize>,
-        y: usize,
-        zs: Vec<Vec<usize>>,
-        nams: Vec<Vec<usize>>,
-        nvas: Vec<Vec<usize>>,
-        pa_true_1st_T: Vec<usize>,
-        an_true_1st_T: Vec<usize>,
-        ch_true_1st_T: Vec<usize>,
-        de_true_1st_T: Vec<usize>,
-        poss_de_true_1st_T: Vec<usize>,
-        prop_an_true_1st_T_and_1st_Y: Vec<usize>,
         ancestor_aid: (f64, usize),
         oset_aid: (f64, usize),
         parent_aid: (f64, usize),
         shd: (f64, usize),
+        nams: Vec<Vec<usize>>,
+        y: usize,
+        zs: Vec<Vec<usize>>,
+        nvas: Vec<Vec<usize>>,
+        pa_in_true_of_1st_T: Vec<usize>,
+        anc_in_true_of_1st_T: Vec<usize>,
+        ch_in_true_of_1st_T: Vec<usize>,
+        desc_in_true_of_1st_T: Vec<usize>,
+        possible_descendants_in_true_of_1st_T: Vec<usize>,
+        proper_ancestor_in_true_of_1st_T_and_Y: Vec<usize>,
     }
 
     #[test]
