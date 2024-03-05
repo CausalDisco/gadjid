@@ -88,7 +88,10 @@ pub(crate) mod test {
                 .unwrap(),
         );
 
-        assert!(g_true.n_nodes == g_guess.n_nodes, "Graphs have different number of nodes");
+        assert!(
+            g_true.n_nodes == g_guess.n_nodes,
+            "Graphs have different number of nodes"
+        );
         assert!(g_true.n_nodes >= 7, "graphs must have at least 7 nodes to run tests, we need (distinct) 5 T and 1 Y and at least 1 Z");
 
         // get deterministic seed by hashing the two graph names
@@ -104,7 +107,7 @@ pub(crate) mod test {
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
 
         // sampling 5 distinct treatment nodes
-        let mut ts: [usize; 5]  = [0; 5];
+        let mut ts: [usize; 5] = [0; 5];
         (0..5).for_each(|i| {
             let mut t = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
             while ts.contains(&t) {
@@ -126,7 +129,7 @@ pub(crate) mod test {
             }
             y
         };
-        
+
         // sampling adjustment set for each treatment node.
         let zs: Vec<Vec<usize>> = ts
             .iter()
@@ -141,7 +144,7 @@ pub(crate) mod test {
                     2 => {
                         // ancestor adjustment
                         let ruletable =
-                        crate::graph_operations::ruletables::ancestors::AncestorsRuletable {};
+                            crate::graph_operations::ruletables::ancestors::AncestorsRuletable {};
                         let ancestor_adjustment = crate::graph_operations::gensearch::gensearch(
                             &g_guess,
                             ruletable,
@@ -166,8 +169,7 @@ pub(crate) mod test {
                     }
                     4 => {
                         // fully random adjustment set of size between 1 and |V|-6
-                        let adj_size =
-                            rng.gen_range(1u32..=g_guess.n_nodes as u32 - 6u32) as usize;
+                        let adj_size = rng.gen_range(1u32..=g_guess.n_nodes as u32 - 6u32) as usize;
 
                         // sampling zs without replacement from the set of all nodes except y and the ts
                         let mut adj_set: Vec<usize> = vec![];
@@ -208,32 +210,24 @@ pub(crate) mod test {
         let pa_in_true_of_1st_T = g_true.parents_of(ts[0]).to_vec();
 
         // below, we sort results because the order of the elements in the hashsets is not defined and we want fully matching snapshots
-        let mut anc_in_true_of_1st_T: Vec<usize> = graph_operations::ancestors(&g_true, [ts[0]].iter())
-            .iter()
-            .copied()
-            .collect();
+        let anc_in_true_of_1st_T = graph_operations::ancestors(&g_true, [ts[0]].iter());
+        let mut anc_in_true_of_1st_T = Vec::from_iter(anc_in_true_of_1st_T);
         anc_in_true_of_1st_T.sort();
-        let mut ch_in_true_of_1st_T: Vec<usize> = graph_operations::children(&g_true, [ts[0]].iter())
-            .iter()
-            .copied()
-            .collect();
+        let ch_in_true_of_1st_T = graph_operations::children(&g_true, [ts[0]].iter());
+        let mut ch_in_true_of_1st_T = Vec::from_iter(ch_in_true_of_1st_T);
         ch_in_true_of_1st_T.sort();
-        let mut desc_in_true_of_1st_T: Vec<usize> = graph_operations::descendants(&g_true, [ts[0]].iter())
-            .iter()
-            .copied()
-            .collect();
+        let desc_in_true_of_1st_T = graph_operations::descendants(&g_true, [ts[0]].iter());
+        let mut desc_in_true_of_1st_T = Vec::from_iter(desc_in_true_of_1st_T);
         desc_in_true_of_1st_T.sort();
-        let mut possible_descendants_in_true_of_1st_T: Vec<usize> =
-            graph_operations::possible_descendants(&g_true, [ts[0]].iter())
-                .iter()
-                .copied()
-                .collect();
+        let possible_descendants_in_true_of_1st_T =
+            graph_operations::possible_descendants(&g_true, [ts[0]].iter());
+        let mut possible_descendants_in_true_of_1st_T =
+            Vec::from_iter(possible_descendants_in_true_of_1st_T);
         possible_descendants_in_true_of_1st_T.sort();
-        let mut proper_ancestor_in_true_of_1st_T_and_Y: Vec<usize> =
-            graph_operations::proper_ancestors(&g_true, [ts[0]].iter(), [y].iter())
-                .iter()
-                .copied()
-                .collect();
+        let proper_ancestor_in_true_of_1st_T_and_Y =
+            graph_operations::proper_ancestors(&g_true, [ts[0]].iter(), [y].iter());
+        let mut proper_ancestor_in_true_of_1st_T_and_Y =
+            Vec::from_iter(proper_ancestor_in_true_of_1st_T_and_Y);
         proper_ancestor_in_true_of_1st_T_and_Y.sort();
 
         Testcase {
