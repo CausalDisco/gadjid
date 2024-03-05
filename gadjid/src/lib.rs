@@ -88,6 +88,9 @@ pub(crate) mod test {
                 .unwrap(),
         );
 
+        assert!(g_true.n_nodes == g_guess.n_nodes, "Graphs have different number of nodes");
+        assert!(g_true.n_nodes >= 7, "graphs must have at least 7 nodes to run tests, we need (distinct) 5 T and 1 Y and at least 1 Z");
+
         // get deterministic seed by hashing the two graph names
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
         g_true_name.hash(&mut hasher);
@@ -95,7 +98,7 @@ pub(crate) mod test {
         let seed = hasher.finish();
 
         // using rand_chacha to sample nodes with seed because it is reproducible across platforms
-        // this is recommended by the rand crate for portability, see
+        // this is recommended mentioned by the rand crate docs on portability, see
         // https://rust-random.github.io/rand/rand/rngs/struct.SmallRng.html
 
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
@@ -115,51 +118,58 @@ pub(crate) mod test {
         let zs: Vec<Vec<usize>> = ts
             .iter()
             .map(|t| {
-                let ruletable =
-                    crate::graph_operations::ruletables::ancestors::AncestorsRuletable {};
-                let mut ancestor_adjustment = crate::graph_operations::gensearch::gensearch(
-                    &g_guess,
-                    ruletable,
-                    [*t].iter(),
-                    // yield_starting_vertices 'false' because Ancestors(T)\T is the adjustment set
-                    false,
-                )
-                .iter()
-                .copied()
-                .collect::<Vec<usize>>();
+                
 
-                // returning a random adjustment set uniformly between some choices
-                match rng.gen_range(0u8..=3u8) {
-                    0 => g_guess.parents_of(*t).to_vec(),
-                    1 => {
+                // choosing a random adjustment set uniformly between 4 variants:
+                // 1) the parents of t
+                // 2) the ancestors of t
+                // 3) the non-descendants of t
+                // 4) a random set of size between 1 and |V|-6, disjoint from all T and Y
+                match rng.gen_range(1u8..=4u8) {
+                    1 => g_guess.parents_of(*t).to_vec(),
+                    2 => {
+                        // ancestor adjustment
+                        let ruletable =
+                        crate::graph_operations::ruletables::ancestors::AncestorsRuletable {};
+                        let ancestor_adjustment = crate::graph_operations::gensearch::gensearch(
+                            &g_guess,
+                            ruletable,
+                            [*t].iter(),
+                            // yield_starting_vertices 'false' because Ancestors(T)\T is the adjustment set
+                            false,
+                        )
+                        .iter()
+                        .copied()
+                        .collect::<Vec<usize>>();
+                        let mut ancestor_adjustment = Vec::from_iter(ancestor_adjustment);
                         ancestor_adjustment.sort();
                         ancestor_adjustment
                     }
-                    2 => {
-                        // fully random adjustment set of size between 2 and n_ancestors
-                        let adj_size =
-                            rng.gen_range(2..=ancestor_adjustment.len().max(3) as u32) as usize;
-
-                        // sampling zs without replacement
-                        let mut adj_set: Vec<usize> = vec![];
-                        (0..=adj_size).for_each(|_| {
-                            let mut sample = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
-                            while adj_set.contains(&sample) || sample == *t || sample == y {
-                                sample = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
-                            }
-                            adj_set.push(sample);
-                        });
-                        adj_set
-                    }
                     3 => {
-                        // the non-descendants are the complement of the possible descendants
+                        // the non-descendants, which are the complement of the possible descendants
                         let possdesc =
                             graph_operations::possible_descendants(&g_guess, [*t].iter());
                         (0..g_guess.n_nodes)
                             .filter(|x| !possdesc.contains(x))
                             .collect::<Vec<usize>>()
                     }
-                    _ => unreachable!("num is 0, 1, or 2"),
+                    4 => {
+                        // fully random adjustment set of size between 1 and |V|-6
+                        let adj_size =
+                            rng.gen_range(1u32..=g_guess.n_nodes as u32 - 6u32) as usize;
+
+                        // sampling zs without replacement from the set of all nodes except y and the ts
+                        let mut adj_set: Vec<usize> = vec![];
+                        (0..=adj_size).for_each(|_| {
+                            let mut sample = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
+                            while adj_set.contains(&sample) || ts.contains(&sample) || y == sample {
+                                sample = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
+                            }
+                            adj_set.push(sample);
+                        });
+                        adj_set
+                    }
+                    _ => unreachable!("num is in {{1, 2, 3, 4}}"),
                 }
             })
             .collect();
