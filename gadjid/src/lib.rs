@@ -95,7 +95,9 @@ pub(crate) mod test {
         let seed = hasher.finish();
 
         // using rand_chacha to sample nodes with seed because it is reproducible across platforms
-        // this is recommended by the rand crate for portable reproducibility
+        // this is recommended by the rand crate for portability, see
+        // https://rust-random.github.io/rand/rand/rngs/struct.SmallRng.html
+
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
 
         // sampling 5 ts without replacement
@@ -269,10 +271,7 @@ pub(crate) mod test {
                 test(
                     &format!("200{:0>2}.DAG-10", left),
                     &format!("200{:0>2}.DAG-10", right)
-                ),
-                {
-                    ".*" => insta::rounded_redaction(3)
-                }
+                )
             );
         }
     }
@@ -285,10 +284,7 @@ pub(crate) mod test {
                 test(
                     &format!("200{:0>2}.CPDAG-10", left),
                     &format!("200{:0>2}.CPDAG-10", right)
-                ),
-                {
-                    ".*" => insta::rounded_redaction(3)
-                }
+                )
             );
         }
     }
@@ -301,10 +297,7 @@ pub(crate) mod test {
                 test(
                     &format!("100{:0>2}.DAG-100", left),
                     &format!("100{:0>2}.DAG-100", right)
-                ),
-                {
-                    ".*" => insta::rounded_redaction(3)
-                }
+                )
             );
         }
     }
@@ -317,10 +310,7 @@ pub(crate) mod test {
                 test(
                     &format!("100{:0>2}.CPDAG-100", left),
                     &format!("100{:0>2}.CPDAG-100", right)
-                ),
-                {
-                    ".*" => insta::rounded_redaction(3)
-                }
+                )
             );
         }
     }
