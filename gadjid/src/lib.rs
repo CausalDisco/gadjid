@@ -274,52 +274,34 @@ pub(crate) mod test {
     }
 
     #[test]
-    fn small_dag_snapshot() {
-        for (left, right) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
+    fn create_and_compare_snapshots() {
+        for (true_id, guess_id) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
             insta::assert_yaml_snapshot!(
-                format!("small-DAG{}-vs-DAG{}", left, right),
+                format!("small-DAG{}-vs-DAG{}", true_id, guess_id),
                 test(
-                    &format!("200{:0>2}.DAG-10", left),
-                    &format!("200{:0>2}.DAG-10", right)
+                    &format!("200{:0>2}.DAG-10", true_id),
+                    &format!("200{:0>2}.DAG-10", guess_id)
                 )
             );
-        }
-    }
-
-    #[test]
-    fn small_cpdag_snapshot() {
-        for (left, right) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
             insta::assert_yaml_snapshot!(
-                format!("small-CPDAG{}-vs-CPDAG{}", left, right),
+                format!("small-CPDAG{}-vs-CPDAG{}", true_id, guess_id),
                 test(
-                    &format!("200{:0>2}.CPDAG-10", left),
-                    &format!("200{:0>2}.CPDAG-10", right)
+                    &format!("200{:0>2}.CPDAG-10", true_id),
+                    &format!("200{:0>2}.CPDAG-10", guess_id)
                 )
             );
-        }
-    }
-
-    #[test]
-    fn big_dag_snapshot() {
-        for (left, right) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
             insta::assert_yaml_snapshot!(
-                format!("big-DAG{}-vs-DAG{}", left, right),
+                format!("big-DAG{}-vs-DAG{}", true_id, guess_id),
                 test(
-                    &format!("100{:0>2}.DAG-100", left),
-                    &format!("100{:0>2}.DAG-100", right)
+                    &format!("100{:0>2}.DAG-100", true_id),
+                    &format!("100{:0>2}.DAG-100", guess_id)
                 )
             );
-        }
-    }
-
-    #[test]
-    fn big_cpdag_snapshot() {
-        for (left, right) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
             insta::assert_yaml_snapshot!(
-                format!("big-CPDAG{}-vs-CPDAG{}", left, right),
+                format!("big-CPDAG{}-vs-CPDAG{}", true_id, guess_id),
                 test(
-                    &format!("100{:0>2}.CPDAG-100", left),
-                    &format!("100{:0>2}.CPDAG-100", right)
+                    &format!("100{:0>2}.CPDAG-100", true_id),
+                    &format!("100{:0>2}.CPDAG-100", guess_id)
                 )
             );
         }
