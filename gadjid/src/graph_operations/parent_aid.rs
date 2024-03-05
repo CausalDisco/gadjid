@@ -128,6 +128,7 @@ mod tests {
     #[test]
     fn sid_paper_test() {
         // Comparing the computed SID with the examples listed in the original SID (structural intervention distance) paper
+        // uses that for DAGs the Parent-AID reduces to the SID
         let g = vec![
             vec![0, 1, 1, 1, 1],
             vec![0, 0, 1, 1, 1],
@@ -158,6 +159,7 @@ mod tests {
     }
 
     #[test]
+    // uses that for DAGs the Parent-AID reduces to the SID
     fn parent_aid_against_r_sid() {
         // get the root of the project
         let root = std::env::var("CARGO_MANIFEST_DIR").unwrap();
@@ -175,12 +177,13 @@ mod tests {
             let mut iter = line.split(',');
             let g_true = iter.next().unwrap().parse::<usize>().unwrap();
             let g_guess = iter.next().unwrap().parse::<usize>().unwrap();
-            let _ = iter.next().unwrap().parse::<usize>().unwrap();
+            iter.next();
             let r_sid = iter.next().unwrap().parse::<usize>().unwrap();
             (g_true, g_guess, r_sid)
         });
 
-        // go through all testcases, load the PDAGs from the mtx files and compare the computed SID with the expected SID
+        // go through all testcases, load the DAGs from the mtx files and
+        // compare the computed Parent-AID=SID with the SID in the csv file (computed via R SID package)
         for (gtrue, gguess, rsid) in tests {
             let full_path_true = testgraphs.join(format!("{}.DAG-100.mtx", gtrue));
             let full_path_guess = testgraphs.join(format!("{}.DAG-100.mtx", gguess));
