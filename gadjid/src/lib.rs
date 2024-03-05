@@ -104,13 +104,13 @@ pub(crate) mod test {
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
 
         // sampling 5 ts without replacement
-        let mut ts: Vec<usize> = vec![];
-        (0..5).for_each(|_| {
+        let mut ts: [usize; 5]  = [0; 5];
+        (0..5).for_each(|i| {
             let mut t = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
             while ts.contains(&t) {
                 t = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
             }
-            ts.push(t);
+            ts[i as usize] = t;
         });
 
         let y: usize = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
@@ -233,7 +233,7 @@ pub(crate) mod test {
         Testcase {
             g_true: g_true_name.to_string(),
             g_guess: g_guess_name.to_string(),
-            ts,
+            ts: ts.to_vec(),
             y,
             zs,
             pa_true_1st_T,
