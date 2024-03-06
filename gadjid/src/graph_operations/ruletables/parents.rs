@@ -8,9 +8,9 @@ use crate::{partially_directed_acyclic_graph::Edge, PDAG};
 use super::ruletable::RuleTable;
 
 /// Implements a ruletable to get children of a set of nodes
-pub struct ParentsRuletable {}
+pub struct Parents {}
 
-impl RuleTable for ParentsRuletable {
+impl RuleTable for Parents {
     fn lookup(
         &self,
         current_edge: &Edge,
@@ -30,9 +30,9 @@ pub fn parents<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
 ) -> FxHashSet<usize> {
-    let ruletable = crate::graph_operations::ruletables::parents::ParentsRuletable {};
+    let ruletable = crate::graph_operations::ruletables::Parents {};
     // gensearch yield_starting_vertices 'false' because $a \notin Parents(a)$
-    super::super::gensearch::gensearch(dag, ruletable, starting_vertices, false)
+    crate::graph_operations::gensearch(dag, ruletable, starting_vertices, false)
 }
 
 #[cfg(test)]

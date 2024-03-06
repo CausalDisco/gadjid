@@ -18,9 +18,9 @@ use super::ruletable::RuleTable;
 /// | <-           | V            | ->        | W         | false    | false   |
 /// ````
 /// Implements a ruletable to get ancestors
-pub struct AncestorsRuletable {}
+pub struct Ancestors {}
 
-impl RuleTable for AncestorsRuletable {
+impl RuleTable for Ancestors {
     fn lookup(
         &self,
         current_edge: &Edge,
@@ -41,9 +41,9 @@ pub fn ancestors<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
 ) -> FxHashSet<usize> {
-    let ruletable = crate::graph_operations::ruletables::ancestors::AncestorsRuletable {};
+    let ruletable = crate::graph_operations::ruletables::Ancestors {};
     // gensearch yield_starting_vertices 'true' because $a \in Ancestors(a)$
-    super::super::gensearch::gensearch(dag, ruletable, starting_vertices, true)
+    crate::graph_operations::gensearch(dag, ruletable, starting_vertices, true)
 }
 
 #[cfg(test)]

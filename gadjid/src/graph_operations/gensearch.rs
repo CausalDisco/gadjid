@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Implements the generalized graph search algorithm and other search algorithms using it.
 use crate::{
-    graph_operations::ruletables::ruletable::RuleTable, partially_directed_acyclic_graph::Edge,
-    PDAG,
+    graph_operations::ruletables::RuleTable, partially_directed_acyclic_graph::Edge, PDAG,
 };
 use rustc_hash::FxHashSet;
 

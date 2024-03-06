@@ -11,7 +11,7 @@ pub fn possible_descendants<'a>(
     pdag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
 ) -> FxHashSet<usize> {
-    let mut to_visit_stack: Vec<usize> = starting_vertices.copied().collect();
+    let mut to_visit_stack = Vec::from_iter(starting_vertices.copied());
 
     let mut result = FxHashSet::from_iter(to_visit_stack.iter().copied());
 
