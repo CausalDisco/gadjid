@@ -122,12 +122,14 @@ pub(crate) mod test {
         // getting the adjustment set nodes
         let random_adj = indices[1 + ts_size..1 + ts_size + random_adj_size as usize].to_vec();
 
-        // computing the adjustment sets for the NVA computation later:
+        let possible_descendants = graph_operations::possible_descendants(&g_guess, ts.iter());
+        let proper_ancestors = graph_operations::proper_ancestors(&g_guess, ts.iter(), [y].iter());
+
+        // precomputing the adjustment sets for the NVA computation later:
         let empty_adj = FxHashSet::default();
         let pa_adj = gensearch(&g_guess, ruletables::Parents {}, ts.iter(), false);
         let anc_adj = gensearch(&g_guess, ruletables::Ancestors {}, ts.iter(), false);
         let nondesc_adj = {
-            let possible_descendants = graph_operations::possible_descendants(&g_guess, ts.iter());
             FxHashSet::from_iter((0..g_guess.n_nodes).filter(|x| !possible_descendants.contains(x)))
         };
         let oset_adj = {
@@ -138,58 +140,64 @@ pub(crate) mod test {
         Testcase {
             g_true: g_true_name.to_string(),
             g_guess: g_guess_name.to_string(),
-            ts: ts.to_vec(),
+            T: ts.to_vec(),
             ancestor_aid: graph_operations::ancestor_aid(&g_true, &g_guess),
             oset_aid: graph_operations::oset_aid(&g_true, &g_guess),
             parent_aid: graph_operations::parent_aid(&g_true, &g_guess),
             shd: graph_operations::shd(&g_true, &g_guess),
-            nams: {
+            NAM: {
                 let mut nam = Vec::from_iter(get_nam(&g_guess, &ts));
                 nam.sort();
                 nam
             },
-            y,
+            Y: y,
             proper_ancestors: {
-                let mut p = Vec::from_iter(graph_operations::proper_ancestors(
-                    &g_guess,
-                    ts.iter(),
-                    [y].iter(),
-                ));
+                let mut p = Vec::from_iter(proper_ancestors);
                 p.sort();
                 p
             },
-            empty_adj_nva: {
-                let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, empty_adj);
-                let mut nva = Vec::from_iter(nva);
-                nva.sort();
-                nva
+            possible_descendants: {
+                let mut p = Vec::from_iter(possible_descendants);
+                p.sort();
+                p
             },
-            pa_adj_nva: {
+            oset: {
+                let mut o = Vec::from_iter(oset_adj.clone());
+                o.sort();
+                o
+            },
+            random_adj: random_adj.clone(),
+            parent_adjustment_NVA: {
                 let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, pa_adj);
                 let mut nva = Vec::from_iter(nva);
                 nva.sort();
                 nva
             },
-            anc_adj_nva: {
+            ancestor_adjustment_NVA: {
                 let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, anc_adj);
                 let mut nva = Vec::from_iter(nva);
                 nva.sort();
                 nva
             },
-            nondesc_adj_nva: {
+            nondescendant_adjustment_NVA: {
                 let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, nondesc_adj);
                 let mut nva = Vec::from_iter(nva);
                 nva.sort();
                 nva
             },
-            oset_adj_nva: {
+            oset_adjustment_NVA: {
                 let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, oset_adj);
                 let mut nva = Vec::from_iter(nva);
                 nva.sort();
                 nva
             },
-            random_adj: random_adj.clone(),
-            random_zs_adj_nva: {
+            empty_adjustment_NVA: {
+                let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, empty_adj);
+                let mut nva = Vec::from_iter(nva);
+                nva.sort();
+                nva
+            },
+            random_Z_adjustment_NVA: {
                 let (_, nva) =
                     graph_operations::get_nam_nva(&g_true, &ts, random_adj.into_iter().collect());
                 let mut nva = Vec::from_iter(nva);
@@ -208,31 +216,37 @@ pub(crate) mod test {
         oset_aid: (f64, usize),
         parent_aid: (f64, usize),
         shd: (f64, usize),
-        ts: Vec<usize>,
-        /// the nodes that are not amenable to adjustment-set identification from the set ts g_true
-        nams: Vec<usize>,
-        y: usize,
-        /// the proper ancestors of g_guess, w.r.t. the set ts
-        proper_ancestors: Vec<usize>,
-        /// the NVA set in g_true for the parent adjustment for ts based on g_guess
-        pa_adj_nva: Vec<usize>,
-        /// the NVA set in g_true for the ancestor adjustment for ts based on g_guess
-        anc_adj_nva: Vec<usize>,
-        /// the NVA set in g_true for the empty adjustment for ts
-        empty_adj_nva: Vec<usize>,
-        /// the NVA set in g_true for the non-descendant adjustment for ts based on g_guess
-        nondesc_adj_nva: Vec<usize>,
-        /// the NVA set in g_true for the optimal adjustment for ts based on g_guess
-        oset_adj_nva: Vec<usize>,
-        /// the random adjustment set drawn from the remaining nodes not in ts or y
+        T: Vec<usize>,
+        /// the nodes that are not amenable to adjustment-set identification from the set T g_true
+        NAM: Vec<usize>,
+        /// the single treatment node considered in the test
+        Y: usize,
+        /// the random adjustment set drawn from the remaining nodes not in T or y
         random_adj: Vec<usize>,
-        /// the NVA set in g_true for a random adjustment for ts
-        random_zs_adj_nva: Vec<usize>,
+        /// the proper ancestors of y in g_guess, w.r.t. the set T
+        proper_ancestors: Vec<usize>,
+        /// the optimal adjustment set in g_guess, w.r.t. the set T and Y
+        oset: Vec<usize>,
+        /// the possible descendanT of g_guess, w.r.t. the set T
+        possible_descendants: Vec<usize>,
+        /// the NVA set in g_true for the parent adjustment for T based on g_guess
+        parent_adjustment_NVA: Vec<usize>,
+        /// the NVA set in g_true for the ancestor adjustment for T based on g_guess
+        ancestor_adjustment_NVA: Vec<usize>,
+        /// the NVA set in g_true for the non-descendant adjustment for T based on g_guess
+        nondescendant_adjustment_NVA: Vec<usize>,
+        /// the NVA set in g_true for the optimal adjustment for T based on g_guess
+        oset_adjustment_NVA: Vec<usize>,
+        /// the NVA set in g_true for the empty adjustment for T
+        empty_adjustment_NVA: Vec<usize>,
+        /// the NVA set in g_true for a random adjustment for T
+        random_Z_adjustment_NVA: Vec<usize>,
     }
 
     #[test]
     fn create_and_compare_snapshots() {
-        for (true_id, guess_id) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
+        // loops through (1, 2), (2, 3), ..., (9, 10), (10, 1) and creates snapshots for each pair
+        for (true_id, guess_id) in (1..=10).map(|x| (x, ((x + 1) % 11) + 1)) {
             insta::assert_yaml_snapshot!(
                 format!("small-DAG{}-vs-DAG{}", true_id, guess_id),
                 test(
