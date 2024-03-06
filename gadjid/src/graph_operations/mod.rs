@@ -22,10 +22,6 @@ pub(crate) use gensearch::gensearch;
 #[cfg(test)]
 pub(crate) use oset_aid::optimal_adjustment_set;
 pub(crate) use possible_descendants::possible_descendants;
-#[cfg(test)]
-pub(crate) use ruletables::ancestors::ancestors;
-#[cfg(test)]
-pub(crate) use ruletables::children::children;
 pub(crate) use ruletables::descendants::descendants;
 pub(crate) use ruletables::parents::parents;
 pub(crate) use ruletables::proper_ancestors::proper_ancestors;
