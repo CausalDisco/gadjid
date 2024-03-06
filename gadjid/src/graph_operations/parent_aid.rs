@@ -5,7 +5,7 @@ use rayon::prelude::*;
 use rustc_hash::FxHashSet;
 
 use crate::{
-    graph_operations::{aid_utils::get_pd_nam_nva, get_nam},
+    graph_operations::{get_pd_nam_nva, get_nam},
     PDAG,
 };
 
