@@ -1,0 +1,98 @@
+---
+source: src/lib.rs
+expression: "test(&format!(\"200{:0>2}.CPDAG-10\", true_id),\n    &format!(\"200{:0>2}.CPDAG-10\", guess_id))"
+---
+g_true: 20002.CPDAG-10
+g_guess: 20003.CPDAG-10
+ancestor_aid:
+  - 0.37777777777777777
+  - 34
+oset_aid:
+  - 0.3888888888888889
+  - 35
+parent_aid:
+  - 0.5555555555555556
+  - 50
+shd:
+  - 0.4444444444444444
+  - 20
+T:
+  - 7
+NAM:
+  - 1
+  - 4
+  - 8
+  - 9
+Y: 1
+random_adj:
+  - 8
+  - 9
+proper_ancestors:
+  - 1
+  - 2
+  - 3
+  - 9
+oset:
+  - 2
+  - 3
+  - 7
+  - 9
+possible_descendants:
+  - 1
+  - 4
+  - 7
+  - 8
+  - 9
+parent_adjustment_NVA:
+  - 0
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 8
+  - 9
+ancestor_adjustment_NVA:
+  - 0
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 8
+  - 9
+nondescendant_adjustment_NVA:
+  - 0
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 9
+oset_adjustment_NVA:
+  - 0
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+empty_adjustment_NVA:
+  - 0
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 8
+  - 9
+random_Z_adjustment_NVA:
+  - 0
+  - 3
+  - 4
+  - 5
+  - 6
+  - 8
+  - 9

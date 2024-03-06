@@ -1,0 +1,90 @@
+---
+source: src/lib.rs
+expression: "test(&format!(\"200{:0>2}.DAG-10\", true_id),\n    &format!(\"200{:0>2}.DAG-10\", guess_id))"
+---
+g_true: 20004.DAG-10
+g_guess: 20005.DAG-10
+ancestor_aid:
+  - 0.32222222222222224
+  - 29
+oset_aid:
+  - 0.37777777777777777
+  - 34
+parent_aid:
+  - 0.5888888888888889
+  - 53
+shd:
+  - 0.4888888888888889
+  - 22
+T:
+  - 6
+  - 7
+NAM: []
+Y: 9
+random_adj:
+  - 1
+  - 8
+proper_ancestors:
+  - 0
+  - 2
+  - 9
+oset: []
+possible_descendants:
+  - 6
+  - 7
+parent_adjustment_NVA:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 7
+  - 8
+  - 9
+ancestor_adjustment_NVA:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 7
+  - 8
+  - 9
+nondescendant_adjustment_NVA:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 8
+  - 9
+oset_adjustment_NVA:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 8
+  - 9
+empty_adjustment_NVA:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 8
+  - 9
+random_Z_adjustment_NVA:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 8
+  - 9

@@ -118,9 +118,11 @@ pub(crate) mod test {
             rng.gen_range(1..=g_guess.n_nodes as u32 - (ts_size as u32) - 1) as usize;
 
         // getting the treatment nodes
-        let ts = indices[1..ts_size + 1].to_vec();
+        let mut ts = indices[1..ts_size + 1].to_vec();
+        ts.sort();
         // getting the adjustment set nodes
-        let random_adj = indices[1 + ts_size..1 + ts_size + random_adj_size as usize].to_vec();
+        let mut random_adj = indices[1 + ts_size..1 + ts_size + random_adj_size as usize].to_vec();
+        random_adj.sort();
 
         let possible_descendants = graph_operations::possible_descendants(&g_guess, ts.iter());
         let proper_ancestors = graph_operations::proper_ancestors(&g_guess, ts.iter(), [y].iter());
@@ -246,7 +248,7 @@ pub(crate) mod test {
     #[test]
     fn create_and_compare_snapshots() {
         // loops through (1, 2), (2, 3), ..., (9, 10), (10, 1) and creates snapshots for each pair
-        for (true_id, guess_id) in (1..=10).map(|x| (x, ((x + 1) % 11) + 1)) {
+        for (true_id, guess_id) in (1..=10).map(|x| (x, (x % 11) + 1)) {
             insta::assert_yaml_snapshot!(
                 format!("small-DAG{}-vs-DAG{}", true_id, guess_id),
                 test(
