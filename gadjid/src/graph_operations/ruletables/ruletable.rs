@@ -3,7 +3,7 @@
 
 use crate::partially_directed_acyclic_graph::Edge;
 
-/// A trait that implements ruletable lookup behaviour for the generalized graph search algorithm
+/// A trait to implement ruletable lookup behaviour for the generalized graph search algorithm
 pub trait RuleTable {
     /// Given context of
     ///

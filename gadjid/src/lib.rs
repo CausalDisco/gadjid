@@ -18,7 +18,7 @@ pub(crate) mod test {
     use std::hash::{Hash, Hasher};
 
     use crate::{
-        graph_operations::{self, parent_aid},
+        graph_operations::{self, gensearch, get_nam, ruletables},
         PDAG,
     };
 
@@ -88,6 +88,12 @@ pub(crate) mod test {
                 .unwrap(),
         );
 
+        assert!(
+            g_true.n_nodes == g_guess.n_nodes,
+            "Graphs have different number of nodes"
+        );
+        assert!(g_true.n_nodes >= 7, "graphs must have at least 7 nodes to run tests, we need (distinct) 5 T and 1 Y and at least 1 Z");
+
         // get deterministic seed by hashing the two graph names
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
         g_true_name.hash(&mut hasher);
@@ -95,147 +101,101 @@ pub(crate) mod test {
         let seed = hasher.finish();
 
         // using rand_chacha to sample nodes with seed because it is reproducible across platforms
-        // this is recommended by the rand crate for portable reproducibility
+        // this is recommended mentioned by the rand crate docs on portability, see
+        // https://rust-random.github.io/rand/rand/rngs/struct.SmallRng.html
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
 
-        // sampling 5 ts without replacement
-        let mut ts: Vec<usize> = vec![];
-        (0..5).for_each(|_| {
-            let mut t = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
-            while ts.contains(&t) {
-                t = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
-            }
-            ts.push(t);
-        });
+        use rand::seq::SliceRandom;
+        let mut indices = Vec::from_iter(0..g_true.n_nodes);
+        indices.shuffle(&mut rng);
 
-        let y: usize = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
+        // determining the single reponse node Y
+        let y = indices[0];
 
-        let zs: Vec<Vec<usize>> = ts
-            .iter()
-            .map(|t| {
-                let ruletable =
-                    crate::graph_operations::ruletables::ancestors::AncestorsRuletable {};
-                let mut ancestor_adjustment = crate::graph_operations::gensearch::gensearch(
-                    &g_guess,
-                    ruletable,
-                    [*t].iter(),
-                    // yield_starting_vertices 'false' because Ancestors(T)\T is the adjustment set
-                    false,
-                )
-                .iter()
-                .copied()
-                .collect::<Vec<usize>>();
+        // determining the size of both the treatment set 'ts' and the random adjustment set 'random_adj'
+        let ts_size = rng.gen_range(1..=g_guess.n_nodes as u32 - 2) as usize;
+        let random_adj_size =
+            rng.gen_range(1..=g_guess.n_nodes as u32 - (ts_size as u32) - 1) as usize;
 
-                // returning a random adjustment set uniformly between some choices
-                match rng.gen_range(0u8..=3u8) {
-                    0 => g_guess.parents_of(*t).to_vec(),
-                    1 => {
-                        ancestor_adjustment.sort();
-                        ancestor_adjustment
-                    }
-                    2 => {
-                        // fully random adjustment set of size between 2 and n_ancestors
-                        let adj_size =
-                            rng.gen_range(2..=ancestor_adjustment.len().max(3) as u32) as usize;
+        // getting the treatment nodes
+        let ts = indices[1..ts_size + 1].to_vec();
+        // getting the adjustment set nodes
+        let random_adj = indices[1 + ts_size..1 + ts_size + random_adj_size as usize].to_vec();
 
-                        // sampling zs without replacement
-                        let mut adj_set: Vec<usize> = vec![];
-                        (0..=adj_size).for_each(|_| {
-                            let mut sample = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
-                            while adj_set.contains(&sample) || sample == *t || sample == y {
-                                sample = rng.gen_range(0u32..g_true.n_nodes as u32) as usize;
-                            }
-                            adj_set.push(sample);
-                        });
-                        adj_set
-                    }
-                    3 => {
-                        // the non-descendants are the complement of the possible descendants
-                        let possdesc =
-                            graph_operations::possible_descendants(&g_guess, [*t].iter());
-                        (0..g_guess.n_nodes)
-                            .filter(|x| !possdesc.contains(x))
-                            .collect::<Vec<usize>>()
-                    }
-                    _ => unreachable!("num is 0, 1, or 2"),
-                }
-            })
-            .collect();
-
-        // parents_of returns a slice, (defined .iter() order), so we don't need to stabilize with sort.
-        let pa_true_1st_T = g_true.parents_of(ts[0] as usize).to_vec();
-
-        // below, we sort results because the order of the elements in the hashsets is not defined and we want fully matching snapshots
-        let mut an_true_1st_T: Vec<usize> = graph_operations::ancestors(&g_true, [ts[0]].iter())
-            .iter()
-            .copied()
-            .collect();
-        an_true_1st_T.sort();
-        let mut ch_true_1st_T: Vec<usize> = graph_operations::children(&g_true, [ts[0]].iter())
-            .iter()
-            .copied()
-            .collect();
-        ch_true_1st_T.sort();
-        let mut de_true_1st_T: Vec<usize> = graph_operations::descendants(&g_true, [ts[0]].iter())
-            .iter()
-            .copied()
-            .collect();
-        de_true_1st_T.sort();
-        let mut poss_de_true_1st_T: Vec<usize> =
-            graph_operations::possible_descendants(&g_true, [ts[0]].iter())
-                .iter()
-                .copied()
-                .collect();
-        poss_de_true_1st_T.sort();
-        let mut prop_an_true_1st_T_and_1st_Y: Vec<usize> =
-            graph_operations::proper_ancestors(&g_true, [ts[0]].iter(), [y].iter())
-                .iter()
-                .copied()
-                .collect();
-        prop_an_true_1st_T_and_1st_Y.sort();
-
-        // for each we pair each t from ts with the random adjustment set z from zs, and compute the NAM and NVA sets.
-        let (nams, nvas): (Vec<Vec<usize>>, Vec<Vec<usize>>) = ts
-            .iter()
-            .zip(zs.iter())
-            .map(|(t, z)| {
-                let (nam, nva) = graph_operations::get_nam_nva(
-                    &g_true,
-                    &[*t],
-                    FxHashSet::from_iter(z.iter().copied()),
-                );
-                let mut nam: Vec<usize> = nam.iter().copied().collect();
-                let mut nva: Vec<usize> = nva.iter().copied().collect();
-                // we have to sort as we don't know the order of the elements in the sets after .collect()
-                nam.sort();
-                nva.sort();
-                (nam, nva)
-            })
-            .unzip();
-
-        let ancestor_aid = graph_operations::ancestor_aid(&g_true, &g_guess);
-        let oset_aid = graph_operations::oset_aid(&g_true, &g_guess);
-        let parent_aid = parent_aid(&g_true, &g_guess);
-        let shd = graph_operations::shd(&g_true, &g_guess);
+        // computing the adjustment sets for the NVA computation later:
+        let empty_adj = FxHashSet::default();
+        let pa_adj = gensearch(&g_guess, ruletables::Parents {}, ts.iter(), false);
+        let anc_adj = gensearch(&g_guess, ruletables::Ancestors {}, ts.iter(), false);
+        let nondesc_adj = {
+            let possible_descendants = graph_operations::possible_descendants(&g_guess, ts.iter());
+            FxHashSet::from_iter((0..g_guess.n_nodes).filter(|x| !possible_descendants.contains(x)))
+        };
+        let oset_adj = {
+            let t_descendants = gensearch(&g_guess, ruletables::Descendants {}, ts.iter(), false);
+            crate::graph_operations::optimal_adjustment_set(&g_guess, &ts, &[y], &t_descendants)
+        };
 
         Testcase {
             g_true: g_true_name.to_string(),
             g_guess: g_guess_name.to_string(),
-            ts,
+            ts: ts.to_vec(),
+            ancestor_aid: graph_operations::ancestor_aid(&g_true, &g_guess),
+            oset_aid: graph_operations::oset_aid(&g_true, &g_guess),
+            parent_aid: graph_operations::parent_aid(&g_true, &g_guess),
+            shd: graph_operations::shd(&g_true, &g_guess),
+            nams: {
+                let mut nam = Vec::from_iter(get_nam(&g_guess, &ts));
+                nam.sort();
+                nam
+            },
             y,
-            zs,
-            pa_true_1st_T,
-            an_true_1st_T,
-            ch_true_1st_T,
-            de_true_1st_T,
-            poss_de_true_1st_T,
-            prop_an_true_1st_T_and_1st_Y,
-            nams,
-            nvas,
-            ancestor_aid,
-            oset_aid,
-            parent_aid,
-            shd,
+            proper_ancestors: {
+                let mut p = Vec::from_iter(graph_operations::proper_ancestors(
+                    &g_guess,
+                    ts.iter(),
+                    [y].iter(),
+                ));
+                p.sort();
+                p
+            },
+            empty_adj_nva: {
+                let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, empty_adj);
+                let mut nva = Vec::from_iter(nva);
+                nva.sort();
+                nva
+            },
+            pa_adj_nva: {
+                let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, pa_adj);
+                let mut nva = Vec::from_iter(nva);
+                nva.sort();
+                nva
+            },
+            anc_adj_nva: {
+                let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, anc_adj);
+                let mut nva = Vec::from_iter(nva);
+                nva.sort();
+                nva
+            },
+            nondesc_adj_nva: {
+                let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, nondesc_adj);
+                let mut nva = Vec::from_iter(nva);
+                nva.sort();
+                nva
+            },
+            oset_adj_nva: {
+                let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, oset_adj);
+                let mut nva = Vec::from_iter(nva);
+                nva.sort();
+                nva
+            },
+            random_adj: random_adj.clone(),
+            random_zs_adj_nva: {
+                let (_, nva) =
+                    graph_operations::get_nam_nva(&g_true, &ts, random_adj.into_iter().collect());
+                let mut nva = Vec::from_iter(nva);
+                nva.sort();
+                nva
+            },
         }
     }
 
@@ -244,83 +204,62 @@ pub(crate) mod test {
     pub struct Testcase {
         g_true: String,
         g_guess: String,
-        ts: Vec<usize>,
-        y: usize,
-        zs: Vec<Vec<usize>>,
-        nams: Vec<Vec<usize>>,
-        nvas: Vec<Vec<usize>>,
-        pa_true_1st_T: Vec<usize>,
-        an_true_1st_T: Vec<usize>,
-        ch_true_1st_T: Vec<usize>,
-        de_true_1st_T: Vec<usize>,
-        poss_de_true_1st_T: Vec<usize>,
-        prop_an_true_1st_T_and_1st_Y: Vec<usize>,
         ancestor_aid: (f64, usize),
         oset_aid: (f64, usize),
         parent_aid: (f64, usize),
         shd: (f64, usize),
+        ts: Vec<usize>,
+        /// the nodes that are not amenable to adjustment-set identification from the set ts g_true
+        nams: Vec<usize>,
+        y: usize,
+        /// the proper ancestors of g_guess, w.r.t. the set ts
+        proper_ancestors: Vec<usize>,
+        /// the NVA set in g_true for the parent adjustment for ts based on g_guess
+        pa_adj_nva: Vec<usize>,
+        /// the NVA set in g_true for the ancestor adjustment for ts based on g_guess
+        anc_adj_nva: Vec<usize>,
+        /// the NVA set in g_true for the empty adjustment for ts
+        empty_adj_nva: Vec<usize>,
+        /// the NVA set in g_true for the non-descendant adjustment for ts based on g_guess
+        nondesc_adj_nva: Vec<usize>,
+        /// the NVA set in g_true for the optimal adjustment for ts based on g_guess
+        oset_adj_nva: Vec<usize>,
+        /// the random adjustment set drawn from the remaining nodes not in ts or y
+        random_adj: Vec<usize>,
+        /// the NVA set in g_true for a random adjustment for ts
+        random_zs_adj_nva: Vec<usize>,
     }
 
     #[test]
-    fn small_dag_snapshot() {
-        for (left, right) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
+    fn create_and_compare_snapshots() {
+        for (true_id, guess_id) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
             insta::assert_yaml_snapshot!(
-                format!("small-DAG{}-vs-DAG{}", left, right),
+                format!("small-DAG{}-vs-DAG{}", true_id, guess_id),
                 test(
-                    &format!("200{:0>2}.DAG-10", left),
-                    &format!("200{:0>2}.DAG-10", right)
-                ),
-                {
-                    ".*" => insta::rounded_redaction(3)
-                }
+                    &format!("200{:0>2}.DAG-10", true_id),
+                    &format!("200{:0>2}.DAG-10", guess_id)
+                )
             );
-        }
-    }
-
-    #[test]
-    fn small_cpdag_snapshot() {
-        for (left, right) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
             insta::assert_yaml_snapshot!(
-                format!("small-CPDAG{}-vs-CPDAG{}", left, right),
+                format!("small-CPDAG{}-vs-CPDAG{}", true_id, guess_id),
                 test(
-                    &format!("200{:0>2}.CPDAG-10", left),
-                    &format!("200{:0>2}.CPDAG-10", right)
-                ),
-                {
-                    ".*" => insta::rounded_redaction(3)
-                }
+                    &format!("200{:0>2}.CPDAG-10", true_id),
+                    &format!("200{:0>2}.CPDAG-10", guess_id)
+                )
             );
-        }
-    }
-
-    #[test]
-    fn big_dag_snapshot() {
-        for (left, right) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
             insta::assert_yaml_snapshot!(
-                format!("big-DAG{}-vs-DAG{}", left, right),
+                format!("big-DAG{}-vs-DAG{}", true_id, guess_id),
                 test(
-                    &format!("100{:0>2}.DAG-100", left),
-                    &format!("100{:0>2}.DAG-100", right)
-                ),
-                {
-                    ".*" => insta::rounded_redaction(3)
-                }
+                    &format!("100{:0>2}.DAG-100", true_id),
+                    &format!("100{:0>2}.DAG-100", guess_id)
+                )
             );
-        }
-    }
-
-    #[test]
-    fn big_cpdag_snapshot() {
-        for (left, right) in (1..=5).map(|x| (2 * x - 1, 2 * x)) {
             insta::assert_yaml_snapshot!(
-                format!("big-CPDAG{}-vs-CPDAG{}", left, right),
+                format!("big-CPDAG{}-vs-CPDAG{}", true_id, guess_id),
                 test(
-                    &format!("100{:0>2}.CPDAG-100", left),
-                    &format!("100{:0>2}.CPDAG-100", right)
-                ),
-                {
-                    ".*" => insta::rounded_redaction(3)
-                }
+                    &format!("100{:0>2}.CPDAG-100", true_id),
+                    &format!("100{:0>2}.CPDAG-100", guess_id)
+                )
             );
         }
     }

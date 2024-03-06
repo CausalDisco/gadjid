@@ -24,5 +24,5 @@ insta.opt-level = 3
 similar.opt-level = 3
 
 [dev-dependencies]
-insta = { version = "1.35", features = ["yaml", "redactions"] }
+insta = { version = "1.35", features = ["yaml"] }
 serde = { version = "1.0", features = ["derive"] }
