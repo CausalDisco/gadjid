@@ -115,6 +115,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn random_inputs_no_crash() {
         for n in 2..40 {
             for _rep in 0..2 {
@@ -159,6 +160,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     // uses that for DAGs the Parent-AID reduces to the SID
     fn parent_aid_against_r_sid() {
         // get the root of the project

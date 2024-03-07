@@ -232,8 +232,7 @@ pub(crate) mod test {
     }
 
     #[test]
-    #[ignore]
-    fn insta_snapshots() {
+    fn insta_snapshots_small() {
         // loops through (1, 2), (2, 3), ..., (9, 10), (10, 1) and creates snapshots for each pair
         for (true_id, guess_id) in (1..=10).map(|x| (x, (x % 10) + 1)) {
             let g_true = &format!("200{:0>2}.DAG-10", true_id);
@@ -248,6 +247,14 @@ pub(crate) mod test {
                 format!("small-CPDAG{:0>2}-vs-CPDAG{:0>2}", true_id, guess_id),
                 test(g_true, g_guess)
             );
+        }
+    }
+
+    #[test]
+    #[ignore]
+    fn insta_snapshots_large() {
+        // loops through (1, 2), (2, 3), ..., (9, 10), (10, 1) and creates snapshots for each pair
+        for (true_id, guess_id) in (1..=10).map(|x| (x, (x % 10) + 1)) {
             let g_true = &format!("100{:0>2}.DAG-100", true_id);
             let g_guess = &format!("100{:0>2}.DAG-100", guess_id);
             insta::assert_yaml_snapshot!(

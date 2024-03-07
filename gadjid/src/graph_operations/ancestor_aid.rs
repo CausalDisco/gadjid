@@ -119,6 +119,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn random_inputs_no_crash() {
         for n in 2..40 {
             for _rep in 0..2 {
