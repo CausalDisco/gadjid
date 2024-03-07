@@ -65,7 +65,8 @@ pub(crate) mod test {
         PDAG::from_vecvec(adj)
     }
 
-    /// Takes two names, like `g_true="DAG1"` and `g_guess="DAG2"` and returns a Testcase, loading from the corresponding `../testgraphs/{g_true}.mtx` files
+    /// Takes two names, like `g_true_name="DAG1"` and `g_guess_name="DAG2"` and returns a Testcase,
+    /// loading from the corresponding `../testgraphs/{g_true_name}.mtx` files
     fn test(g_true_name: &str, g_guess_name: &str) -> Testcase {
         // get the root of the project
         let root = std::env::var("CARGO_MANIFEST_DIR").unwrap();
@@ -92,7 +93,8 @@ pub(crate) mod test {
             g_true.n_nodes == g_guess.n_nodes,
             "Graphs have different number of nodes"
         );
-        assert!(g_true.n_nodes >= 7, "graphs must have at least 7 nodes to run tests, we need (distinct) 5 T and 1 Y and at least 1 Z");
+        assert!(g_true.n_nodes >= 7,
+             "graphs must have at least 7 nodes to run tests, we need distinct 5 T and 1 Y and at least 1 Z");
 
         // get deterministic seed by hashing the two graph names
         let mut hasher = std::collections::hash_map::DefaultHasher::new();
@@ -101,7 +103,7 @@ pub(crate) mod test {
         let seed = hasher.finish();
 
         // using rand_chacha to sample nodes with seed because it is reproducible across platforms
-        // this is recommended mentioned by the rand crate docs on portability, see
+        // this is recommended by the rand crate docs on portability, see
         // https://rust-random.github.io/rand/rand/rngs/struct.SmallRng.html
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
 
@@ -109,7 +111,7 @@ pub(crate) mod test {
         let mut indices = Vec::from_iter(0..g_true.n_nodes);
         indices.shuffle(&mut rng);
 
-        // determining the single reponse node Y
+        // determining a single reponse node y
         let y = indices[0];
 
         // determining the size of both the treatment set 'ts' and the random adjustment set 'random_adj'
@@ -130,10 +132,6 @@ pub(crate) mod test {
         // precomputing the adjustment sets for the NVA computation later:
         let empty_adj = FxHashSet::default();
         let pa_adj = gensearch(&g_guess, ruletables::Parents {}, ts.iter(), false);
-        let anc_adj = gensearch(&g_guess, ruletables::Ancestors {}, ts.iter(), false);
-        let nondesc_adj = {
-            FxHashSet::from_iter((0..g_guess.n_nodes).filter(|x| !possible_descendants.contains(x)))
-        };
         let oset_adj = {
             let t_descendants = gensearch(&g_guess, ruletables::Descendants {}, ts.iter(), false);
             crate::graph_operations::optimal_adjustment_set(&g_guess, &ts, &[y], &t_descendants)
@@ -142,66 +140,54 @@ pub(crate) mod test {
         Testcase {
             g_true: g_true_name.to_string(),
             g_guess: g_guess_name.to_string(),
-            T: ts.to_vec(),
             ancestor_aid: graph_operations::ancestor_aid(&g_true, &g_guess),
             oset_aid: graph_operations::oset_aid(&g_true, &g_guess),
             parent_aid: graph_operations::parent_aid(&g_true, &g_guess),
             shd: graph_operations::shd(&g_true, &g_guess),
-            NAM: {
-                let mut nam = Vec::from_iter(get_nam(&g_guess, &ts));
-                nam.sort();
-                nam
-            },
-            Y: y,
-            proper_ancestors: {
-                let mut p = Vec::from_iter(proper_ancestors);
-                p.sort();
-                p
-            },
-            possible_descendants: {
+            t: ts.to_vec(),
+            y,
+            z: random_adj.clone(),
+            possible_descendants_of_t_in_g_guess: {
                 let mut p = Vec::from_iter(possible_descendants);
                 p.sort();
                 p
             },
-            oset: {
+            not_amenable_in_g_guess_wrt_t: {
+                let mut nam = Vec::from_iter(get_nam(&g_guess, &ts));
+                nam.sort();
+                nam
+            },
+            proper_ancestors_of_y_in_g_guess_wrt_t: {
+                let mut p = Vec::from_iter(proper_ancestors);
+                p.sort();
+                p
+            },
+            oset_for_t_onto_y_in_g_guess: {
                 let mut o = Vec::from_iter(oset_adj.clone());
                 o.sort();
                 o
             },
-            random_adj: random_adj.clone(),
-            parent_adjustment_NVA: {
-                let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, pa_adj);
+            not_validly_adjusted_for_in_g_guess_by_parents_of_t: {
+                let (_, nva) = graph_operations::get_nam_nva(&g_guess, &ts, pa_adj);
                 let mut nva = Vec::from_iter(nva);
                 nva.sort();
                 nva
             },
-            ancestor_adjustment_NVA: {
-                let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, anc_adj);
+            not_validly_adjusted_for_in_g_guess_by_oset_for_t_onto_y: {
+                let (_, nva) = graph_operations::get_nam_nva(&g_guess, &ts, oset_adj);
                 let mut nva = Vec::from_iter(nva);
                 nva.sort();
                 nva
             },
-            nondescendant_adjustment_NVA: {
-                let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, nondesc_adj);
+            not_validly_adjusted_for_in_g_guess_by_empty_set: {
+                let (_, nva) = graph_operations::get_nam_nva(&g_guess, &ts, empty_adj);
                 let mut nva = Vec::from_iter(nva);
                 nva.sort();
                 nva
             },
-            oset_adjustment_NVA: {
-                let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, oset_adj);
-                let mut nva = Vec::from_iter(nva);
-                nva.sort();
-                nva
-            },
-            empty_adjustment_NVA: {
-                let (_, nva) = graph_operations::get_nam_nva(&g_true, &ts, empty_adj);
-                let mut nva = Vec::from_iter(nva);
-                nva.sort();
-                nva
-            },
-            random_Z_adjustment_NVA: {
+            not_validly_adjusted_for_in_g_guess_by_z: {
                 let (_, nva) =
-                    graph_operations::get_nam_nva(&g_true, &ts, random_adj.into_iter().collect());
+                    graph_operations::get_nam_nva(&g_guess, &ts, random_adj.into_iter().collect());
                 let mut nva = Vec::from_iter(nva);
                 nva.sort();
                 nva
@@ -218,64 +204,60 @@ pub(crate) mod test {
         oset_aid: (f64, usize),
         parent_aid: (f64, usize),
         shd: (f64, usize),
-        T: Vec<usize>,
-        /// the nodes that are not amenable to adjustment-set identification from the set T g_true
-        NAM: Vec<usize>,
-        /// the single treatment node considered in the test
-        Y: usize,
-        /// the random adjustment set drawn from the remaining nodes not in T or y
-        random_adj: Vec<usize>,
-        /// the proper ancestors of y in g_guess, w.r.t. the set T
-        proper_ancestors: Vec<usize>,
-        /// the optimal adjustment set in g_guess, w.r.t. the set T and Y
-        oset: Vec<usize>,
-        /// the possible descendanT of g_guess, w.r.t. the set T
-        possible_descendants: Vec<usize>,
-        /// the NVA set in g_true for the parent adjustment for T based on g_guess
-        parent_adjustment_NVA: Vec<usize>,
-        /// the NVA set in g_true for the ancestor adjustment for T based on g_guess
-        ancestor_adjustment_NVA: Vec<usize>,
-        /// the NVA set in g_true for the non-descendant adjustment for T based on g_guess
-        nondescendant_adjustment_NVA: Vec<usize>,
-        /// the NVA set in g_true for the optimal adjustment for T based on g_guess
-        oset_adjustment_NVA: Vec<usize>,
-        /// the NVA set in g_true for the empty adjustment for T
-        empty_adjustment_NVA: Vec<usize>,
-        /// the NVA set in g_true for a random adjustment for T
-        random_Z_adjustment_NVA: Vec<usize>,
+        t: Vec<usize>,
+        /// the single effect node considered in the test
+        y: usize,
+        /// the random adjustment set drawn from the remaining nodes not in t or y
+        z: Vec<usize>,
+        /// the possible descendants of t in g_guess
+        possible_descendants_of_t_in_g_guess: Vec<usize>,
+        /// the nodes onto which the effect of t is not amenable to adjustment-set identification in g_guess
+        not_amenable_in_g_guess_wrt_t: Vec<usize>,
+        /// the proper ancestors of y in g_guess, w.r.t. the set t
+        proper_ancestors_of_y_in_g_guess_wrt_t: Vec<usize>,
+        /// the optimal adjustment set in g_guess, w.r.t. the effect of t onto y
+        oset_for_t_onto_y_in_g_guess: Vec<usize>,
+        /// the set of nodes for which the effect of t onto those nodes is not validly adjusted for in g_guess
+        /// by the parents of t in g_guess
+        not_validly_adjusted_for_in_g_guess_by_parents_of_t: Vec<usize>,
+        /// the set of nodes for which the effect of t onto those nodes is not validly adjusted for in g_guess
+        /// by the optimal adjustment set for t onto y in g_guess
+        not_validly_adjusted_for_in_g_guess_by_oset_for_t_onto_y: Vec<usize>,
+        /// the set of nodes for which the effect of t onto those nodes is not validly adjusted for in g_guess
+        /// by the empty set
+        not_validly_adjusted_for_in_g_guess_by_empty_set: Vec<usize>,
+        /// the set of nodes for which the effect of t onto those nodes is not validly adjusted for in g_guess
+        /// by the (randomly drawn) set z
+        not_validly_adjusted_for_in_g_guess_by_z: Vec<usize>,
     }
 
     #[test]
     fn create_and_compare_snapshots() {
         // loops through (1, 2), (2, 3), ..., (9, 10), (10, 1) and creates snapshots for each pair
         for (true_id, guess_id) in (1..=10).map(|x| (x, (x % 10) + 1)) {
+            let g_true = &format!("200{:0>2}.DAG-10", true_id);
+            let g_guess = &format!("200{:0>2}.DAG-10", guess_id);
             insta::assert_yaml_snapshot!(
                 format!("small-DAG{:0>2}-vs-DAG{:0>2}", true_id, guess_id),
-                test(
-                    &format!("200{:0>2}.DAG-10", true_id),
-                    &format!("200{:0>2}.DAG-10", guess_id)
-                )
+                test(g_true, g_guess)
             );
+            let g_true = &format!("200{:0>2}.CPDAG-10", true_id);
+            let g_guess = &format!("200{:0>2}.CPDAG-10", guess_id);
             insta::assert_yaml_snapshot!(
                 format!("small-CPDAG{:0>2}-vs-CPDAG{:0>2}", true_id, guess_id),
-                test(
-                    &format!("200{:0>2}.CPDAG-10", true_id),
-                    &format!("200{:0>2}.CPDAG-10", guess_id)
-                )
+                test(g_true, g_guess)
             );
+            let g_true = &format!("100{:0>2}.DAG-100", true_id);
+            let g_guess = &format!("100{:0>2}.DAG-100", guess_id);
             insta::assert_yaml_snapshot!(
-                format!("big-DAG{:0>2}-vs-DAG{:0>2}", true_id, guess_id),
-                test(
-                    &format!("100{:0>2}.DAG-100", true_id),
-                    &format!("100{:0>2}.DAG-100", guess_id)
-                )
+                format!("large-DAG{:0>2}-vs-DAG{:0>2}", true_id, guess_id),
+                test(g_true, g_guess)
             );
+            let g_true = &format!("100{:0>2}.CPDAG-100", true_id);
+            let g_guess = &format!("100{:0>2}.CPDAG-100", guess_id);
             insta::assert_yaml_snapshot!(
-                format!("big-CPDAG{:0>2}-vs-CPDAG{:0>2}", true_id, guess_id),
-                test(
-                    &format!("100{:0>2}.CPDAG-100", true_id),
-                    &format!("100{:0>2}.CPDAG-100", guess_id)
-                )
+                format!("large-CPDAG{:0>2}-vs-CPDAG{:0>2}", true_id, guess_id),
+                test(g_true, g_guess)
             );
         }
     }
