@@ -232,7 +232,7 @@ pub(crate) mod test {
     }
 
     #[test]
-    fn create_and_compare_snapshots() {
+    fn insta_snapshots() {
         // loops through (1, 2), (2, 3), ..., (9, 10), (10, 1) and creates snapshots for each pair
         for (true_id, guess_id) in (1..=10).map(|x| (x, (x % 10) + 1)) {
             let g_true = &format!("200{:0>2}.DAG-10", true_id);
