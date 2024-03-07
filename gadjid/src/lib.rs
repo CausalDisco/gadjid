@@ -122,10 +122,7 @@ pub(crate) mod test {
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
 
         let mut indices = Vec::from_iter(0..g_true.n_nodes);
-        {
-            use rand::seq::SliceRandom;
-            indices.shuffle(&mut rng);
-        }
+        rand::seq::SliceRandom::shuffle(&mut *indices, &mut rng);
         let indices = indices;
 
         // determining a single reponse node y
