@@ -18,7 +18,10 @@ pub(crate) mod test {
     use std::hash::{Hash, Hasher};
 
     use crate::{
-        graph_operations::{self, gensearch, get_nam, ruletables},
+        graph_operations::{
+            ancestor_aid, gensearch, get_nam, get_nam_nva, optimal_adjustment_set, oset_aid,
+            parent_aid, possible_descendants, proper_ancestors, ruletables, shd,
+        },
         PDAG,
     };
 
@@ -63,6 +66,17 @@ pub(crate) mod test {
         }
 
         PDAG::from_vecvec(adj)
+    }
+
+    fn hashset_to_sorted_vec<V: std::cmp::Ord>(set: FxHashSet<V>) -> Vec<V> {
+        let mut vec = Vec::from_iter(set);
+        vec.sort();
+        vec
+    }
+
+    fn get_nva_sorted_vec(graph: &PDAG, t: &[usize], z: FxHashSet<usize>) -> Vec<usize> {
+        let (_, nva) = get_nam_nva(graph, t, z);
+        hashset_to_sorted_vec(nva)
     }
 
     /// Takes two names, like `g_true_name="DAG1"` and `g_guess_name="DAG2"` and returns a Testcase,
@@ -115,83 +129,64 @@ pub(crate) mod test {
         let y = indices[0];
 
         // determining the size of both the treatment set 'ts' and the random adjustment set 'random_adj'
-        let ts_size = rng.gen_range(1..=g_guess.n_nodes as u32 - 2) as usize;
-        let random_adj_size =
-            rng.gen_range(1..=g_guess.n_nodes as u32 - (ts_size as u32) - 1) as usize;
+        let t_size = rng.gen_range(1..=(g_guess.n_nodes - 2) as u32) as usize;
+        let random_z_size = rng.gen_range(1..=(g_guess.n_nodes - t_size - 1) as u32) as usize;
 
         // getting the treatment nodes
-        let mut ts = indices[1..ts_size + 1].to_vec();
-        ts.sort();
+        let mut t = indices[1..t_size + 1].to_vec();
+        t.sort();
         // getting the adjustment set nodes
-        let mut random_adj = indices[1 + ts_size..1 + ts_size + random_adj_size as usize].to_vec();
-        random_adj.sort();
+        let mut random_z = indices[1 + t_size..1 + t_size + random_z_size as usize].to_vec();
+        random_z.sort();
 
-        let possible_descendants = graph_operations::possible_descendants(&g_guess, ts.iter());
-        let proper_ancestors = graph_operations::proper_ancestors(&g_guess, ts.iter(), [y].iter());
-
-        // precomputing the adjustment sets for the NVA computation later:
-        let empty_adj = FxHashSet::default();
-        let pa_adj = gensearch(&g_guess, ruletables::Parents {}, ts.iter(), false);
-        let oset_adj = {
-            let t_descendants = gensearch(&g_guess, ruletables::Descendants {}, ts.iter(), false);
-            crate::graph_operations::optimal_adjustment_set(&g_guess, &ts, &[y], &t_descendants)
+        let oset_for_t_onto_y_in_g_guess = {
+            let t_descendants = gensearch(&g_guess, ruletables::Descendants {}, t.iter(), false);
+            optimal_adjustment_set(&g_guess, &t, &[y], &t_descendants)
         };
 
         Testcase {
             g_true: g_true_name.to_string(),
             g_guess: g_guess_name.to_string(),
-            ancestor_aid: graph_operations::ancestor_aid(&g_true, &g_guess),
-            oset_aid: graph_operations::oset_aid(&g_true, &g_guess),
-            parent_aid: graph_operations::parent_aid(&g_true, &g_guess),
-            shd: graph_operations::shd(&g_true, &g_guess),
-            t: ts.to_vec(),
+            ancestor_aid: ancestor_aid(&g_true, &g_guess),
+            oset_aid: oset_aid(&g_true, &g_guess),
+            parent_aid: parent_aid(&g_true, &g_guess),
+            shd: shd(&g_true, &g_guess),
+            t: t.clone(),
             y,
-            z: random_adj.clone(),
-            possible_descendants_of_t_in_g_guess: {
-                let mut p = Vec::from_iter(possible_descendants);
-                p.sort();
-                p
-            },
-            not_amenable_in_g_guess_wrt_t: {
-                let mut nam = Vec::from_iter(get_nam(&g_guess, &ts));
-                nam.sort();
-                nam
-            },
-            proper_ancestors_of_y_in_g_guess_wrt_t: {
-                let mut p = Vec::from_iter(proper_ancestors);
-                p.sort();
-                p
-            },
-            oset_for_t_onto_y_in_g_guess: {
-                let mut o = Vec::from_iter(oset_adj.clone());
-                o.sort();
-                o
-            },
-            not_validly_adjusted_for_in_g_guess_by_parents_of_t: {
-                let (_, nva) = graph_operations::get_nam_nva(&g_guess, &ts, pa_adj);
-                let mut nva = Vec::from_iter(nva);
-                nva.sort();
-                nva
-            },
-            not_validly_adjusted_for_in_g_guess_by_oset_for_t_onto_y: {
-                let (_, nva) = graph_operations::get_nam_nva(&g_guess, &ts, oset_adj);
-                let mut nva = Vec::from_iter(nva);
-                nva.sort();
-                nva
-            },
-            not_validly_adjusted_for_in_g_guess_by_empty_set: {
-                let (_, nva) = graph_operations::get_nam_nva(&g_guess, &ts, empty_adj);
-                let mut nva = Vec::from_iter(nva);
-                nva.sort();
-                nva
-            },
-            not_validly_adjusted_for_in_g_guess_by_z: {
-                let (_, nva) =
-                    graph_operations::get_nam_nva(&g_guess, &ts, random_adj.into_iter().collect());
-                let mut nva = Vec::from_iter(nva);
-                nva.sort();
-                nva
-            },
+            z: random_z.clone(),
+            possible_descendants_of_t_in_g_guess: hashset_to_sorted_vec(possible_descendants(
+                &g_guess,
+                t.iter(),
+            )),
+            not_amenable_in_g_guess_wrt_t: hashset_to_sorted_vec(get_nam(&g_guess, &t)),
+            proper_ancestors_of_y_in_g_guess_wrt_t: hashset_to_sorted_vec(proper_ancestors(
+                &g_guess,
+                t.iter(),
+                [y].iter(),
+            )),
+            oset_for_t_onto_y_in_g_guess: hashset_to_sorted_vec(
+                oset_for_t_onto_y_in_g_guess.clone(),
+            ),
+            not_validly_adjusted_for_in_g_guess_by_parents_of_t: get_nva_sorted_vec(
+                &g_guess,
+                &t,
+                gensearch(&g_guess, ruletables::Parents {}, t.iter(), false),
+            ),
+            not_validly_adjusted_for_in_g_guess_by_oset_for_t_onto_y: get_nva_sorted_vec(
+                &g_guess,
+                &t,
+                oset_for_t_onto_y_in_g_guess,
+            ),
+            not_validly_adjusted_for_in_g_guess_by_empty_set: get_nva_sorted_vec(
+                &g_guess,
+                &t,
+                FxHashSet::default(),
+            ),
+            not_validly_adjusted_for_in_g_guess_by_z: get_nva_sorted_vec(
+                &g_guess,
+                &t,
+                random_z.into_iter().collect(),
+            ),
         }
     }
 
