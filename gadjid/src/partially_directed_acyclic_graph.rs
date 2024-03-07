@@ -2,10 +2,9 @@
 //! Defines the PDAG struct that is a supertype of DAGs and CPDAGs.
 
 use core::panic;
-use std::{error::Error, fmt::Display};
-
 use rand::distributions::Distribution;
 use rustc_hash::FxHashMap;
+use std::{error::Error, fmt::Display};
 
 use crate::{
     ascending_list_utils::ascending_lists_first_shared_element,
@@ -627,10 +626,9 @@ pub fn has_cycle(graph: &PDAG) -> bool {
 }
 
 #[cfg(test)]
-mod tests {
-    use std::collections::HashSet;
-
+mod test {
     use rand::distributions::Distribution;
+    use std::collections::HashSet;
 
     use crate::PDAG;
 
@@ -644,6 +642,7 @@ mod tests {
 
         PDAG::from_vecvec(dense);
     }
+
     #[test]
     #[should_panic]
     pub fn fail_if_not_simple2() {
@@ -654,6 +653,7 @@ mod tests {
 
         PDAG::from_vecvec(dense);
     }
+
     #[test]
     pub fn lenient_with_undirected() {
         let dense: Vec<Vec<i8>> = vec![
@@ -965,6 +965,7 @@ mod tests {
         ];
         let _ = PDAG::from_vecvec(g_truth);
     }
+
     #[test]
     #[should_panic]
     fn cyclic_dag_fail_1() {
@@ -975,6 +976,7 @@ mod tests {
         ];
         let _ = PDAG::from_vecvec(g_truth);
     }
+
     #[test]
     #[should_panic]
     fn cyclic_dag_fail_2() {

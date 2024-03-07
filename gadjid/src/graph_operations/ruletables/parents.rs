@@ -36,11 +36,12 @@ pub fn parents<'a>(
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
+    use std::collections::HashSet;
+
+    use crate::PDAG;
 
     use super::parents;
-    use crate::PDAG;
-    use std::collections::HashSet;
 
     #[test]
     fn get_parents() {

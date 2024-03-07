@@ -47,11 +47,12 @@ pub fn descendants<'a>(
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
+    use std::collections::HashSet;
+
+    use crate::PDAG;
 
     use super::descendants;
-    use crate::PDAG;
-    use std::collections::HashSet;
 
     #[test]
     fn descendants_search() {

@@ -60,11 +60,12 @@ pub fn proper_ancestors<'a>(
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
+    use std::collections::HashSet;
+
+    use crate::PDAG;
 
     use super::proper_ancestors;
-    use crate::PDAG;
-    use std::collections::HashSet;
 
     #[test]
     fn proper_ancestors_search() {

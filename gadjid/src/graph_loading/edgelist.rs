@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 //! This module contains the Edgelist struct, which is an iterator over the edges of a graph.
+
 use std::{any::type_name, marker::PhantomData};
 
 /// An iterator over the edges of a graph, yielding `(from/to, to/from, edgetype)` tuples.

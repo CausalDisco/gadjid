@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
+
 use std::cmp::Ordering;
 
 /// Returns the first element that is in both lists, or None if there is no such element.

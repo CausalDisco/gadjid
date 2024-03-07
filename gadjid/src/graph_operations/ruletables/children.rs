@@ -37,11 +37,12 @@ pub fn children<'a>(
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
+    use std::collections::HashSet;
+
+    use crate::PDAG;
 
     use super::children;
-    use crate::PDAG;
-    use std::collections::HashSet;
 
     #[test]
     fn get_children() {

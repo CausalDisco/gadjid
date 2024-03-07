@@ -5,7 +5,9 @@ use rayon::prelude::*;
 use rustc_hash::FxHashSet;
 
 use crate::{
-    graph_operations::{descendants, get_nam, get_nam_nva, possible_descendants},
+    graph_operations::{
+        descendants, get_nam, get_nam_nva, parents, possible_descendants, proper_ancestors,
+    },
     PDAG,
 };
 
@@ -17,10 +19,10 @@ pub fn optimal_adjustment_set(
     responses: &[usize],
     t_descendants: &FxHashSet<usize>,
 ) -> FxHashSet<usize> {
-    let response_ancestors = super::proper_ancestors(dag, treatments.iter(), responses.iter());
+    let response_ancestors = proper_ancestors(dag, treatments.iter(), responses.iter());
     let response_and_anc_hash = FxHashSet::from_iter(response_ancestors);
     let causal_nodes = response_and_anc_hash.intersection(t_descendants);
-    let causal_nodes_parents = super::parents(dag, causal_nodes);
+    let causal_nodes_parents = parents(dag, causal_nodes);
     causal_nodes_parents
         .difference(t_descendants)
         .copied()
@@ -110,7 +112,8 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
+    use rustc_hash::FxHashSet;
     use std::io::Write;
 
     use crate::{graph_operations::oset_aid, PDAG};
@@ -144,8 +147,6 @@ mod tests {
             }
         }
     }
-
-    use rustc_hash::FxHashSet;
 
     fn optimal_adjustment_set(
         dag: &PDAG,

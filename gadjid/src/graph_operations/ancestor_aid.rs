@@ -96,7 +96,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     use std::io::Write;
 
     use crate::{graph_operations::ancestor_aid, PDAG};

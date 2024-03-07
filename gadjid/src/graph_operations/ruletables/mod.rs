@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Holds ruletables that implement specific behaviour for the generalized graph search algorithm
+
 // the actual type definition for the ruletable trait
 pub mod ruletable;
 

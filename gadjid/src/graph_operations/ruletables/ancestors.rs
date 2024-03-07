@@ -47,11 +47,12 @@ pub fn ancestors<'a>(
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
+    use std::collections::HashSet;
+
+    use crate::PDAG;
 
     use super::ancestors;
-    use crate::PDAG;
-    use std::collections::HashSet;
 
     #[test]
     fn ancestors_search() {

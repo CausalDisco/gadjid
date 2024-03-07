@@ -75,7 +75,10 @@ pub fn shd(g_truth: &PDAG, g_guess: &PDAG) -> (f64, usize) {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
+    use std::io::Write;
+
+    use crate::{graph_operations::shd::shd, PDAG};
 
     /// Structural hamming distance between two adjacency matrices, ignores diagonal. Only used for the tests.
     /// This function works directly on the adjacency matrix representation.
@@ -124,9 +127,6 @@ mod tests {
         let comparisons = g_truth.len() * (g_truth.len() - 1) / 2;
         (dist as f64 / comparisons as f64, dist)
     }
-
-    use crate::{graph_operations::shd::shd, PDAG};
-    use std::io::Write;
 
     #[test]
     fn property_equal_dags_zero_distance() {

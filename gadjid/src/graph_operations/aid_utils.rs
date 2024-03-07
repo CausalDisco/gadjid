@@ -198,9 +198,10 @@ pub fn get_nam(cpdag: &PDAG, t: &[usize]) -> FxHashSet<usize> {
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
     use rustc_hash::FxHashSet;
 
+    use crate::graph_operations::{ancestor_aid, oset_aid, parent_aid};
     use crate::PDAG;
 
     use super::get_nam;
@@ -222,11 +223,9 @@ mod tests {
         assert!(get_nam(&cpdag, &[0]) == FxHashSet::from_iter([3]));
     }
 
-    use crate::graph_operations::{ancestor_aid, oset_aid, parent_aid};
-
     #[test]
     pub fn nam_correctly_counted_as_mistake() {
-        // this tests checks mistakes between the cpdag X - Y and dag X -> Y for all distances.
+        // this test checks mistakes between the cpdag X - Y and dag X -> Y for all distances.
 
         let dag = vec![
             vec![0, 1], //

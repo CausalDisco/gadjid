@@ -95,8 +95,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 }
 
 #[cfg(test)]
-mod tests {
-
+mod test {
     use crate::{graph_operations::parent_aid, PDAG};
 
     #[test]
