@@ -121,9 +121,12 @@ pub(crate) mod test {
         // https://rust-random.github.io/rand/rand/rngs/struct.SmallRng.html
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
 
-        use rand::seq::SliceRandom;
         let mut indices = Vec::from_iter(0..g_true.n_nodes);
-        indices.shuffle(&mut rng);
+        {
+            use rand::seq::SliceRandom;
+            indices.shuffle(&mut rng);
+        }
+        let indices = indices;
 
         // determining a single reponse node y
         let y = indices[0];
