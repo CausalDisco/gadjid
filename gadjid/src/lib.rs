@@ -17,7 +17,7 @@ pub use partially_directed_acyclic_graph::PDAG;
 mod test {
     use rand::{Rng, SeedableRng};
     use rustc_hash::FxHashSet;
-    use std::hash::{Hash, Hasher};
+    use std::{hash::{Hash, Hasher}, path::PathBuf};
 
     use crate::{
         graph_operations::{
@@ -84,12 +84,10 @@ mod test {
     /// Takes two names, like `g_true_name="DAG1"` and `g_guess_name="DAG2"` and returns a Testcase,
     /// loading from the corresponding `../testgraphs/{g_true_name}.mtx` files
     fn test(g_true_name: &str, g_guess_name: &str) -> Testcase {
-        // get the root of the project
-        let root = std::env::var("CARGO_MANIFEST_DIR").unwrap();
-        // get the parent directory of the project
-        let root_parent = std::path::Path::new(&root).parent().unwrap();
-        // get the child dir "testgraphs"
-        let testgraphs = root_parent.join("testgraphs");
+        
+        let mut testgraphs = PathBuf::new();
+        testgraphs.push("..");
+        testgraphs.push("testgraphs");
 
         // load the true and guess graphs
         let g_true = load_pdag_from_mtx(
