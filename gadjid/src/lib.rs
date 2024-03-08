@@ -87,6 +87,8 @@ mod test {
     /// Takes two names, like `g_true_name="DAG1"` and `g_guess_name="DAG2"` and returns a Testcase,
     /// loading from the corresponding `../testgraphs/{g_true_name}.mtx` files
     fn test(g_true_name: &str, g_guess_name: &str) -> Testcase {
+        
+        // anchors at parent directory of Cargo.toml
         let mut testgraphs = PathBuf::new();
         testgraphs.push("..");
         testgraphs.push("testgraphs");

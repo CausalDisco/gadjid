@@ -96,6 +96,8 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 
 #[cfg(test)]
 mod test {
+    use std::path::PathBuf;
+
     use crate::{graph_operations::parent_aid, PDAG};
 
     #[test]
@@ -162,12 +164,11 @@ mod test {
     #[ignore]
     // uses that for DAGs the Parent-AID reduces to the SID
     fn parent_aid_against_r_sid() {
-        // get the root of the project
-        let root = std::env::var("CARGO_MANIFEST_DIR").unwrap();
-        // get the parent directory of the project
-        let root_parent = std::path::Path::new(&root).parent().unwrap();
-        // get the child dir "testgraphs"
-        let testgraphs = root_parent.join("testgraphs");
+        
+        // anchors at parent directory of Cargo.toml
+        let mut testgraphs = PathBuf::new();
+        testgraphs.push("..");
+        testgraphs.push("testgraphs");
 
         let testcases_file = std::fs::read_to_string(testgraphs.join("SID.DAG-100.csv")).unwrap();
         let mut testcases = testcases_file.lines();
