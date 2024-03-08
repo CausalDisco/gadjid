@@ -15,9 +15,6 @@ use ::gadjid::graph_operations::shd as rust_shd;
 use ::gadjid::graph_operations::sid as rust_sid;
 use ::gadjid::EdgelistIterator;
 use ::gadjid::PDAG;
-use anyhow::bail;
-use pyo3::exceptions::PyTypeError;
-use pyo3::prelude::*;
 
 use numpy_ndarray_handler::try_from as try_from_dense;
 use scipy_sparse_handler::try_from as try_from_sparse;
@@ -74,7 +71,7 @@ fn edge_direction_semantics_is_row_to_col(edge_direction: &str) -> PyResult<bool
     match edge_direction {
         ROW_TO_COL => Ok(true),
         COL_TO_ROW => Ok(false),
-        _ => Err(PyErr::new::<PyTypeError, _>(format!(
+        _ => Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(format!(
             "edge_direction argument must be either a string containing (exactly) '{}' or '{}'",
             ROW_TO_COL, COL_TO_ROW
         ))),
