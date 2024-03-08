@@ -8,6 +8,7 @@ use rustc_hash::FxHashSet;
 use crate::{
     graph_operations::{
         aid_utils::{get_pd_nam, get_pd_nam_nva},
+        gensearch,
         ruletables::descendants,
     },
     PDAG,
