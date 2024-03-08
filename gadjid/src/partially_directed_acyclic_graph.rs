@@ -2,10 +2,9 @@
 //! Defines the PDAG struct that is a supertype of DAGs and CPDAGs.
 
 use core::panic;
-use std::{error::Error, fmt::Display};
-
 use rand::distributions::Distribution;
 use rustc_hash::FxHashMap;
+use std::{error::Error, fmt};
 
 use crate::{
     ascending_list_utils::ascending_lists_first_shared_element,
@@ -63,18 +62,17 @@ pub struct PDAG {
 }
 
 #[derive(Debug, PartialEq, Eq)]
+#[allow(clippy::upper_case_acronyms)]
 /// The type that the PDAG has been determined to be.
 pub enum Structure {
     /// The PDAG contains no undirected edges and is acyclic, so it is a DAG.
-    #[allow(clippy::upper_case_acronyms)]
     DAG,
     /// The PDAG contains undirected edges. It is however not guaranteed to be a CPDAG.
-    #[allow(clippy::upper_case_acronyms)]
     CPDAG,
 }
 
-impl Display for PDAG {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for PDAG {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut adjacency = vec![vec![0; self.n_nodes]; self.n_nodes];
 
         #[allow(clippy::needless_range_loop)]
@@ -172,8 +170,8 @@ pub enum LoadError {
 
 impl Error for LoadError {}
 
-impl Display for LoadError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for LoadError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             LoadError::NotAcyclic => write!(f, "Graph is not acyclic"),
         }
@@ -628,10 +626,9 @@ pub fn has_cycle(graph: &PDAG) -> bool {
 }
 
 #[cfg(test)]
-mod tests {
-    use std::collections::HashSet;
-
+mod test {
     use rand::distributions::Distribution;
+    use std::collections::HashSet;
 
     use crate::PDAG;
 
@@ -645,6 +642,7 @@ mod tests {
 
         PDAG::from_vecvec(dense);
     }
+
     #[test]
     #[should_panic]
     pub fn fail_if_not_simple2() {
@@ -655,6 +653,7 @@ mod tests {
 
         PDAG::from_vecvec(dense);
     }
+
     #[test]
     pub fn lenient_with_undirected() {
         let dense: Vec<Vec<i8>> = vec![
@@ -966,6 +965,7 @@ mod tests {
         ];
         let _ = PDAG::from_vecvec(g_truth);
     }
+
     #[test]
     #[should_panic]
     fn cyclic_dag_fail_1() {
@@ -976,6 +976,7 @@ mod tests {
         ];
         let _ = PDAG::from_vecvec(g_truth);
     }
+
     #[test]
     #[should_panic]
     fn cyclic_dag_fail_2() {

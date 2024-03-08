@@ -19,12 +19,12 @@ use super::ruletable::RuleTable;
 ///+--------------+--------------+-----------+-----------+------------+------------+
 /// ```
 /// where T is the treatment set
-pub struct ProperAncestorsRuletable {
+pub struct ProperAncestors {
     /// The treatment variables T that are the first not to be included as ancestors
     pub treatments: FxHashSet<usize>,
 }
 
-impl RuleTable for ProperAncestorsRuletable {
+impl RuleTable for ProperAncestors {
     fn lookup(
         &self,
         current_edge: &Edge,
@@ -52,20 +52,20 @@ pub fn proper_ancestors<'a>(
     responses: impl Iterator<Item = &'a usize>,
 ) -> FxHashSet<usize> {
     let treatment_hashset = FxHashSet::from_iter(treatments.copied());
-    let ruletable =
-        crate::graph_operations::ruletables::proper_ancestors::ProperAncestorsRuletable {
-            treatments: treatment_hashset,
-        };
+    let ruletable = ProperAncestors {
+        treatments: treatment_hashset,
+    };
     // gensearch yield_starting_vertices 'true' because $a \in ProperAncestors(a)$
-    super::super::gensearch::gensearch(dag, ruletable, responses, true)
+    crate::graph_operations::gensearch(dag, ruletable, responses, true)
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
+    use std::collections::HashSet;
+
+    use crate::PDAG;
 
     use super::proper_ancestors;
-    use crate::PDAG;
-    use std::collections::HashSet;
 
     #[test]
     fn proper_ancestors_search() {

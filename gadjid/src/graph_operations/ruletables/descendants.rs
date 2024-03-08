@@ -18,9 +18,9 @@ use super::ruletable::RuleTable;
 /// | <-           | V            | ->        | W         | -        | -       |
 /// ````
 /// Implements a ruletable to get descendants
-pub struct DescendantsRuletable {}
+pub struct Descendants {}
 
-impl RuleTable for DescendantsRuletable {
+impl RuleTable for Descendants {
     fn lookup(
         &self,
         current_edge: &Edge,
@@ -41,17 +41,18 @@ pub fn descendants<'a>(
     starting_vertices: impl Iterator<Item = &'a usize>,
 ) -> FxHashSet<usize> {
     let start: Vec<usize> = starting_vertices.copied().collect();
-    let ruletable = crate::graph_operations::ruletables::descendants::DescendantsRuletable {};
+    let ruletable = Descendants {};
     // gensearch yield_starting_vertices 'true' because $a \in Descendants(a)$
-    super::super::gensearch::gensearch(dag, ruletable, start.iter(), true)
+    crate::graph_operations::gensearch(dag, ruletable, start.iter(), true)
 }
 
 #[cfg(test)]
-mod tests {
+mod test {
+    use std::collections::HashSet;
+
+    use crate::PDAG;
 
     use super::descendants;
-    use crate::PDAG;
-    use std::collections::HashSet;
 
     #[test]
     fn descendants_search() {

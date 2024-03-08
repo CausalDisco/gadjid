@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
+
 use anyhow::bail;
 use gadjid::PDAG;
 use numpy::PyReadonlyArray1;

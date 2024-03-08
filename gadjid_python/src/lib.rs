@@ -2,6 +2,12 @@
 #![warn(missing_docs)]
 //! Python-wrappers for the rust gadjid (Graph Adjustment Identification Distance) library.
 
+mod numpy_ndarray_handler;
+mod scipy_sparse_handler;
+
+use anyhow::bail;
+use pyo3::prelude::*;
+
 use ::gadjid::graph_operations::ancestor_aid as rust_ancestor_aid;
 use ::gadjid::graph_operations::oset_aid as rust_oset_aid;
 use ::gadjid::graph_operations::parent_aid as rust_parent_aid;
@@ -9,11 +15,7 @@ use ::gadjid::graph_operations::shd as rust_shd;
 use ::gadjid::graph_operations::sid as rust_sid;
 use ::gadjid::EdgelistIterator;
 use ::gadjid::PDAG;
-use anyhow::bail;
-use pyo3::prelude::*;
 
-mod numpy_ndarray_handler;
-mod scipy_sparse_handler;
 use numpy_ndarray_handler::try_from as try_from_dense;
 use scipy_sparse_handler::try_from as try_from_sparse;
 

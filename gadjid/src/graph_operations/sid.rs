@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Implements Structural Intervention Distance between two DAGs
 
-use std::{error::Error, fmt::Display};
+use std::{error::Error, fmt};
 
+use crate::graph_operations::parent_aid;
+use crate::partially_directed_acyclic_graph::Structure::DAG;
 use crate::PDAG;
 
 #[derive(Debug)]
@@ -16,8 +18,8 @@ pub enum SIDError {
     NotSameSize,
 }
 
-impl Display for SIDError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for SIDError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             SIDError::TruthNotDAG => write!(
                 f,
@@ -35,23 +37,17 @@ impl Display for SIDError {
 impl Error for SIDError {}
 
 /// Structural Intervention Distance between DAGs.
-/// Will panic if either graph is not a DAG.
+/// Will return error if either graph is not a DAG.
 pub fn sid(truth: &PDAG, guess: &PDAG) -> Result<(f64, usize), SIDError> {
-    if !matches!(
-        truth.pdag_type,
-        crate::partially_directed_acyclic_graph::Structure::DAG
-    ) {
+    if !matches!(truth.pdag_type, DAG) {
         return Err(SIDError::TruthNotDAG);
     }
-    if !matches!(
-        guess.pdag_type,
-        crate::partially_directed_acyclic_graph::Structure::DAG
-    ) {
+    if !matches!(guess.pdag_type, DAG) {
         return Err(SIDError::GuessNotDAG);
     }
     if truth.n_nodes != guess.n_nodes {
         return Err(SIDError::NotSameSize);
     }
 
-    Ok(crate::graph_operations::parent_aid(truth, guess))
+    Ok(parent_aid(truth, guess))
 }

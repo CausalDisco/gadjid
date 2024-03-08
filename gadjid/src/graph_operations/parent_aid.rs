@@ -5,7 +5,7 @@ use rayon::prelude::*;
 use rustc_hash::FxHashSet;
 
 use crate::{
-    graph_operations::{get_nam, get_nam_nvas, possible_descendants},
+    graph_operations::{get_nam, get_nam_nva, possible_descendants},
     PDAG,
 };
 
@@ -46,7 +46,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             );
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
-            let (nam_in_true, nvas_in_true) = get_nam_nvas(truth, &[treatment], parent_adjustment);
+            let (nam_in_true, nva_in_true) = get_nam_nva(truth, &[treatment], parent_adjustment);
             // --- to here
             let t_poss_desc_in_truth = possible_descendants(truth, [treatment].iter());
 
@@ -75,7 +75,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     // if we reach this point, y has a VAS in guess
                     // now, if the adjustment set is not valid in truth
                     // (either because the pair (t,y) is not amenable or because the VAS is not valid)
-                    else if nvas_in_true.contains(&y) {
+                    else if nva_in_true.contains(&y) {
                         // we count a mistake
                         mistakes += 1;
                     }
@@ -95,10 +95,10 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 }
 
 #[cfg(test)]
-mod tests {
-    use std::io::Write;
+mod test {
+    use crate::PDAG;
 
-    use crate::{graph_operations::parent_aid, PDAG};
+    use super::parent_aid;
 
     #[test]
     fn property_equal_dags_zero_distance() {
@@ -111,20 +111,18 @@ mod tests {
                     "parent_aid between same dags of size {n} must be zero, dag: {}",
                     dag
                 );
-                print!(".");
-                let _ = std::io::stdout().flush();
             }
         }
     }
 
     #[test]
+    #[ignore]
     fn random_inputs_no_crash() {
         for n in 2..40 {
             for _rep in 0..2 {
                 let dag1 = PDAG::random_dag(1.0, n);
                 let dag2 = PDAG::random_dag(1.0, n);
                 parent_aid(&dag1, &dag2);
-                let _ = std::io::stdout().flush();
             }
         }
     }
@@ -132,6 +130,7 @@ mod tests {
     #[test]
     fn sid_paper_test() {
         // Comparing the computed SID with the examples listed in the original SID (structural intervention distance) paper
+        // uses that for DAGs the Parent-AID reduces to the SID
         let g = vec![
             vec![0, 1, 1, 1, 1],
             vec![0, 0, 1, 1, 1],
@@ -159,5 +158,42 @@ mod tests {
 
         assert_eq!(parent_aid(&g_dag, &h1_dag), (0.0, 0));
         assert_eq!(parent_aid(&g_dag, &h2_dag), (0.4, 8));
+    }
+
+    #[test]
+    #[ignore]
+    // uses that for DAGs the Parent-AID reduces to the SID
+    fn parent_aid_against_r_sid() {
+        // anchors at parent directory of Cargo.toml
+        let mut testgraphs = std::path::PathBuf::new();
+        testgraphs.push("..");
+        testgraphs.push("testgraphs");
+
+        let testcases_file = std::fs::read_to_string(testgraphs.join("SID.DAG-100.csv")).unwrap();
+        let mut testcases = testcases_file.lines();
+        testcases.next(); // skip header
+
+        // create iterator over testcases to later use in the loop
+        let tests = testcases.map(|line| {
+            let mut iter = line.split(',');
+            let g_true = iter.next().unwrap().parse::<usize>().unwrap();
+            let g_guess = iter.next().unwrap().parse::<usize>().unwrap();
+            iter.next();
+            let r_sid = iter.next().unwrap().parse::<usize>().unwrap();
+            (g_true, g_guess, r_sid)
+        });
+
+        // go through all testcases, load the DAGs from the mtx files and
+        // compare the computed Parent-AID=SID with the SID in the csv file (computed via R SID package)
+        for (gtrue, gguess, rsid) in tests {
+            let full_path_true = testgraphs.join(format!("{}.DAG-100.mtx", gtrue));
+            let full_path_guess = testgraphs.join(format!("{}.DAG-100.mtx", gguess));
+            let g_true = crate::test::load_pdag_from_mtx(full_path_true.to_str().unwrap());
+            let g_guess = crate::test::load_pdag_from_mtx(full_path_guess.to_str().unwrap());
+
+            let (_, mistakes) = parent_aid(&g_true, &g_guess);
+
+            assert_eq!(mistakes, rsid);
+        }
     }
 }

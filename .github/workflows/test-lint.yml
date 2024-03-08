@@ -50,6 +50,7 @@ jobs:
       - name: Run rust tests
         run: |
           cargo test --manifest-path gadjid/Cargo.toml
+          cargo test --manifest-path gadjid/Cargo.toml --profile test-opt -- --ignored
 
       - name: Run python tests
         run: |

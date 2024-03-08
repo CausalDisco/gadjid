@@ -5,7 +5,7 @@ use rayon::prelude::*;
 use rustc_hash::FxHashSet;
 
 use crate::{
-    graph_operations::{get_nam, get_nam_nvas, possible_descendants},
+    graph_operations::{gensearch, get_nam, get_nam_nva, possible_descendants},
     PDAG,
 };
 
@@ -35,9 +35,9 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             };
 
             // --- this function differs from parent_aid.rs only in the imports and from here
-            let ruletable = crate::graph_operations::ruletables::ancestors::AncestorsRuletable {};
-            // gensearch yield_starting_vertices 'false' because Ancestors(T)\T is the adjustment set
-            let ancestor_adjustment = crate::graph_operations::gensearch::gensearch(
+            let ruletable = crate::graph_operations::ruletables::ancestors::Ancestors {};
+            let ancestor_adjustment = gensearch(
+                // gensearch yield_starting_vertices 'false' because Ancestors(T)\T is the adjustment set
                 guess,
                 ruletable,
                 [treatment].iter(),
@@ -47,8 +47,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             let claim_possible_effect = possible_descendants(guess, [treatment].iter());
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
-            let (nam_in_true, nvas_in_true) =
-                get_nam_nvas(truth, &[treatment], ancestor_adjustment);
+            let (nam_in_true, nva_in_true) = get_nam_nva(truth, &[treatment], ancestor_adjustment);
             // --- to here
             let t_poss_desc_in_truth = possible_descendants(truth, [treatment].iter());
 
@@ -77,7 +76,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     // if we reach this point, y has a VAS in guess
                     // now, if the adjustment set is not valid in truth
                     // (either because the pair (t,y) is not amenable or because the VAS is not valid)
-                    else if nvas_in_true.contains(&y) {
+                    else if nva_in_true.contains(&y) {
                         // we count a mistake
                         mistakes += 1;
                     }
@@ -97,10 +96,10 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 }
 
 #[cfg(test)]
-mod tests {
-    use std::io::Write;
+mod test {
+    use crate::PDAG;
 
-    use crate::{graph_operations::ancestor_aid, PDAG};
+    use super::ancestor_aid;
 
     #[test]
     fn property_equal_dags_zero_distance() {
@@ -113,20 +112,18 @@ mod tests {
                     "ancestor_aid between same dags of size {n} must be zero, dag: {}",
                     dag
                 );
-                print!(".");
-                let _ = std::io::stdout().flush();
             }
         }
     }
 
     #[test]
+    #[ignore]
     fn random_inputs_no_crash() {
         for n in 2..40 {
             for _rep in 0..2 {
                 let dag1 = PDAG::random_dag(1.0, n);
                 let dag2 = PDAG::random_dag(1.0, n);
                 ancestor_aid(&dag1, &dag2);
-                let _ = std::io::stdout().flush();
             }
         }
     }
