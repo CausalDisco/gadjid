@@ -17,7 +17,10 @@ pub use partially_directed_acyclic_graph::PDAG;
 mod test {
     use rand::{Rng, SeedableRng};
     use rustc_hash::FxHashSet;
-    use std::{hash::{Hash, Hasher}, path::PathBuf};
+    use std::{
+        hash::{Hash, Hasher},
+        path::PathBuf,
+    };
 
     use crate::{
         graph_operations::{
@@ -84,7 +87,6 @@ mod test {
     /// Takes two names, like `g_true_name="DAG1"` and `g_guess_name="DAG2"` and returns a Testcase,
     /// loading from the corresponding `../testgraphs/{g_true_name}.mtx` files
     fn test(g_true_name: &str, g_guess_name: &str) -> Testcase {
-        
         let mut testgraphs = PathBuf::new();
         testgraphs.push("..");
         testgraphs.push("testgraphs");
