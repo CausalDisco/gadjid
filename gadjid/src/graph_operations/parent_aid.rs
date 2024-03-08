@@ -96,8 +96,6 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 
 #[cfg(test)]
 mod test {
-    use std::path::PathBuf;
-
     use crate::PDAG;
 
     use super::parent_aid;
@@ -167,7 +165,7 @@ mod test {
     // uses that for DAGs the Parent-AID reduces to the SID
     fn parent_aid_against_r_sid() {
         // anchors at parent directory of Cargo.toml
-        let mut testgraphs = PathBuf::new();
+        let mut testgraphs = std::path::PathBuf::new();
         testgraphs.push("..");
         testgraphs.push("testgraphs");
 

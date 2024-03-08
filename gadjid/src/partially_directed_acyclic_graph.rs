@@ -4,7 +4,7 @@
 use core::panic;
 use rand::distributions::Distribution;
 use rustc_hash::FxHashMap;
-use std::{error::Error, fmt::Display};
+use std::{error::Error, fmt};
 
 use crate::{
     ascending_list_utils::ascending_lists_first_shared_element,
@@ -71,8 +71,8 @@ pub enum Structure {
     CPDAG,
 }
 
-impl Display for PDAG {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for PDAG {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut adjacency = vec![vec![0; self.n_nodes]; self.n_nodes];
 
         #[allow(clippy::needless_range_loop)]
@@ -170,8 +170,8 @@ pub enum LoadError {
 
 impl Error for LoadError {}
 
-impl Display for LoadError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for LoadError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             LoadError::NotAcyclic => write!(f, "Graph is not acyclic"),
         }

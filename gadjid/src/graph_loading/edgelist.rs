@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 //! This module contains the Edgelist struct, which is an iterator over the edges of a graph.
 
-use std::{any::type_name, marker::PhantomData};
-
 /// An iterator over the edges of a graph, yielding `(from/to, to/from, edgetype)` tuples.
 /// The choice between `from/to` is indicated by the associated implementation of `Order` ([`IterationLayoutTag`]).
 /// Will skip over all 0's in the inner iterator, yielding only nonzero checks.
@@ -12,7 +10,7 @@ where
     I: Iterator<Item = (usize, usize, i8)>,
 {
     /// Holds the order layout. Used only for strong typing.
-    pub layout_tag: PhantomData<Order>,
+    pub layout_tag: std::marker::PhantomData<Order>,
     /// |V| where V is the set of vertices.
     pub size: usize,
     /// The iterator over the entries of the matrix, yielding (row, column, value) tuples.
@@ -36,7 +34,7 @@ where
             if next_outer < prev_outer || (next_outer == prev_outer && next_inner <= prev_inner) {
                 panic!(
                     "Iterator yielded entries in wrong order. {}, prev (outer, inner) index:{:?}, next (outer, inner) index:{:?}",
-                    type_name::<Self>(),
+                    std::any::type_name::<Self>(),
                     (prev_outer, prev_inner),
                     (next_outer, next_inner)
                 );

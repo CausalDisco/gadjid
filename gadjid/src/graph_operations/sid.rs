@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Implements Structural Intervention Distance between two DAGs
 
-use std::{error::Error, fmt::Display};
+use std::{error::Error, fmt};
 
 use crate::graph_operations::parent_aid;
 use crate::partially_directed_acyclic_graph::Structure::DAG;
@@ -18,8 +18,8 @@ pub enum SIDError {
     NotSameSize,
 }
 
-impl Display for SIDError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for SIDError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             SIDError::TruthNotDAG => write!(
                 f,

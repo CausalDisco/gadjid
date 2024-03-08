@@ -87,7 +87,7 @@ impl<T: IterationLayoutTag> Edgelist<T, ConversionFromVecVecToTriple> {
 
         // ugly but necessary type annotations
         type OrderConverter = fn((usize, (usize, i8))) -> (usize, usize, i8);
-        type EnumZip = Enumerate<Zip<std::iter::Repeat<usize>, std::vec::IntoIter<i8>>>;
+        type EnumZip = Enumerate<Zip<Repeat<usize>, IntoIter<i8>>>;
 
         fn give_index((row, val): (usize, Vec<i8>)) -> Map<EnumZip, OrderConverter> {
             repeat(row).zip(val).enumerate().map(reorder)
