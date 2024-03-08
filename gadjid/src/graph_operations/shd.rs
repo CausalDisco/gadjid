@@ -76,8 +76,6 @@ pub fn shd(g_truth: &PDAG, g_guess: &PDAG) -> (f64, usize) {
 
 #[cfg(test)]
 mod test {
-    use std::io::Write;
-
     use crate::PDAG;
 
     use super::shd;
@@ -139,8 +137,6 @@ mod test {
                 shd(&dag, &dag),
                 "dist between same dags of size {n} must be zero"
             );
-            print!(".");
-            let _ = std::io::stdout().flush();
         }
     }
 

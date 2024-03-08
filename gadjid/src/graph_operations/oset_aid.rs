@@ -114,7 +114,6 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 #[cfg(test)]
 mod test {
     use rustc_hash::FxHashSet;
-    use std::io::Write;
 
     use crate::PDAG;
 
@@ -131,8 +130,6 @@ mod test {
                     "oset_aid between same dags of size {n} must be zero, dag: {}",
                     dag
                 );
-                print!(".");
-                let _ = std::io::stdout().flush();
             }
         }
     }
@@ -145,7 +142,6 @@ mod test {
                 let dag1 = PDAG::random_dag(1.0, n);
                 let dag2 = PDAG::random_dag(1.0, n);
                 oset_aid(&dag1, &dag2);
-                let _ = std::io::stdout().flush();
             }
         }
     }
