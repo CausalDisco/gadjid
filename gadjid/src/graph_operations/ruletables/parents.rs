@@ -56,19 +56,19 @@ mod test {
 
         let result = parents(&dag, [0].iter());
         let expected = HashSet::from([]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         let result = parents(&dag, [1].iter());
         let expected = HashSet::from([0]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         let result = parents(&dag, [0, 2].iter());
         let expected = HashSet::from([1]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         let result = parents(&dag, [2].iter());
         let expected = HashSet::from([1]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         // 0 -> 1 -> 2 ----> 3
         //           ^       ^
@@ -86,14 +86,14 @@ mod test {
 
         let result = parents(&dag, [4].iter());
         let expected = HashSet::from([]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         let result = parents(&dag, [2].iter());
         let expected = HashSet::from([1, 4]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         let result = parents(&dag, [1, 3].iter());
         let expected = HashSet::from([0, 2, 4]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
     }
 }

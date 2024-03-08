@@ -35,7 +35,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             };
 
             // --- this function differs from ancestor_aid.rs only in the imports and from here
-            let adjustment_set = guess.parents_of(treatment).iter().copied().collect();
+            let adjustment_set = FxHashSet::from_iter(guess.parents_of(treatment).to_vec());
 
             // in line with the original SID, claim all NonParents may be effects
             // (this is a larger set than the NonDescendants in ancestor_aid and oset_aid;

@@ -187,7 +187,7 @@ mod test {
             not_validly_adjusted_for_in_g_guess_by_z: get_nva_sorted_vec(
                 &g_guess,
                 &t,
-                random_z.into_iter().collect(),
+                FxHashSet::from_iter(random_z),
             ),
         }
     }
