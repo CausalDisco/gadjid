@@ -21,10 +21,13 @@ t:
   - 1
   - 2
   - 3
-  - 5
-y: 4
-z:
+  - 4
+  - 7
   - 8
+  - 9
+y: 5
+z:
+  - 6
 possible_descendants_of_t_in_g_guess:
   - 0
   - 1
@@ -37,35 +40,20 @@ possible_descendants_of_t_in_g_guess:
   - 8
   - 9
 not_amenable_in_g_guess_wrt_t:
-  - 4
+  - 5
   - 6
-  - 7
-  - 8
-  - 9
 proper_ancestors_of_y_in_g_guess_wrt_t:
-  - 4
+  - 5
 oset_for_t_onto_y_in_g_guess: []
 not_validly_adjusted_for_in_g_guess_by_parents_of_t:
-  - 4
+  - 5
   - 6
-  - 7
-  - 8
-  - 9
 not_validly_adjusted_for_in_g_guess_by_oset_for_t_onto_y:
-  - 4
+  - 5
   - 6
-  - 7
-  - 8
-  - 9
 not_validly_adjusted_for_in_g_guess_by_empty_set:
-  - 4
+  - 5
   - 6
-  - 7
-  - 8
-  - 9
 not_validly_adjusted_for_in_g_guess_by_z:
-  - 4
+  - 5
   - 6
-  - 7
-  - 8
-  - 9

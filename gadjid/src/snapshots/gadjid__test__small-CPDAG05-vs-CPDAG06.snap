@@ -17,49 +17,33 @@ shd:
   - 0.35555555555555557
   - 16
 t:
-  - 3
-  - 4
-  - 7
-y: 9
+  - 5
+y: 1
 z:
   - 0
-  - 1
   - 2
+  - 3
+  - 4
+  - 6
+  - 7
+  - 8
+  - 9
 possible_descendants_of_t_in_g_guess:
+  - 2
+  - 5
+not_amenable_in_g_guess_wrt_t: []
+proper_ancestors_of_y_in_g_guess_wrt_t:
+  - 1
+oset_for_t_onto_y_in_g_guess: []
+not_validly_adjusted_for_in_g_guess_by_parents_of_t: []
+not_validly_adjusted_for_in_g_guess_by_oset_for_t_onto_y: []
+not_validly_adjusted_for_in_g_guess_by_empty_set: []
+not_validly_adjusted_for_in_g_guess_by_z:
   - 0
   - 2
   - 3
   - 4
+  - 6
   - 7
-  - 8
-  - 9
-not_amenable_in_g_guess_wrt_t:
-  - 0
-  - 2
-  - 8
-  - 9
-proper_ancestors_of_y_in_g_guess_wrt_t:
-  - 9
-oset_for_t_onto_y_in_g_guess: []
-not_validly_adjusted_for_in_g_guess_by_parents_of_t:
-  - 0
-  - 2
-  - 8
-  - 9
-not_validly_adjusted_for_in_g_guess_by_oset_for_t_onto_y:
-  - 0
-  - 2
-  - 8
-  - 9
-not_validly_adjusted_for_in_g_guess_by_empty_set:
-  - 0
-  - 2
-  - 8
-  - 9
-not_validly_adjusted_for_in_g_guess_by_z:
-  - 0
-  - 1
-  - 2
-  - 5
   - 8
   - 9

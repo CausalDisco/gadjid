@@ -16,7 +16,7 @@ pub use partially_directed_acyclic_graph::PDAG;
 #[allow(non_snake_case)]
 mod test {
     use rand::{Rng, SeedableRng};
-    use rustc_hash::FxHashSet;
+    use rustc_hash::{FxHashSet, FxHasher};
     use std::{
         hash::{Hash, Hasher},
         path::PathBuf,
@@ -113,8 +113,10 @@ mod test {
         assert!(g_true.n_nodes >= 7,
              "graphs must have at least 7 nodes to run tests, we need distinct 5 T and 1 Y and at least 1 Z");
 
-        // get deterministic seed by hashing the two graph names
-        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        // get deterministic seed by hashing the two graph names using the fx algorithm
+        // (should not rely upon std::collections::hash_map::DefaultHasher::new() over releases
+        // as its internal algorithm is not specified, cf. https://doc.rust-lang.org/std/collections/hash_map/struct.DefaultHasher.html)
+        let mut hasher = FxHasher::default();
         g_true_name.hash(&mut hasher);
         g_guess_name.hash(&mut hasher);
         let seed = hasher.finish();
