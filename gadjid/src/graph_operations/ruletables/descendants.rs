@@ -41,7 +41,7 @@ pub fn descendants<'a>(
     starting_vertices: impl Iterator<Item = &'a usize>,
 ) -> FxHashSet<usize> {
     let start: Vec<usize> = starting_vertices.copied().collect();
-    let ruletable = crate::graph_operations::ruletables::Descendants {};
+    let ruletable = Descendants {};
     // gensearch yield_starting_vertices 'true' because $a \in Descendants(a)$
     crate::graph_operations::gensearch(dag, ruletable, start.iter(), true)
 }

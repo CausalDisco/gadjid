@@ -52,7 +52,7 @@ pub fn proper_ancestors<'a>(
     responses: impl Iterator<Item = &'a usize>,
 ) -> FxHashSet<usize> {
     let treatment_hashset = FxHashSet::from_iter(treatments.copied());
-    let ruletable = crate::graph_operations::ruletables::ProperAncestors {
+    let ruletable = ProperAncestors {
         treatments: treatment_hashset,
     };
     // gensearch yield_starting_vertices 'true' because $a \in ProperAncestors(a)$

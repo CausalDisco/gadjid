@@ -169,11 +169,10 @@ where
 
 #[cfg(test)]
 mod test {
-    use crate::ascending_list_utils::{
-        ascending_lists_first_shared_element, ascending_lists_set_union,
+    use super::{
+        ascending_lists_first_shared_element, ascending_lists_set_symmetric_difference,
+        ascending_lists_set_union,
     };
-
-    use super::ascending_lists_set_symmetric_difference;
 
     #[test]
     fn first_shared() {

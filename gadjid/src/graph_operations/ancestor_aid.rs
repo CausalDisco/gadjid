@@ -5,7 +5,7 @@ use rayon::prelude::*;
 use rustc_hash::FxHashSet;
 
 use crate::{
-    graph_operations::{get_nam, get_nam_nva, possible_descendants},
+    graph_operations::{gensearch, get_nam, get_nam_nva, possible_descendants},
     PDAG,
 };
 
@@ -36,7 +36,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 
             // --- this function differs from parent_aid.rs only in the imports and from here
             let ruletable = crate::graph_operations::ruletables::ancestors::Ancestors {};
-            let ancestor_adjustment = crate::graph_operations::gensearch(
+            let ancestor_adjustment = gensearch(
                 // gensearch yield_starting_vertices 'false' because Ancestors(T)\T is the adjustment set
                 guess,
                 ruletable,
@@ -99,7 +99,9 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 mod test {
     use std::io::Write;
 
-    use crate::{graph_operations::ancestor_aid, PDAG};
+    use crate::PDAG;
+
+    use super::ancestor_aid;
 
     #[test]
     fn property_equal_dags_zero_distance() {

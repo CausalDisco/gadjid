@@ -96,7 +96,9 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 
 #[cfg(test)]
 mod test {
-    use crate::{graph_operations::parent_aid, PDAG};
+    use crate::PDAG;
+
+    use super::parent_aid;
 
     #[test]
     fn property_equal_dags_zero_distance() {

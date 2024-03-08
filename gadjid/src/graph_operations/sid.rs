@@ -3,6 +3,8 @@
 
 use std::{error::Error, fmt::Display};
 
+use crate::graph_operations::parent_aid;
+use crate::partially_directed_acyclic_graph::Structure::DAG;
 use crate::PDAG;
 
 #[derive(Debug)]
@@ -37,21 +39,15 @@ impl Error for SIDError {}
 /// Structural Intervention Distance between DAGs.
 /// Will return error if either graph is not a DAG.
 pub fn sid(truth: &PDAG, guess: &PDAG) -> Result<(f64, usize), SIDError> {
-    if !matches!(
-        truth.pdag_type,
-        crate::partially_directed_acyclic_graph::Structure::DAG
-    ) {
+    if !matches!(truth.pdag_type, DAG) {
         return Err(SIDError::TruthNotDAG);
     }
-    if !matches!(
-        guess.pdag_type,
-        crate::partially_directed_acyclic_graph::Structure::DAG
-    ) {
+    if !matches!(guess.pdag_type, DAG) {
         return Err(SIDError::GuessNotDAG);
     }
     if truth.n_nodes != guess.n_nodes {
         return Err(SIDError::NotSameSize);
     }
 
-    Ok(crate::graph_operations::parent_aid(truth, guess))
+    Ok(parent_aid(truth, guess))
 }

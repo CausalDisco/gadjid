@@ -30,7 +30,7 @@ pub fn parents<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
 ) -> FxHashSet<usize> {
-    let ruletable = crate::graph_operations::ruletables::Parents {};
+    let ruletable = Parents {};
     // gensearch yield_starting_vertices 'false' because $a \notin Parents(a)$
     crate::graph_operations::gensearch(dag, ruletable, starting_vertices, false)
 }

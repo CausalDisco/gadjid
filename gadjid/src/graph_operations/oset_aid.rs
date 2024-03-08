@@ -116,7 +116,9 @@ mod test {
     use rustc_hash::FxHashSet;
     use std::io::Write;
 
-    use crate::{graph_operations::oset_aid, PDAG};
+    use crate::PDAG;
+
+    use super::oset_aid;
 
     #[test]
     fn property_equal_dags_zero_distance() {
