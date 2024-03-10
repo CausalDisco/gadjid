@@ -19,15 +19,16 @@ pub use shd::shd;
 pub use sid::sid;
 
 pub(crate) use reachability::get_nam;
-#[cfg(test)]
-pub(crate) use reachability::get_nam_nva;
 pub(crate) use reachability::{get_d_pd_nam, get_invalid_unblocked, get_pd_nam, get_pd_nam_nva};
 pub(crate) use gensearch::gensearch;
+pub(crate) use ruletables::parents::parents;
+pub(crate) use ruletables::proper_ancestors::proper_ancestors;
+
 #[cfg(test)]
 pub(crate) use oset_aid::optimal_adjustment_set;
+#[cfg(test)]
+pub(crate) use reachability::get_nam_nva;
 #[cfg(test)]
 pub(crate) use possible_descendants::possible_descendants;
 #[cfg(test)]
 pub(crate) use ruletables::descendants::descendants;
-pub(crate) use ruletables::parents::parents;
-pub(crate) use ruletables::proper_ancestors::proper_ancestors;
