@@ -78,11 +78,10 @@ pub struct PDAG {
 pub enum Structure {
     /// The PDAG contains no undirected edges and is acyclic, so it is a DAG.
     DAG,
-    /// The graph contains directed and undirected edges and no directed cycles. 
+    /// The graph contains directed and undirected edges and no directed cycles.
     /// It is however not guaranteed to be a CPDAG.
     CPDAG,
 }
-
 
 /// Will display the adjacency matrix of the PDAG, encoded as row-to-column adjacency matrix.
 impl fmt::Display for PDAG {
@@ -500,8 +499,8 @@ impl PDAG {
         Ok(pdag)
     }
 
-    /// Creates a PDAG from a row-major encoded adjacency matrix. 
-    /// An entry of 1 at position `[i,j]` indicates a directed edge `i -> j`, 
+    /// Creates a PDAG from a row-major encoded adjacency matrix.
+    /// An entry of 1 at position `[i,j]` indicates a directed edge `i -> j`,
     /// the opposite of how [`from_col_to_row_vecvec`] does it.
     /// An entry of 2 at position `[i,j]` and/or `[j,i]` indicates an undirected edge between `i` and `j`.
     pub fn from_row_to_col_vecvec(dense: Vec<Vec<i8>>) -> Self {
@@ -517,8 +516,8 @@ impl PDAG {
         pdag
     }
 
-    /// Creates a PDAG from a row_major adjacency matrix. 
-    /// An entry of 1 at position `[i,j]` indicates a directed edge `j -> i`, 
+    /// Creates a PDAG from a row_major adjacency matrix.
+    /// An entry of 1 at position `[i,j]` indicates a directed edge `j -> i`,
     /// the opposite of how [`from_row_to_col_vecvec`] does it.
     /// An entry of 2 at position `[i,j]` and/or `[j,i]` indicates an undirected edge between `i` and `j`.
     pub fn from_col_to_row_vecvec(vecvec: Vec<Vec<i8>>) -> Self {
