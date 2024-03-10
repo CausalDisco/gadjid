@@ -146,7 +146,10 @@ mod test {
         let g_guess = vec![vec![0]];
 
         assert_eq!(shd_from_adjacency(&g_truth, &g_guess), (0f64, 0));
-        let (d_truth, d_guess) = (PDAG::from_row_to_col_vecvec(g_truth), PDAG::from_row_to_col_vecvec(g_guess));
+        let (d_truth, d_guess) = (
+            PDAG::from_row_to_col_vecvec(g_truth),
+            PDAG::from_row_to_col_vecvec(g_guess),
+        );
 
         assert_eq!(shd(&d_truth, &d_guess), (0f64, 0));
 
@@ -159,7 +162,10 @@ mod test {
             vec![0, 0],
         ];
         assert_eq!(shd_from_adjacency(&g_truth, &g_guess), (1f64, 1));
-        let (d_truth, d_guess) = (PDAG::from_row_to_col_vecvec(g_truth), PDAG::from_row_to_col_vecvec(g_guess));
+        let (d_truth, d_guess) = (
+            PDAG::from_row_to_col_vecvec(g_truth),
+            PDAG::from_row_to_col_vecvec(g_guess),
+        );
         assert_eq!(shd(&d_truth, &d_guess), (1f64, 1));
 
         // 0 -> 1
@@ -174,7 +180,10 @@ mod test {
         ];
 
         assert_eq!(shd_from_adjacency(&g_truth, &g_guess), (1f64, 1));
-        let (d_truth, d_guess) = (PDAG::from_row_to_col_vecvec(g_truth), PDAG::from_row_to_col_vecvec(g_guess));
+        let (d_truth, d_guess) = (
+            PDAG::from_row_to_col_vecvec(g_truth),
+            PDAG::from_row_to_col_vecvec(g_guess),
+        );
 
         assert_eq!(shd(&d_truth, &d_guess), (1f64, 1));
 
@@ -189,7 +198,10 @@ mod test {
             vec![0, 0, 0],
         ];
         assert_eq!(shd_from_adjacency(&g_truth, &g_guess), (0f64, 0));
-        let (d_truth, d_guess) = (PDAG::from_row_to_col_vecvec(g_truth), PDAG::from_row_to_col_vecvec(g_guess));
+        let (d_truth, d_guess) = (
+            PDAG::from_row_to_col_vecvec(g_truth),
+            PDAG::from_row_to_col_vecvec(g_guess),
+        );
 
         assert_eq!(shd(&d_truth, &d_guess), (0f64, 0));
 
@@ -206,7 +218,10 @@ mod test {
             vec![0, 1, 0, 0],
         ];
         assert_eq!(shd_from_adjacency(&g_truth, &g_guess), (1f64 / 6f64, 1));
-        let (d_truth, d_guess) = (PDAG::from_row_to_col_vecvec(g_truth), PDAG::from_row_to_col_vecvec(g_guess));
+        let (d_truth, d_guess) = (
+            PDAG::from_row_to_col_vecvec(g_truth),
+            PDAG::from_row_to_col_vecvec(g_guess),
+        );
 
         assert_eq!(shd(&d_truth, &d_guess), (1f64 / 6f64, 1));
     }
@@ -217,7 +232,10 @@ mod test {
         let g_guess = vec![vec![0]];
 
         assert_eq!(shd_from_adjacency(&g_truth, &g_guess), (0f64, 0));
-        let (d_truth, d_guess) = (PDAG::from_row_to_col_vecvec(g_truth), PDAG::from_row_to_col_vecvec(g_guess));
+        let (d_truth, d_guess) = (
+            PDAG::from_row_to_col_vecvec(g_truth),
+            PDAG::from_row_to_col_vecvec(g_guess),
+        );
 
         assert_eq!(shd(&d_truth, &d_guess), (0f64, 0));
 
@@ -230,7 +248,10 @@ mod test {
             vec![0, 0],
         ];
         assert_eq!(shd_from_adjacency(&g_truth, &g_guess), (1f64, 1));
-        let (d_truth, d_guess) = (PDAG::from_row_to_col_vecvec(g_truth), PDAG::from_row_to_col_vecvec(g_guess));
+        let (d_truth, d_guess) = (
+            PDAG::from_row_to_col_vecvec(g_truth),
+            PDAG::from_row_to_col_vecvec(g_guess),
+        );
         assert_eq!(shd(&d_truth, &d_guess), (1f64, 1));
 
         // 0 -> 1
@@ -245,7 +266,10 @@ mod test {
         ];
 
         assert_eq!(shd_from_adjacency(&g_truth, &g_guess), (1f64, 1));
-        let (d_truth, d_guess) = (PDAG::from_row_to_col_vecvec(g_truth), PDAG::from_row_to_col_vecvec(g_guess));
+        let (d_truth, d_guess) = (
+            PDAG::from_row_to_col_vecvec(g_truth),
+            PDAG::from_row_to_col_vecvec(g_guess),
+        );
 
         assert_eq!(shd(&d_truth, &d_guess), (1f64, 1));
 
@@ -260,7 +284,10 @@ mod test {
             vec![0, 0, 0],
         ];
         assert_eq!(shd_from_adjacency(&g_truth, &g_guess), (0f64, 0));
-        let (d_truth, d_guess) = (PDAG::from_row_to_col_vecvec(g_truth), PDAG::from_row_to_col_vecvec(g_guess));
+        let (d_truth, d_guess) = (
+            PDAG::from_row_to_col_vecvec(g_truth),
+            PDAG::from_row_to_col_vecvec(g_guess),
+        );
         assert_eq!(shd(&d_truth, &d_guess), (0f64, 0));
 
         let g_truth = vec![
@@ -274,7 +301,10 @@ mod test {
             vec![0, 0, 0],
         ];
         assert_eq!(shd_from_adjacency(&g_truth, &g_guess), (1f64, 3));
-        let (d_truth, d_guess) = (PDAG::from_row_to_col_vecvec(g_truth), PDAG::from_row_to_col_vecvec(g_guess));
+        let (d_truth, d_guess) = (
+            PDAG::from_row_to_col_vecvec(g_truth),
+            PDAG::from_row_to_col_vecvec(g_guess),
+        );
         assert_eq!(shd(&d_truth, &d_guess), (1f64, 3));
 
         let g_truth = vec![
@@ -290,7 +320,10 @@ mod test {
             vec![0, 2, 0, 0],
         ];
         assert_eq!(shd_from_adjacency(&g_truth, &g_guess), (1f64 / 6f64, 1));
-        let (d_truth, d_guess) = (PDAG::from_row_to_col_vecvec(g_truth), PDAG::from_row_to_col_vecvec(g_guess));
+        let (d_truth, d_guess) = (
+            PDAG::from_row_to_col_vecvec(g_truth),
+            PDAG::from_row_to_col_vecvec(g_guess),
+        );
 
         assert_eq!(shd(&d_truth, &d_guess), (1f64 / 6f64, 1));
     }
