@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Implements functions that take graphs, such as SHD, generalized search, ...
 
-mod aid_utils;
+mod reachability;
 mod ancestor_aid;
 mod oset_aid;
 mod parent_aid;
@@ -18,10 +18,10 @@ pub use parent_aid::parent_aid;
 pub use shd::shd;
 pub use sid::sid;
 
-pub(crate) use aid_utils::get_nam;
+pub(crate) use reachability::get_nam;
 #[cfg(test)]
-pub(crate) use aid_utils::get_nam_nva;
-pub(crate) use aid_utils::{get_d_pd_nam, get_invalid_unblocked, get_pd_nam, get_pd_nam_nva};
+pub(crate) use reachability::get_nam_nva;
+pub(crate) use reachability::{get_d_pd_nam, get_invalid_unblocked, get_pd_nam, get_pd_nam_nva};
 pub(crate) use gensearch::gensearch;
 #[cfg(test)]
 pub(crate) use oset_aid::optimal_adjustment_set;
