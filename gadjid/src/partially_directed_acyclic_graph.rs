@@ -11,9 +11,20 @@ use crate::{
     graph_loading::edgelist::{ColumnMajorOrder, Edgelist, RowMajorOrder},
 };
 
-/// If having traversed from some node `X` to a current `Y` along edge `e`, specifies the relation `e`
-/// has to `Y`. For example, in the case of `X -> Y`, we have `e` = `Incoming`.
-///
+/// PDAG edge enum defined from a graph traversal perspective.
+/// 
+/// If traversing from some node `X` along edge `e` to a node of interest `Y` , 
+/// defines `e` as the direction it has to `Y`. 
+/// 
+/// Examples: 
+/// 
+/// When traversing from X to its child Y, `X -> Y`, we have `e` = `Incoming`.
+/// 
+/// It can be instructive to think of associating the edge and node of interest with
+/// a parenthesis, like `X (-> Y)`, making it clear that the edge is `Incoming`.
+/// 
+/// In the case of `X (<- Y)` <=> `(Y ->) X`, the edge would be `Outgoing`.
+/// 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Edge {
     /// An auxiliary edge type used to indicate that a search was rooted at this node.
@@ -67,10 +78,13 @@ pub struct PDAG {
 pub enum Structure {
     /// The PDAG contains no undirected edges and is acyclic, so it is a DAG.
     DAG,
-    /// The PDAG contains undirected edges. It is however not guaranteed to be a CPDAG.
+    /// The graph contains directed and undirected edges and no directed cycles. 
+    /// It is however not guaranteed to be a CPDAG.
     CPDAG,
 }
 
+
+/// Will display the adjacency matrix of the PDAG, encoded as row-to-column adjacency matrix.
 impl fmt::Display for PDAG {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut adjacency = vec![vec![0; self.n_nodes]; self.n_nodes];
@@ -541,7 +555,9 @@ impl PDAG {
 
         PDAG::from_row_to_col_vecvec(adjacency)
     }
+    
     /// Creates a random PDAG with random edges with the given edge density and size.
+    /// Do not use to create CPDAGs, as this is just a general PDAG.
     pub fn random_pdag(edge_density: f64, graph_size: usize) -> PDAG {
         assert!(graph_size > 0, "Graph size must be larger than 0");
         assert!(
