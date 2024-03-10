@@ -638,7 +638,10 @@ pub fn get_nam(cpdag: &PDAG, t: &[usize]) -> FxHashSet<usize> {
 mod test {
     use rustc_hash::FxHashSet;
 
-    use crate::graph_operations::{ancestor_aid, oset_aid, parent_aid};
+    use crate::graph_operations::{
+        ancestor_aid, descendants, gensearch, get_nam_nva, oset_aid, parent_aid,
+        possible_descendants, ruletables,
+    };
     use crate::PDAG;
 
     use super::get_nam;
@@ -681,5 +684,39 @@ mod test {
         assert_eq!((1.0, 2), ancestor_aid(&cpdag, &dag));
         assert_eq!((1.0, 2), oset_aid(&dag, &cpdag));
         assert_eq!((1.0, 2), oset_aid(&cpdag, &dag));
+    }
+
+    #[test]
+    pub fn reachability_algos_agree() {
+        let reps = 30;
+        (0..reps).for_each(|_| {
+            let pdag = PDAG::random_pdag(0.5, 100);
+            let t = [0];
+            let adjust = gensearch(&pdag, ruletables::Parents {}, t.iter(), false);
+
+            let d_expected = descendants(&pdag, t.iter());
+            let pd_expected = possible_descendants(&pdag, t.iter());
+            let (nam_expected, nva_expected) = get_nam_nva(&pdag, &t, adjust.clone());
+
+            let (pd, nam, nva) = super::get_pd_nam_nva(&pdag, &t, adjust.clone());
+            assert_eq!(pd_expected, pd);
+            assert_eq!(nam_expected, nam);
+            assert_eq!(nva_expected, nva);
+
+            let (pd, nam) = super::get_pd_nam(&pdag, &t);
+            assert_eq!(nam_expected, nam);
+            assert_eq!(pd_expected, pd);
+
+            let nam = super::get_nam(&pdag, &t);
+            assert_eq!(nam_expected, nam);
+
+            let (d, pd, nam) = super::get_d_pd_nam(&pdag, &t);
+            assert_eq!(d_expected, d);
+            assert_eq!(pd_expected, pd);
+            assert_eq!(nam_expected, nam);
+
+            let ivb = super::get_invalid_unblocked(&pdag, &t, adjust.clone());
+            assert!(ivb.is_subset(&nva_expected));
+        });
     }
 }

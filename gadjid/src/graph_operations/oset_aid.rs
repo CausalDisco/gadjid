@@ -23,8 +23,7 @@ pub fn optimal_adjustment_set(
     let response_and_anc_hash = FxHashSet::from_iter(response_ancestors);
     let causal_nodes = response_and_anc_hash.intersection(t_descendants);
     let causal_nodes_parents = parents(dag, causal_nodes);
-    FxHashSet::from_iter(causal_nodes_parents
-        .difference(t_descendants).copied())
+    FxHashSet::from_iter(causal_nodes_parents.difference(t_descendants).copied())
 }
 
 /// Computes the oset adjustment intervention distance
