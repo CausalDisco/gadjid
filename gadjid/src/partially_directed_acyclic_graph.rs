@@ -78,10 +78,13 @@ pub struct PDAG {
 pub enum Structure {
     /// The PDAG contains no undirected edges and is acyclic, so it is a DAG.
     DAG,
-    /// The PDAG contains undirected edges. It is however not guaranteed to be a CPDAG.
+    /// The graph contains directed and undirected edges and no directed cycles. 
+    /// It is however not guaranteed to be a CPDAG.
     CPDAG,
 }
 
+
+/// Will display the adjacency matrix of the PDAG, encoded as row-to-column adjacency matrix.
 impl fmt::Display for PDAG {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut adjacency = vec![vec![0; self.n_nodes]; self.n_nodes];
