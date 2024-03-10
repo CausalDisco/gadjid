@@ -162,7 +162,7 @@ mod test {
             vec![0, 0, 0, 1, 0, 0, 0, 0],
         ];
 
-        let dag = PDAG::from_vecvec(v_dag);
+        let dag = PDAG::from_row_to_col_vecvec(v_dag);
 
         assert_eq!(
             FxHashSet::from_iter([7]),
@@ -214,7 +214,7 @@ mod test {
             vec![0, 0, 0, 1, 0, 0, 0, 0],
         ];
 
-        let dag = PDAG::from_vecvec(v_dag);
+        let dag = PDAG::from_row_to_col_vecvec(v_dag);
 
         assert_eq!(
             FxHashSet::from_iter([5]),
