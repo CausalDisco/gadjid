@@ -1,0 +1,18 @@
+[package]
+name = 'rgadjid'
+version = '0.1.0'
+edition = '2021'
+
+[lib]
+crate-type = [ 'staticlib' ]
+name = 'rgadjid'
+
+[dependencies]
+anyhow = "1.0.79"
+extendr-api = '*'
+gadjid = { path = "../../../gadjid" }
+
+[profile.release]
+codegen-units = 1
+opt-level = 3
+lto = "fat"
