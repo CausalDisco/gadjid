@@ -41,9 +41,7 @@ pub fn get_nam_nva(
     let mut not_vas = z.clone();
 
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
-    let mut to_visit_stack = Vec::<(Edge, usize, WalkStatus)>::new();
-    t.iter()
-        .for_each(|v| to_visit_stack.push((Edge::Init, *v, WalkStatus::Init)));
+    let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     let get_next_steps = |arrived_by: Edge, v: usize, node_is_adjustment: bool| {
         let mut next = Vec::<(Edge, usize, bool)>::new();
@@ -162,14 +160,12 @@ pub fn get_pd_nam_nva(
     t: &[usize],
     z: FxHashSet<usize>,
 ) -> (FxHashSet<usize>, FxHashSet<usize>, FxHashSet<usize>) {
+    let mut poss_de = FxHashSet::from_iter(t.iter().copied());
     let mut not_amenable = FxHashSet::<usize>::default();
     let mut not_vas = z.clone();
-    let mut poss_de = FxHashSet::from_iter(t.iter().copied());
 
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
-    let mut to_visit_stack = Vec::<(Edge, usize, WalkStatus)>::new();
-    t.iter()
-        .for_each(|v| to_visit_stack.push((Edge::Init, *v, WalkStatus::Init)));
+    let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     let get_next_steps = |arrived_by: Edge, v: usize, node_is_adjustment: bool| {
         let mut next = Vec::<(Edge, usize, bool)>::new();
@@ -301,13 +297,12 @@ pub fn get_pd_nam(truth_dag: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet
         Init,
     }
 
-    let mut not_amenable = FxHashSet::<usize>::default();
     let mut poss_de = FxHashSet::from_iter(t.iter().copied());
+    let mut not_amenable = FxHashSet::<usize>::default();
 
     let mut visited = FxHashSet::<(Edge, usize, Alg5WalkStatus)>::default();
-    let mut to_visit_stack = Vec::<(Edge, usize, Alg5WalkStatus)>::new();
-    t.iter()
-        .for_each(|v| to_visit_stack.push((Edge::Init, *v, Alg5WalkStatus::Init)));
+    let mut to_visit_stack =
+        Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, Alg5WalkStatus::Init)));
 
     let get_next_steps = |v: usize| {
         let mut next = Vec::<(Edge, usize)>::new();
@@ -394,14 +389,13 @@ pub fn get_d_pd_nam(
         Init,
     }
 
-    let mut not_amenable = FxHashSet::<usize>::default();
-    let mut poss_desc = FxHashSet::from_iter(t.iter().copied());
     let mut desc = FxHashSet::from_iter(t.iter().copied());
+    let mut poss_desc = desc.clone();
+    let mut not_amenable = FxHashSet::<usize>::default();
 
     let mut visited = FxHashSet::<(Edge, usize, Alg6WalkStatus)>::default();
-    let mut to_visit_stack = Vec::<(Edge, usize, Alg6WalkStatus)>::new();
-    t.iter()
-        .for_each(|v| to_visit_stack.push((Edge::Init, *v, Alg6WalkStatus::Init)));
+    let mut to_visit_stack =
+        Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, Alg6WalkStatus::Init)));
 
     let get_next_steps = |v: usize| {
         let mut next = Vec::<(Edge, usize)>::new();
@@ -499,10 +493,10 @@ pub fn get_invalid_unblocked(
     }
 
     let mut ivb = z.clone();
+
     let mut visited = FxHashSet::<(Edge, usize, Alg7WalkStatus)>::default();
-    let mut to_visit_stack = Vec::<(Edge, usize, Alg7WalkStatus)>::new();
-    t.iter()
-        .for_each(|v| to_visit_stack.push((Edge::Init, *v, Alg7WalkStatus::Init)));
+    let mut to_visit_stack =
+        Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, Alg7WalkStatus::Init)));
 
     let get_next_steps = |arrived_by: Edge, v: usize, node_is_adjustment: bool| {
         let mut next = Vec::<(Edge, usize, bool)>::new();
@@ -599,11 +593,10 @@ pub fn get_invalid_unblocked(
 ///
 /// Follows Algorithm 2 in https://doi.org/10.48550/arXiv.2402.08616
 pub fn get_nam(cpdag: &PDAG, t: &[usize]) -> FxHashSet<usize> {
-    let mut to_visit_stack: Vec<(Edge, usize)> = Vec::new();
-    t.iter().for_each(|v| to_visit_stack.push((Edge::Init, *v)));
+    let mut not_amenable = FxHashSet::<usize>::default();
 
     let mut visited = FxHashSet::<usize>::default();
-    let mut not_amenable = FxHashSet::<usize>::default();
+    let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v)));
 
     while let Some((arrived_by, node)) = to_visit_stack.pop() {
         visited.insert(node);
