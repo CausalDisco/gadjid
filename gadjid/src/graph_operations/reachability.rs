@@ -474,11 +474,7 @@ pub fn get_d_pd_nam(
 ///
 /// Returns tuple of:<br>
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
-pub fn get_invalid_unblocked(
-    graph: &PDAG,
-    t: &[usize],
-    z: FxHashSet<usize>,
-) -> FxHashSet<usize> {
+pub fn get_invalid_unblocked(graph: &PDAG, t: &[usize], z: FxHashSet<usize>) -> FxHashSet<usize> {
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum Alg7WalkStatus {
