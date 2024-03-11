@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-//! Holds utility functions for the AID algorithm.
+//! Walk-status-aware reachability algorithms for calculating the AID efficiently.
 
 use rustc_hash::FxHashSet;
 
@@ -8,13 +8,13 @@ use crate::{partially_directed_acyclic_graph::Edge, PDAG};
 #[allow(non_camel_case_types)]
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 enum WalkStatus {
-    /// Possible Descendant / Partially Directed, Amenable, and Open Walk
+    /// Possible Descendant / Partially Directed, Amenable (starts T→), and Open Walk
     PD_OPEN_AM,
-    /// Possible Descendant / Partially Directed, Amenable, and Blocked Walk
+    /// Possible Descendant / Partially Directed, Amenable (starts T→), and Blocked Walk
     PD_BLOCK_AM,
-    /// Possible Descendant / Partially Directed, Not Amenable, and Open Walk
+    /// Possible Descendant / Partially Directed, Not Amenable (starts T—), and Open Walk
     PD_OPEN_NAM,
-    /// Possible Descendant / Partially Directed, Not Amenable, and Blocked Walk
+    /// Possible Descendant / Partially Directed, Not Amenable (starts T–), and Blocked Walk
     PD_BLOCK_NAM,
     /// Non-Causal walk
     NON_CAUSAL,
@@ -31,7 +31,7 @@ enum WalkStatus {
 /// Returns tuple of:<br>
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
-/// This includes all NAM, so NAM is a subset NVA.
+///   This includes all NAM, so NAM is a subset NVA.
 pub fn get_nam_nva(
     truth_dag: &PDAG,
     t: &[usize],
@@ -156,7 +156,7 @@ pub fn get_nam_nva(
 /// - Set PD of possible descendants of T in G
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
-/// This includes all NAM, so NAM is a subset NVA.
+///   This includes all NAM, so NAM is a subset NVA.
 pub fn get_pd_nam_nva(
     truth_dag: &PDAG,
     t: &[usize],
@@ -281,7 +281,8 @@ pub fn get_pd_nam_nva(
     (poss_de, not_amenable, not_vas)
 }
 
-/// Checks amenability of some DAG/CPDAG for a given set T of treatments and all response variables
+/// Checks amenability of a (CP)DAG relative to (T, Y) for a given set T of treatment
+/// nodes and all possible Y.
 ///
 /// Follows Algorithm 5 in https://doi.org/10.48550/arXiv.2402.08616
 ///
@@ -292,9 +293,9 @@ pub fn get_pd_nam(truth_dag: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum Alg5WalkStatus {
-        /// Possible Descendant, Amenable
+        /// Possible Descendant / Partially Directed, Amenable (starts T→)
         POSS_DESC_AM,
-        /// Possible Descendant, Not Amenable
+        /// Possible Descendant / Partially Directed, Not Amenable (starts T—)
         POSS_DESC_NAM,
         /// Initial status
         Init,
@@ -335,7 +336,7 @@ pub fn get_pd_nam(truth_dag: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet
                 not_amenable.insert(node);
                 poss_de.insert(node);
             }
-            // any AM walk
+            // any other PD walk
             Alg5WalkStatus::POSS_DESC_AM => {
                 poss_de.insert(node);
             }
@@ -366,7 +367,8 @@ pub fn get_pd_nam(truth_dag: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet
     (poss_de, not_amenable)
 }
 
-/// Checks amenability of some DAG/CPDAG for a given set T of treatments and all response variables
+/// Checks amenability of a (CP)DAG relative to (T, Y) for a given set T of treatment
+/// nodes and all possible Y.
 ///
 /// Follows Algorithm 6 in https://doi.org/10.48550/arXiv.2402.08616
 ///
@@ -382,11 +384,11 @@ pub fn get_d_pd_nam(
     #[allow(clippy::upper_case_acronyms)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum Alg6WalkStatus {
-        /// Descendant, always Amenable
+        /// Descendant / Directed (always amenable)
         DESC,
-        /// Possible Descendant, Amenable
+        /// Possible Descendant / Partially Directed, Amenable (starts T→)
         POSS_DESC_AM,
-        /// Possible Descendant, Not Amenable
+        /// Possible Descendant / Partially Directed, Not Amenable (starts T—)
         POSS_DESC_NAM,
         /// Initial status
         Init,
@@ -474,6 +476,10 @@ pub fn get_d_pd_nam(
 ///
 /// Returns tuple of:<br>
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
+///   Here, amenability (condition 1.) is not verified, that is, NVA is not a superset of NAM;
+///   instead, NVA contains Y for which condition 2. or 3.
+///   of the modified adjustment criterion for walk-based verification
+///   in https://doi.org/10.48550/arXiv.2402.08616 are violated
 pub fn get_invalid_unblocked(
     truth_dag: &PDAG,
     t: &[usize],
@@ -586,7 +592,7 @@ pub fn get_invalid_unblocked(
     ivb
 }
 
-/// Check amenability of a CPDAG relative to (T, Y) for a given set T of treatment
+/// Checks amenability of a CPDAG relative to (T, Y) for a given set T of treatment
 /// nodes and all possible Y.
 ///
 /// Returns set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
