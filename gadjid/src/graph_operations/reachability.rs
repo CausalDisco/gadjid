@@ -474,11 +474,7 @@ pub fn get_d_pd_nam(
 ///   instead, NVA contains Y for which condition 2. or 3.
 ///   of the modified adjustment criterion for walk-based verification
 ///   in https://doi.org/10.48550/arXiv.2402.08616 are violated
-pub fn get_invalid_unblocked(
-    graph: &PDAG,
-    t: &[usize],
-    z: FxHashSet<usize>,
-) -> FxHashSet<usize> {
+pub fn get_invalid_unblocked(graph: &PDAG, t: &[usize], z: FxHashSet<usize>) -> FxHashSet<usize> {
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum Alg7WalkStatus {
