@@ -33,7 +33,7 @@ enum WalkStatus {
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
 ///   This includes all NAM, so NAM is a subset NVA.
 pub fn get_nam_nva(
-    truth_dag: &PDAG,
+    graph: &PDAG,
     t: &[usize],
     z: FxHashSet<usize>,
 ) -> (FxHashSet<usize>, FxHashSet<usize>) {
@@ -47,7 +47,7 @@ pub fn get_nam_nva(
         let mut next = Vec::<(Edge, usize, bool)>::new();
         match arrived_by {
             Edge::Incoming => {
-                truth_dag
+                graph
                     .parents_of(v)
                     .iter()
                     .filter(|p| !t.contains(*p))
@@ -56,7 +56,7 @@ pub fn get_nam_nva(
                     });
             }
             Edge::Init | Edge::Outgoing => {
-                truth_dag
+                graph
                     .parents_of(v)
                     .iter()
                     .filter(|p| !t.contains(*p))
@@ -66,14 +66,14 @@ pub fn get_nam_nva(
             }
             _ => (),
         }
-        truth_dag
+        graph
             .adjacent_undirected_of(v)
             .iter()
             .filter(|u| !t.contains(*u))
             .for_each(|u| {
                 next.push((Edge::Undirected, *u, node_is_adjustment));
             });
-        truth_dag
+        graph
             .children_of(v)
             .iter()
             .filter(|c| !t.contains(*c))
@@ -156,7 +156,7 @@ pub fn get_nam_nva(
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
 ///   This includes all NAM, so NAM is a subset NVA.
 pub fn get_pd_nam_nva(
-    truth_dag: &PDAG,
+    graph: &PDAG,
     t: &[usize],
     z: FxHashSet<usize>,
 ) -> (FxHashSet<usize>, FxHashSet<usize>, FxHashSet<usize>) {
@@ -171,7 +171,7 @@ pub fn get_pd_nam_nva(
         let mut next = Vec::<(Edge, usize, bool)>::new();
         match arrived_by {
             Edge::Incoming => {
-                truth_dag
+                graph
                     .parents_of(v)
                     .iter()
                     .filter(|p| !t.contains(*p))
@@ -180,7 +180,7 @@ pub fn get_pd_nam_nva(
                     });
             }
             Edge::Init | Edge::Outgoing => {
-                truth_dag
+                graph
                     .parents_of(v)
                     .iter()
                     .filter(|p| !t.contains(*p))
@@ -190,14 +190,14 @@ pub fn get_pd_nam_nva(
             }
             _ => (),
         }
-        truth_dag
+        graph
             .adjacent_undirected_of(v)
             .iter()
             .filter(|u| !t.contains(*u))
             .for_each(|u| {
                 next.push((Edge::Undirected, *u, node_is_adjustment));
             });
-        truth_dag
+        graph
             .children_of(v)
             .iter()
             .filter(|c| !t.contains(*c))
@@ -285,7 +285,7 @@ pub fn get_pd_nam_nva(
 /// Returns tuple of:<br>
 /// - Set PD of possible descendants of T in G
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
-pub fn get_pd_nam(truth_dag: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usize>) {
+pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usize>) {
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum Alg5WalkStatus {
@@ -306,14 +306,14 @@ pub fn get_pd_nam(truth_dag: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet
 
     let get_next_steps = |v: usize| {
         let mut next = Vec::<(Edge, usize)>::new();
-        truth_dag
+        graph
             .adjacent_undirected_of(v)
             .iter()
             .filter(|u| !t.contains(*u))
             .for_each(|u| {
                 next.push((Edge::Undirected, *u));
             });
-        truth_dag
+        graph
             .children_of(v)
             .iter()
             .filter(|c| !t.contains(*c))
@@ -372,7 +372,7 @@ pub fn get_pd_nam(truth_dag: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet
 /// - Set PD of possible descendants of T in G
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 pub fn get_d_pd_nam(
-    truth_dag: &PDAG,
+    graph: &PDAG,
     t: &[usize],
 ) -> (FxHashSet<usize>, FxHashSet<usize>, FxHashSet<usize>) {
     #[allow(non_camel_case_types)]
@@ -399,14 +399,14 @@ pub fn get_d_pd_nam(
 
     let get_next_steps = |v: usize| {
         let mut next = Vec::<(Edge, usize)>::new();
-        truth_dag
+        graph
             .adjacent_undirected_of(v)
             .iter()
             .filter(|u| !t.contains(*u))
             .for_each(|u| {
                 next.push((Edge::Undirected, *u));
             });
-        truth_dag
+        graph
             .children_of(v)
             .iter()
             .filter(|c| !t.contains(*c))
@@ -475,7 +475,7 @@ pub fn get_d_pd_nam(
 ///   of the modified adjustment criterion for walk-based verification
 ///   in https://doi.org/10.48550/arXiv.2402.08616 are violated
 pub fn get_invalid_unblocked(
-    truth_dag: &PDAG,
+    graph: &PDAG,
     t: &[usize],
     z: FxHashSet<usize>,
 ) -> FxHashSet<usize> {
@@ -502,7 +502,7 @@ pub fn get_invalid_unblocked(
         let mut next = Vec::<(Edge, usize, bool)>::new();
         match arrived_by {
             Edge::Incoming => {
-                truth_dag
+                graph
                     .parents_of(v)
                     .iter()
                     .filter(|p| !t.contains(*p))
@@ -511,7 +511,7 @@ pub fn get_invalid_unblocked(
                     });
             }
             Edge::Init | Edge::Outgoing => {
-                truth_dag
+                graph
                     .parents_of(v)
                     .iter()
                     .filter(|p| !t.contains(*p))
@@ -521,14 +521,14 @@ pub fn get_invalid_unblocked(
             }
             _ => (),
         }
-        truth_dag
+        graph
             .adjacent_undirected_of(v)
             .iter()
             .filter(|u| !t.contains(*u))
             .for_each(|u| {
                 next.push((Edge::Undirected, *u, node_is_adjustment));
             });
-        truth_dag
+        graph
             .children_of(v)
             .iter()
             .filter(|c| !t.contains(*c))
