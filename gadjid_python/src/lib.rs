@@ -64,8 +64,8 @@ fn gadjid(_py: Python, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
-const ROW_TO_COL: &str = "row->col";
-const COL_TO_ROW: &str = "col->row";
+const ROW_TO_COL: &str = "from row to col";
+const COL_TO_ROW: &str = "from col to row";
 
 fn edge_direction_semantics_is_row_to_col(edge_direction: &str) -> PyResult<bool> {
     match edge_direction {
