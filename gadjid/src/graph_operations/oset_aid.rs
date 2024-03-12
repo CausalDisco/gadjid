@@ -61,17 +61,16 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                         mistakes += 1;
                     }
                 } else {
-                    let y_am_in_guess = !nam_in_guess.contains(&y);
-                    let y_am_in_true = !nam_in_true.contains(&y);
+                    let y_nam_in_guess = nam_in_guess.contains(&y);
+                    let y_nam_in_true = nam_in_true.contains(&y);
 
                     // if they disagree on amenability:
-                    if y_am_in_guess != y_am_in_true {
+                    if y_nam_in_guess != y_nam_in_true {
                         mistakes += 1;
-                        continue;
                     }
 
                     // if they agree on amenability and y is amenable, we need to find the adjustment set
-                    if y_am_in_guess {
+                    else if !y_nam_in_guess {
                         // this oset function uses the precomputed t_desc_in_guess
                         let o_set_adjustment =
                             optimal_adjustment_set(guess, &[treatment], &[y], &t_desc_in_guess);

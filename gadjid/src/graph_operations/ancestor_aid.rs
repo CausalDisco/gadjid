@@ -74,18 +74,18 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                         mistakes += 1;
                     }
                 } else {
-                    let y_am_in_guess = !nam_in_guess.contains(&y);
-                    let y_am_in_true = !nam_in_true.contains(&y);
+                    let y_nam_in_guess = nam_in_guess.contains(&y);
+                    let y_nam_in_true = nam_in_true.contains(&y);
 
                     // if they disagree on amenability:
-                    if y_am_in_guess != y_am_in_true {
+                    if y_nam_in_guess != y_nam_in_true {
                         mistakes += 1;
                     }
 
                     // if we reach this point, y has a VAS in guess
                     // now, if the adjustment set is not valid in truth
                     // (either because the pair (t,y) is not amenable or because the VAS is not valid)
-                    else if y_am_in_guess && nva_in_true.contains(&y) {
+                    else if !y_nam_in_guess && nva_in_true.contains(&y) {
                         // we count a mistake
                         mistakes += 1;
                     }
