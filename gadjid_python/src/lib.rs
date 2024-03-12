@@ -104,11 +104,7 @@ pub fn oset_aid(g_true: &PyAny, g_guess: &PyAny, edge_direction: &str) -> PyResu
 
 /// Parent Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[pyfunction]
-pub fn parent_aid(
-    g_true: &PyAny,
-    g_guess: &PyAny,
-    edge_direction: &str,
-) -> PyResult<(f64, usize)> {
+pub fn parent_aid(g_true: &PyAny, g_guess: &PyAny, edge_direction: &str) -> PyResult<(f64, usize)> {
     let row_to_col = edge_direction_is_row_to_col(edge_direction)?;
     let graph_truth = graph_from_pyobject(g_true, row_to_col)?;
     let graph_guess = graph_from_pyobject(g_guess, row_to_col)?;
@@ -128,11 +124,7 @@ pub fn shd(g_true: &PyAny, g_guess: &PyAny, edge_direction: &str) -> PyResult<(f
 
 /// Structural Identification Distance between two DAG adjacency matrices (sparse or dense)
 #[pyfunction]
-pub fn sid(
-    g_true: &PyAny,
-    g_guess: &PyAny,
-    edge_direction: &str,
-) -> anyhow::Result<(f64, usize)> {
+pub fn sid(g_true: &PyAny, g_guess: &PyAny, edge_direction: &str) -> anyhow::Result<(f64, usize)> {
     let row_to_col = edge_direction_is_row_to_col(edge_direction)?;
     let dag_truth = graph_from_pyobject(g_true, row_to_col)?;
     let dag_guess = graph_from_pyobject(g_guess, row_to_col)?;
