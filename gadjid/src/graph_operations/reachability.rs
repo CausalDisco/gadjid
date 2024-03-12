@@ -9,13 +9,13 @@ use crate::{partially_directed_acyclic_graph::Edge, PDAG};
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 enum WalkStatus {
     /// Possible Descendant / Partially Directed, Amenable (starts T→), and Open Walk
-    PD_OPEN_AM,
+    POSS_DESC_OPEN_AM,
     /// Possible Descendant / Partially Directed, Amenable (starts T→), and Blocked Walk
-    PD_BLOCK_AM,
+    POSS_DESC_BLOCK_AM,
     /// Possible Descendant / Partially Directed, Not Amenable (starts T—), and Open Walk
-    PD_OPEN_NAM,
+    POSS_DESC_OPEN_NAM,
     /// Possible Descendant / Partially Directed, Not Amenable (starts T–), and Blocked Walk
-    PD_BLOCK_NAM,
+    POSS_DESC_BLOCK_NAM,
     /// Non-Causal walk
     NON_CAUSAL,
     /// Initial status
@@ -87,13 +87,13 @@ pub fn get_nam_nva(
         visited.insert((arrived_by, node, walkstatus));
 
         match walkstatus {
-            WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCK_NAM => {
+            WalkStatus::POSS_DESC_OPEN_NAM | WalkStatus::POSS_DESC_BLOCK_NAM => {
                 not_amenable.insert(node);
                 // we want the property that not_amenable is a subset of not_vas
                 // so, if we insert a node into not_amenable, we also insert it into not_vas
                 not_vas.insert(node);
             }
-            WalkStatus::NON_CAUSAL | WalkStatus::PD_BLOCK_AM => {
+            WalkStatus::NON_CAUSAL | WalkStatus::POSS_DESC_BLOCK_AM => {
                 not_vas.insert(node);
             }
             _ => (),
@@ -103,27 +103,27 @@ pub fn get_nam_nva(
         for (move_on_by, w, blocked) in get_next_steps(arrived_by, node, node_is_adjustment) {
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
-                    Edge::Incoming => Some((move_on_by, w, WalkStatus::PD_OPEN_AM)),
+                    Edge::Incoming => Some((move_on_by, w, WalkStatus::POSS_DESC_OPEN_AM)),
                     Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL)),
-                    Edge::Undirected => Some((move_on_by, w, WalkStatus::PD_OPEN_NAM)),
+                    Edge::Undirected => Some((move_on_by, w, WalkStatus::POSS_DESC_OPEN_NAM)),
                     _ => None,
                 },
-                WalkStatus::PD_OPEN_AM | WalkStatus::PD_BLOCK_AM => match move_on_by {
+                WalkStatus::POSS_DESC_OPEN_AM | WalkStatus::POSS_DESC_BLOCK_AM => match move_on_by {
                     Edge::Incoming | Edge::Undirected => match blocked {
                         false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, WalkStatus::PD_BLOCK_AM)),
+                        true => Some((move_on_by, w, WalkStatus::POSS_DESC_BLOCK_AM)),
                     },
-                    Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_AM) => {
+                    Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::POSS_DESC_OPEN_AM) => {
                         Some((move_on_by, w, WalkStatus::NON_CAUSAL))
                     }
                     _ => None,
                 },
-                WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCK_NAM => match move_on_by {
+                WalkStatus::POSS_DESC_OPEN_NAM | WalkStatus::POSS_DESC_BLOCK_NAM => match move_on_by {
                     Edge::Incoming | Edge::Undirected => match blocked {
                         false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, WalkStatus::PD_BLOCK_NAM)),
+                        true => Some((move_on_by, w, WalkStatus::POSS_DESC_BLOCK_NAM)),
                     },
-                    Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_NAM) => {
+                    Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::POSS_DESC_OPEN_NAM) => {
                         Some((move_on_by, w, WalkStatus::NON_CAUSAL))
                     }
                     _ => None,
@@ -212,7 +212,7 @@ pub fn get_pd_nam_nva(
         visited.insert((arrived_by, node, walkstatus));
 
         match walkstatus {
-            WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCK_NAM => {
+            WalkStatus::POSS_DESC_OPEN_NAM | WalkStatus::POSS_DESC_BLOCK_NAM => {
                 not_amenable.insert(node);
                 // we want the property that not_amenable is a subset of not_vas
                 // so, if we insert a node into not_amenable, we also insert it into not_vas
@@ -222,11 +222,11 @@ pub fn get_pd_nam_nva(
             WalkStatus::NON_CAUSAL => {
                 not_vas.insert(node);
             }
-            WalkStatus::PD_BLOCK_AM => {
+            WalkStatus::POSS_DESC_BLOCK_AM => {
                 not_vas.insert(node);
                 poss_de.insert(node);
             }
-            WalkStatus::PD_OPEN_AM => {
+            WalkStatus::POSS_DESC_OPEN_AM => {
                 poss_de.insert(node);
             }
             _ => (),
@@ -236,27 +236,27 @@ pub fn get_pd_nam_nva(
         for (move_on_by, w, blocked) in get_next_steps(arrived_by, node, node_is_adjustment) {
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
-                    Edge::Incoming => Some((move_on_by, w, WalkStatus::PD_OPEN_AM)),
+                    Edge::Incoming => Some((move_on_by, w, WalkStatus::POSS_DESC_OPEN_AM)),
                     Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL)),
-                    Edge::Undirected => Some((move_on_by, w, WalkStatus::PD_OPEN_NAM)),
+                    Edge::Undirected => Some((move_on_by, w, WalkStatus::POSS_DESC_OPEN_NAM)),
                     _ => None,
                 },
-                WalkStatus::PD_OPEN_AM | WalkStatus::PD_BLOCK_AM => match move_on_by {
+                WalkStatus::POSS_DESC_OPEN_AM | WalkStatus::POSS_DESC_BLOCK_AM => match move_on_by {
                     Edge::Incoming | Edge::Undirected => match blocked {
                         false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, WalkStatus::PD_BLOCK_AM)),
+                        true => Some((move_on_by, w, WalkStatus::POSS_DESC_BLOCK_AM)),
                     },
-                    Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_AM) => {
+                    Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::POSS_DESC_OPEN_AM) => {
                         Some((move_on_by, w, WalkStatus::NON_CAUSAL))
                     }
                     _ => None,
                 },
-                WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCK_NAM => match move_on_by {
+                WalkStatus::POSS_DESC_OPEN_NAM | WalkStatus::POSS_DESC_BLOCK_NAM => match move_on_by {
                     Edge::Incoming | Edge::Undirected => match blocked {
                         false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, WalkStatus::PD_BLOCK_NAM)),
+                        true => Some((move_on_by, w, WalkStatus::POSS_DESC_BLOCK_NAM)),
                     },
-                    Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_NAM) => {
+                    Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::POSS_DESC_OPEN_NAM) => {
                         Some((move_on_by, w, WalkStatus::NON_CAUSAL))
                     }
                     _ => None,
@@ -472,14 +472,18 @@ pub fn get_d_pd_nam(
 ///
 /// Returns tuple of:<br>
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
+/// Here, amenability (condition 1.) is not verified, that is, NVA is not a superset of NAM;
+/// instead, NVA contains Y for which condition 2. or 3.
+/// of the modified adjustment criterion for walk-based verification
+/// in https://doi.org/10.48550/arXiv.2402.08616 are violated
 pub fn get_invalid_un_blocked(graph: &PDAG, t: &[usize], z: FxHashSet<usize>) -> FxHashSet<usize> {
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum Alg7WalkStatus {
         /// Possible Descendant / Partially Directed, and Open Walk
-        PD_OPEN,
+        POSS_DESC_OPEN,
         /// Possible Descendant / Partially Directed, and Blocked Walk
-        PD_BLOCK,
+        POSS_DESC_BLOCK,
         /// Non-Causal walk that has not been blocked
         NON_CAUSAL_OPEN,
         /// Initial status
@@ -537,7 +541,7 @@ pub fn get_invalid_un_blocked(graph: &PDAG, t: &[usize], z: FxHashSet<usize>) ->
 
         match walkstatus {
             // when the node is reached on a causal path but blocked, or an unblocked non-causal path
-            Alg7WalkStatus::PD_BLOCK | Alg7WalkStatus::NON_CAUSAL_OPEN => {
+            Alg7WalkStatus::POSS_DESC_BLOCK | Alg7WalkStatus::NON_CAUSAL_OPEN => {
                 ivb.insert(node);
             }
             _ => (),
@@ -548,17 +552,17 @@ pub fn get_invalid_un_blocked(graph: &PDAG, t: &[usize], z: FxHashSet<usize>) ->
             let next = match walkstatus {
                 Alg7WalkStatus::Init => match move_on_by {
                     Edge::Incoming | Edge::Undirected => {
-                        Some((move_on_by, w, Alg7WalkStatus::PD_OPEN))
+                        Some((move_on_by, w, Alg7WalkStatus::POSS_DESC_OPEN))
                     }
                     Edge::Outgoing => Some((move_on_by, w, Alg7WalkStatus::NON_CAUSAL_OPEN)),
                     _ => None,
                 },
-                Alg7WalkStatus::PD_OPEN | Alg7WalkStatus::PD_BLOCK => match move_on_by {
+                Alg7WalkStatus::POSS_DESC_OPEN | Alg7WalkStatus::POSS_DESC_BLOCK => match move_on_by {
                     Edge::Incoming | Edge::Undirected => match blocked {
                         false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, Alg7WalkStatus::PD_BLOCK)),
+                        true => Some((move_on_by, w, Alg7WalkStatus::POSS_DESC_BLOCK)),
                     },
-                    Edge::Outgoing if !blocked && matches!(walkstatus, Alg7WalkStatus::PD_OPEN) => {
+                    Edge::Outgoing if !blocked && matches!(walkstatus, Alg7WalkStatus::POSS_DESC_OPEN) => {
                         Some((move_on_by, w, Alg7WalkStatus::NON_CAUSAL_OPEN))
                     }
                     _ => None,
