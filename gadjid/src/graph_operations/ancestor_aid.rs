@@ -30,9 +30,8 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     let verifier_mistakes_found = (0..guess.n_nodes)
         .into_par_iter()
         .map(|treatment| {
-            
             // --- this function differs from parent_aid.rs only in the imports and from here
-            
+
             // claim that all possible descendants could could be affected by the treatment
             let (claim_possible_effect, nam_in_guess) = if matches!(
                 guess.pdag_type,
@@ -81,7 +80,6 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     if y_nam_in_guess != y_nam_in_true {
                         mistakes += 1;
                     }
-
                     // if we reach this point, y has a VAS in guess
                     // now, if the adjustment set is not valid in truth
                     // (either because the pair (t,y) is not amenable or because the VAS is not valid)

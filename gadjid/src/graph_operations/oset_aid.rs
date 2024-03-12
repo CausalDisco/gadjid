@@ -68,7 +68,6 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     if y_nam_in_guess != y_nam_in_true {
                         mistakes += 1;
                     }
-
                     // if they agree on amenability and y is amenable, we need to find the adjustment set
                     else if !y_nam_in_guess {
                         // this oset function uses the precomputed t_desc_in_guess
@@ -76,7 +75,8 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                             optimal_adjustment_set(guess, &[treatment], &[y], &t_desc_in_guess);
 
                         // (because the VAS is not valid, by blocking too much or too)
-                        if get_invalid_un_blocked(truth, &[treatment], o_set_adjustment).contains(&y)
+                        if get_invalid_un_blocked(truth, &[treatment], o_set_adjustment)
+                            .contains(&y)
                         {
                             // we count a mistake
                             mistakes += 1;

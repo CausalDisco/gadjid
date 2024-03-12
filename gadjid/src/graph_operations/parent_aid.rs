@@ -25,7 +25,6 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     let verifier_mistakes_found = (0..guess.n_nodes)
         .into_par_iter()
         .map(|treatment| {
-            
             // --- this function differs from ancestor_aid.rs only in the imports and from here
             let nam_in_guess = if matches!(
                 guess.pdag_type,
@@ -34,7 +33,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                 get_nam(guess, &[treatment])
             } else {
                 FxHashSet::<usize>::default()
-            }; 
+            };
 
             let adjustment_set = FxHashSet::from_iter(guess.parents_of(treatment).to_vec());
 
@@ -42,9 +41,8 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             // (this is a larger set than the NonDescendants in ancestor_aid and oset_aid;
             //  that is, the validity of the adjustment set is also checked
             //  for the additional non-effect nodes in NonParents\NonDescendants)
-            let claim_possible_effect = FxHashSet::from_iter(
-                (0..truth.n_nodes).filter(|v| !adjustment_set.contains(v)),
-            );
+            let claim_possible_effect =
+                FxHashSet::from_iter((0..truth.n_nodes).filter(|v| !adjustment_set.contains(v)));
             // --- to here
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
@@ -72,7 +70,6 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     if y_nam_in_guess != y_nam_in_true {
                         mistakes += 1;
                     }
-
                     // if we reach this point, y has a VAS in guess
                     // now, if the adjustment set is not valid in truth
                     // (either because the pair (t,y) is not amenable or because the VAS is not valid)
