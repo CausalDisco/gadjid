@@ -31,7 +31,7 @@ def run_parent_aid(size=500, probability=.1):
     DAGb = random_dag(size, probability)
 
     tic = timer()
-    print(f"    {parent_aid(DAGa, DAGb)}")
+    print(f"    {parent_aid(DAGa, DAGb, edge_direction="from row to col")}")
     toc = timer() - tic
     print(
         f"\ntook {toc:.3f} seconds.\n\n"
