@@ -22,7 +22,6 @@ enum WalkStatus {
     Init,
 }
 
-#[allow(unused)]
 /// Validate Z as adjustment set relative to (T, Y) for a given set T of treatment
 /// nodes and all possible Y in G.
 ///
@@ -32,6 +31,7 @@ enum WalkStatus {
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
 ///   This includes all NAM, so NAM is a subset NVA.
+#[cfg(test)]
 pub fn get_nam_nva(
     graph: &PDAG,
     t: &[usize],
