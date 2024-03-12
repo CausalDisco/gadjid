@@ -78,11 +78,11 @@ where
 /// associated with this trait, it is purely for strong type checking.
 pub trait IterationLayoutTag: Sized {}
 
-/// This indicates that the outermost index is the row, and the innermost index is the column. The
+/// This indicates that the outer index is the row, and the inner index is the column. The
 /// column index will vary the fastest. The iterator will yield triples of `(row, column, edge_type)`.
 pub struct RowMajorOrder;
 
-/// This indicates that the outermost index is the column, and the innermost index is the row. The
+/// This indicates that the outer index is the column, and the inner index is the row. The
 /// row index will vary the fastest. The iterator will yield triples of `(column, row, edge_type)`.
 pub struct ColumnMajorOrder;
 
