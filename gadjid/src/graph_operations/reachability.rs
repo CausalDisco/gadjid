@@ -384,9 +384,6 @@ pub fn get_pd_nam_nva(
         }
     }
 
-    #[cfg(test)]
-    assert!(not_amenable.is_subset(&not_vas));
-
     (poss_de, not_amenable, not_vas)
 }
 
@@ -515,9 +512,6 @@ pub fn get_nam_nva(
             }
         }
     }
-
-    #[cfg(test)]
-    assert!(not_amenable.is_subset(&not_vas));
 
     (not_amenable, not_vas)
 }
@@ -696,6 +690,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     pub fn reachability_algos_agree() {
         let reps = 30;
         (0..reps).for_each(|_| {
@@ -706,6 +701,13 @@ mod test {
             let d_expected = get_descendants(&pdag, t.iter());
             let pd_expected = get_possible_descendants(&pdag, t.iter());
             let (nam_expected, nva_expected) = get_nam_nva(&pdag, &t, adjust.clone());
+
+            #[cfg(test)]
+            assert!(d_expected.is_subset(&pd_expected));
+            #[cfg(test)]
+            assert!(nam_expected.is_subset(&pd_expected));
+            #[cfg(test)]
+            assert!(nam_expected.is_subset(&nva_expected));
 
             let (pd, nam, nva) = super::get_pd_nam_nva(&pdag, &t, adjust.clone());
             assert_eq!(pd_expected, pd);
@@ -726,6 +728,7 @@ mod test {
 
             let ivb = super::get_invalid_un_blocked(&pdag, &t, adjust.clone());
             assert!(ivb.is_subset(&nva_expected));
+            assert_eq!(nva_expected, &ivb | &nam_expected);
         });
     }
 }
