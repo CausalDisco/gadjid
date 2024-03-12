@@ -26,15 +26,8 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
         .into_par_iter()
         .map(|treatment| {
             // --- this function differs from ancestor_aid.rs only in the imports and from here
-            let nam_in_guess = if matches!(
-                guess.pdag_type,
-                crate::partially_directed_acyclic_graph::Structure::CPDAG
-            ) {
-                get_nam(guess, &[treatment])
-            } else {
-                FxHashSet::<usize>::default()
-            };
 
+            // parent adjustment
             let adjustment_set = FxHashSet::from_iter(guess.parents_of(treatment).to_vec());
 
             // in line with the original SID, claim all NonParents may be effects
@@ -43,6 +36,14 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             //  for the additional non-effect nodes in NonParents\NonDescendants)
             let claim_possible_effect =
                 FxHashSet::from_iter((0..truth.n_nodes).filter(|v| !adjustment_set.contains(v)));
+            let nam_in_guess = if matches!(
+                guess.pdag_type,
+                crate::partially_directed_acyclic_graph::Structure::CPDAG
+            ) {
+                get_nam(guess, &[treatment])
+            } else {
+                FxHashSet::<usize>::default()
+            };
             // --- to here
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
@@ -66,6 +67,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     let y_nam_in_guess = nam_in_guess.contains(&y);
                     let y_nam_in_true = nam_in_true.contains(&y);
 
+                    #[allow(clippy::if_same_then_else)]
                     // if they disagree on amenability:
                     if y_nam_in_guess != y_nam_in_true {
                         mistakes += 1;

@@ -32,7 +32,17 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
         .map(|treatment| {
             // --- this function differs from parent_aid.rs only in the imports and from here
 
-            // claim that all possible descendants could could be affected by the treatment
+            // ancestor adjustment
+            let ruletable = crate::graph_operations::ruletables::ancestors::Ancestors {};
+            let adjustment_set = gensearch(
+                // gensearch yield_starting_vertices 'false' because Ancestors(T)\T is the adjustment set
+                guess,
+                ruletable,
+                [treatment].iter(),
+                false,
+            );
+
+            // claim that all possible descendants could be affected by the treatment
             let (claim_possible_effect, nam_in_guess) = if matches!(
                 guess.pdag_type,
                 crate::partially_directed_acyclic_graph::Structure::CPDAG
@@ -44,15 +54,6 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     FxHashSet::<usize>::default(),
                 )
             };
-
-            let ruletable = crate::graph_operations::ruletables::ancestors::Ancestors {};
-            let adjustment_set = gensearch(
-                // gensearch yield_starting_vertices 'false' because Ancestors(T)\T is the adjustment set
-                guess,
-                ruletable,
-                [treatment].iter(),
-                false,
-            );
             // --- to here
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
@@ -76,6 +77,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     let y_nam_in_guess = nam_in_guess.contains(&y);
                     let y_nam_in_true = nam_in_true.contains(&y);
 
+                    #[allow(clippy::if_same_then_else)]
                     // if they disagree on amenability:
                     if y_nam_in_guess != y_nam_in_true {
                         mistakes += 1;
