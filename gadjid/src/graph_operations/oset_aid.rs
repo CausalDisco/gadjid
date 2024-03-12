@@ -11,7 +11,7 @@ use crate::{
     PDAG,
 };
 
-/// This oset function takes in a precomputed t_descentants set.
+/// This oset function takes in a precomputed t_descendants set.
 /// Returns the optimal adjustment set of the provided treatments.
 pub fn optimal_adjustment_set(
     dag: &PDAG,
@@ -42,7 +42,6 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
         .into_par_iter()
         .map(|treatment| {
             // precomputed once for each T because we use it for the optimal adjustment set.
-
             let (t_desc_in_guess, claim_possible_effect, nam_in_guess) =
                 get_d_pd_nam(guess, &[treatment]);
 

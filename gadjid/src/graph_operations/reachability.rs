@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-//! Holds utility functions for the AID algorithm.
+//! Walk-status-aware reachability algorithms for calculating the AID efficiently.
 
 use rustc_hash::FxHashSet;
 
@@ -8,13 +8,13 @@ use crate::{partially_directed_acyclic_graph::Edge, PDAG};
 #[allow(non_camel_case_types)]
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 enum WalkStatus {
-    /// Possible Descendant / Partially Directed, Amenable, and Open Walk
+    /// Possible Descendant / Partially Directed, Amenable (starts T→), and Open Walk
     PD_OPEN_AM,
-    /// Possible Descendant / Partially Directed, Amenable, and Blocked Walk
+    /// Possible Descendant / Partially Directed, Amenable (starts T→), and Blocked Walk
     PD_BLOCK_AM,
-    /// Possible Descendant / Partially Directed, Not Amenable, and Open Walk
+    /// Possible Descendant / Partially Directed, Not Amenable (starts T—), and Open Walk
     PD_OPEN_NAM,
-    /// Possible Descendant / Partially Directed, Not Amenable, and Blocked Walk
+    /// Possible Descendant / Partially Directed, Not Amenable (starts T–), and Blocked Walk
     PD_BLOCK_NAM,
     /// Non-Causal walk
     NON_CAUSAL,
@@ -31,7 +31,7 @@ enum WalkStatus {
 /// Returns tuple of:<br>
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
-/// This includes all NAM, so NAM is a subset NVA.
+///   This includes all NAM, so NAM is a subset NVA.
 pub fn get_nam_nva(
     graph: &PDAG,
     t: &[usize],
@@ -41,9 +41,7 @@ pub fn get_nam_nva(
     let mut not_vas = z.clone();
 
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
-    let mut to_visit_stack = Vec::<(Edge, usize, WalkStatus)>::new();
-    t.iter()
-        .for_each(|v| to_visit_stack.push((Edge::Init, *v, WalkStatus::Init)));
+    let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     let get_next_steps = |arrived_by: Edge, v: usize, node_is_adjustment: bool| {
         let mut next = Vec::<(Edge, usize, bool)>::new();
@@ -156,20 +154,18 @@ pub fn get_nam_nva(
 /// - Set PD of possible descendants of T in G
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
-/// This includes all NAM, so NAM is a subset NVA.
+///   This includes all NAM, so NAM is a subset NVA.
 pub fn get_pd_nam_nva(
     graph: &PDAG,
     t: &[usize],
     z: FxHashSet<usize>,
 ) -> (FxHashSet<usize>, FxHashSet<usize>, FxHashSet<usize>) {
+    let mut poss_de = FxHashSet::from_iter(t.iter().copied());
     let mut not_amenable = FxHashSet::<usize>::default();
     let mut not_vas = z.clone();
-    let mut poss_de = FxHashSet::from_iter(t.iter().copied());
 
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
-    let mut to_visit_stack = Vec::<(Edge, usize, WalkStatus)>::new();
-    t.iter()
-        .for_each(|v| to_visit_stack.push((Edge::Init, *v, WalkStatus::Init)));
+    let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     let get_next_steps = |arrived_by: Edge, v: usize, node_is_adjustment: bool| {
         let mut next = Vec::<(Edge, usize, bool)>::new();
@@ -281,7 +277,8 @@ pub fn get_pd_nam_nva(
     (poss_de, not_amenable, not_vas)
 }
 
-/// Checks amenability of some DAG/CPDAG for a given set T of treatments and all response variables
+/// Checks amenability of a (CP)DAG relative to (T, Y) for a given set T of treatment
+/// nodes and all possible Y.
 ///
 /// Follows Algorithm 5 in https://doi.org/10.48550/arXiv.2402.08616
 ///
@@ -292,21 +289,20 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum Alg5WalkStatus {
-        /// Possible Descendant, Amenable
+        /// Possible Descendant / Partially Directed, Amenable (starts T→)
         POSS_DESC_AM,
-        /// Possible Descendant, Not Amenable
+        /// Possible Descendant / Partially Directed, Not Amenable (starts T—)
         POSS_DESC_NAM,
         /// Initial status
         Init,
     }
 
-    let mut not_amenable = FxHashSet::<usize>::default();
     let mut poss_de = FxHashSet::from_iter(t.iter().copied());
+    let mut not_amenable = FxHashSet::<usize>::default();
 
     let mut visited = FxHashSet::<(Edge, usize, Alg5WalkStatus)>::default();
-    let mut to_visit_stack = Vec::<(Edge, usize, Alg5WalkStatus)>::new();
-    t.iter()
-        .for_each(|v| to_visit_stack.push((Edge::Init, *v, Alg5WalkStatus::Init)));
+    let mut to_visit_stack =
+        Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, Alg5WalkStatus::Init)));
 
     let get_next_steps = |v: usize| {
         let mut next = Vec::<(Edge, usize)>::new();
@@ -335,7 +331,7 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
                 not_amenable.insert(node);
                 poss_de.insert(node);
             }
-            // any AM walk
+            // any other PD walk
             Alg5WalkStatus::POSS_DESC_AM => {
                 poss_de.insert(node);
             }
@@ -366,7 +362,8 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
     (poss_de, not_amenable)
 }
 
-/// Checks amenability of some DAG/CPDAG for a given set T of treatments and all response variables
+/// Checks amenability of a (CP)DAG relative to (T, Y) for a given set T of treatment
+/// nodes and all possible Y.
 ///
 /// Follows Algorithm 6 in https://doi.org/10.48550/arXiv.2402.08616
 ///
@@ -382,24 +379,23 @@ pub fn get_d_pd_nam(
     #[allow(clippy::upper_case_acronyms)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum Alg6WalkStatus {
-        /// Descendant, always Amenable
+        /// Descendant / Directed (always amenable)
         DESC,
-        /// Possible Descendant, Amenable
+        /// Possible Descendant / Partially Directed, Amenable (starts T→)
         POSS_DESC_AM,
-        /// Possible Descendant, Not Amenable
+        /// Possible Descendant / Partially Directed, Not Amenable (starts T—)
         POSS_DESC_NAM,
         /// Initial status
         Init,
     }
 
-    let mut not_amenable = FxHashSet::<usize>::default();
-    let mut poss_desc = FxHashSet::from_iter(t.iter().copied());
     let mut desc = FxHashSet::from_iter(t.iter().copied());
+    let mut poss_desc = desc.clone();
+    let mut not_amenable = FxHashSet::<usize>::default();
 
     let mut visited = FxHashSet::<(Edge, usize, Alg6WalkStatus)>::default();
-    let mut to_visit_stack = Vec::<(Edge, usize, Alg6WalkStatus)>::new();
-    t.iter()
-        .for_each(|v| to_visit_stack.push((Edge::Init, *v, Alg6WalkStatus::Init)));
+    let mut to_visit_stack =
+        Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, Alg6WalkStatus::Init)));
 
     let get_next_steps = |v: usize| {
         let mut next = Vec::<(Edge, usize)>::new();
@@ -489,10 +485,10 @@ pub fn get_invalid_un_blocked(graph: &PDAG, t: &[usize], z: FxHashSet<usize>) ->
     }
 
     let mut ivb = z.clone();
+
     let mut visited = FxHashSet::<(Edge, usize, Alg7WalkStatus)>::default();
-    let mut to_visit_stack = Vec::<(Edge, usize, Alg7WalkStatus)>::new();
-    t.iter()
-        .for_each(|v| to_visit_stack.push((Edge::Init, *v, Alg7WalkStatus::Init)));
+    let mut to_visit_stack =
+        Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, Alg7WalkStatus::Init)));
 
     let get_next_steps = |arrived_by: Edge, v: usize, node_is_adjustment: bool| {
         let mut next = Vec::<(Edge, usize, bool)>::new();
@@ -582,18 +578,17 @@ pub fn get_invalid_un_blocked(graph: &PDAG, t: &[usize], z: FxHashSet<usize>) ->
     ivb
 }
 
-/// Check amenability of a CPDAG relative to (T, Y) for a given set T of treatment
+/// Checks amenability of a CPDAG relative to (T, Y) for a given set T of treatment
 /// nodes and all possible Y.
 ///
 /// Returns set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 ///
 /// Follows Algorithm 2 in https://doi.org/10.48550/arXiv.2402.08616
 pub fn get_nam(cpdag: &PDAG, t: &[usize]) -> FxHashSet<usize> {
-    let mut to_visit_stack: Vec<(Edge, usize)> = Vec::new();
-    t.iter().for_each(|v| to_visit_stack.push((Edge::Init, *v)));
+    let mut not_amenable = FxHashSet::<usize>::default();
 
     let mut visited = FxHashSet::<usize>::default();
-    let mut not_amenable = FxHashSet::<usize>::default();
+    let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v)));
 
     while let Some((arrived_by, node)) = to_visit_stack.pop() {
         visited.insert(node);
