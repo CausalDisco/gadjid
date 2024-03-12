@@ -140,6 +140,7 @@ pub fn get_nam_nva(
         }
     }
 
+    #[cfg(test)]
     assert!(not_amenable.is_subset(&not_vas));
 
     (not_amenable, not_vas)
@@ -272,6 +273,7 @@ pub fn get_pd_nam_nva(
         }
     }
 
+    #[cfg(test)]
     assert!(not_amenable.is_subset(&not_vas));
 
     (poss_de, not_amenable, not_vas)
