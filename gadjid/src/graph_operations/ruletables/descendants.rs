@@ -36,7 +36,7 @@ impl RuleTable for Descendants {
 }
 
 /// Gets all descendants of a set of nodes. Will also return the starting nodes.
-pub fn descendants<'a>(
+pub fn get_descendants<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
 ) -> FxHashSet<usize> {
@@ -52,7 +52,7 @@ mod test {
 
     use crate::PDAG;
 
-    use super::descendants;
+    use super::get_descendants;
 
     #[test]
     fn descendants_search() {
@@ -66,19 +66,19 @@ mod test {
         let dag = PDAG::from_vecvec(v_dag);
 
         let expected = HashSet::from([1, 2]);
-        let result = descendants(&dag, [2, 1].iter());
+        let result = get_descendants(&dag, [2, 1].iter());
         assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([2]);
-        let result = descendants(&dag, [2].iter());
+        let result = get_descendants(&dag, [2].iter());
         assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([1, 2]);
-        let result = descendants(&dag, [1].iter());
+        let result = get_descendants(&dag, [1].iter());
         assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([0, 1, 2]);
-        let result = descendants(&dag, [0].iter());
+        let result = get_descendants(&dag, [0].iter());
         assert_eq!(expected, HashSet::from_iter(result));
 
         // 0 -> 1 -> 2 ----> 3
@@ -96,19 +96,19 @@ mod test {
         let dag = PDAG::from_vecvec(v_dag);
 
         let expected = HashSet::from([2, 3]);
-        let result = descendants(&dag, [2].iter());
+        let result = get_descendants(&dag, [2].iter());
         assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([0, 1, 2, 3]);
-        let result = descendants(&dag, [0, 1].iter());
+        let result = get_descendants(&dag, [0, 1].iter());
         assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([2, 3, 4]);
-        let result = descendants(&dag, [4].iter());
+        let result = get_descendants(&dag, [4].iter());
         assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([3]);
-        let result = descendants(&dag, [3].iter());
+        let result = get_descendants(&dag, [3].iter());
         assert_eq!(expected, HashSet::from_iter(result));
     }
 }

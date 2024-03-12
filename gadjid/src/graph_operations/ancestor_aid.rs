@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Implements the Ancestor Adjustment Intervention Distance (Ancestor-AID) algorithm
 
-use descendants::descendants;
+use descendants::get_descendants;
 use rayon::prelude::*;
 use rustc_hash::FxHashSet;
 
@@ -40,7 +40,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                 get_pd_nam(guess, &[treatment])
             } else {
                 (
-                    descendants(guess, [treatment].iter()),
+                    get_descendants(guess, [treatment].iter()),
                     FxHashSet::<usize>::default(),
                 )
             };

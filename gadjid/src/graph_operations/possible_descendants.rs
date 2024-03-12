@@ -8,7 +8,7 @@ use crate::PDAG;
 #[allow(unused)]
 /// Gets all the possible descendants (reachable via combinations of (-- and ->) of a set of nodes.
 /// The input nodes are also included in the output.
-pub(crate) fn possible_descendants<'a>(
+pub(crate) fn get_possible_descendants<'a>(
     pdag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
 ) -> FxHashSet<usize> {
@@ -50,7 +50,7 @@ mod test {
             vec![0, 0, 0, 0],
         ];
         let cpdag = PDAG::from_vecvec(cpdag);
-        let result = super::possible_descendants(&cpdag, [0].iter());
+        let result = super::get_possible_descendants(&cpdag, [0].iter());
         assert_eq!(result, FxHashSet::from_iter(vec![0, 1, 2, 3]));
 
         // 5 -> 4 -- 0 -> 1 -- 2
@@ -65,7 +65,7 @@ mod test {
             vec![0, 0, 0, 0, 1, 0],
         ];
         let cpdag = PDAG::from_vecvec(cpdag);
-        let result = super::possible_descendants(&cpdag, [4].iter());
+        let result = super::get_possible_descendants(&cpdag, [4].iter());
         assert_eq!(result, FxHashSet::from_iter(vec![0, 1, 2, 3, 4]));
     }
 }

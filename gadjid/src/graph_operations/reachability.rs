@@ -648,8 +648,8 @@ mod test {
     use rustc_hash::FxHashSet;
 
     use crate::graph_operations::{
-        ancestor_aid, descendants, gensearch, get_nam_nva, oset_aid, parent_aid,
-        possible_descendants, ruletables,
+        ancestor_aid, get_descendants, gensearch, get_nam_nva, oset_aid, parent_aid,
+        get_possible_descendants, ruletables,
     };
     use crate::PDAG;
 
@@ -703,8 +703,8 @@ mod test {
             let t = [0];
             let adjust = gensearch(&pdag, ruletables::Parents {}, t.iter(), false);
 
-            let d_expected = descendants(&pdag, t.iter());
-            let pd_expected = possible_descendants(&pdag, t.iter());
+            let d_expected = get_descendants(&pdag, t.iter());
+            let pd_expected = get_possible_descendants(&pdag, t.iter());
             let (nam_expected, nva_expected) = get_nam_nva(&pdag, &t, adjust.clone());
 
             let (pd, nam, nva) = super::get_pd_nam_nva(&pdag, &t, adjust.clone());

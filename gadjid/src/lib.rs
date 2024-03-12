@@ -22,7 +22,7 @@ mod test {
     use crate::{
         graph_operations::{
             ancestor_aid, gensearch, get_nam, get_nam_nva, optimal_adjustment_set, oset_aid,
-            parent_aid, possible_descendants, proper_ancestors, ruletables, shd,
+            parent_aid, get_possible_descendants, get_proper_ancestors, ruletables, shd,
         },
         PDAG,
     };
@@ -156,12 +156,12 @@ mod test {
             t: t.clone(),
             y,
             z: random_z.clone(),
-            possible_descendants_of_t_in_g_guess: hashset_to_sorted_vec(possible_descendants(
+            possible_descendants_of_t_in_g_guess: hashset_to_sorted_vec(get_possible_descendants(
                 &g_guess,
                 t.iter(),
             )),
             not_amenable_in_g_guess_wrt_t: hashset_to_sorted_vec(get_nam(&g_guess, &t)),
-            proper_ancestors_of_y_in_g_guess_wrt_t: hashset_to_sorted_vec(proper_ancestors(
+            proper_ancestors_of_y_in_g_guess_wrt_t: hashset_to_sorted_vec(get_proper_ancestors(
                 &g_guess,
                 t.iter(),
                 [y].iter(),

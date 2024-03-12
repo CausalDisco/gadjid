@@ -36,8 +36,8 @@ impl RuleTable for Ancestors {
 }
 
 /// Gets all ancestors of a set of nodes. Will also return the starting nodes.
-#[allow(dead_code)]
-pub fn ancestors<'a>(
+#[allow(unused)]
+pub fn get_ancestors<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
 ) -> FxHashSet<usize> {
@@ -52,7 +52,7 @@ mod test {
 
     use crate::PDAG;
 
-    use super::ancestors;
+    use super::get_ancestors;
 
     #[test]
     fn ancestors_search() {
@@ -66,19 +66,19 @@ mod test {
         let dag = PDAG::from_vecvec(v_dag);
 
         let expected = HashSet::from([0, 1, 2]);
-        let result = ancestors(&dag, [1, 2].iter());
+        let result = get_ancestors(&dag, [1, 2].iter());
         assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([0, 1, 2]);
-        let result = ancestors(&dag, [2].iter());
+        let result = get_ancestors(&dag, [2].iter());
         assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([0, 1]);
-        let result = ancestors(&dag, [1].iter());
+        let result = get_ancestors(&dag, [1].iter());
         assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([0]);
-        let result = ancestors(&dag, [0].iter());
+        let result = get_ancestors(&dag, [0].iter());
         assert_eq!(expected, HashSet::from_iter(result));
 
         // 0 -> 1 -> 2 ----> 3
@@ -96,19 +96,19 @@ mod test {
         let dag = PDAG::from_vecvec(v_dag);
 
         let expected = HashSet::from([0, 1, 2, 4]);
-        let result = ancestors(&dag, [2].iter());
+        let result = get_ancestors(&dag, [2].iter());
         assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([0, 1]);
-        let result = ancestors(&dag, [0, 1].iter());
+        let result = get_ancestors(&dag, [0, 1].iter());
         assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([4]);
-        let result = ancestors(&dag, [4].iter());
+        let result = get_ancestors(&dag, [4].iter());
         assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([0, 1, 2, 3, 4]);
-        let result = ancestors(&dag, [3].iter());
+        let result = get_ancestors(&dag, [3].iter());
         assert_eq!(expected, HashSet::from_iter(result));
     }
 }

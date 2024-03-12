@@ -46,7 +46,7 @@ impl RuleTable for ProperAncestors {
 }
 
 /// Gets all proper ancestors of responses given them and the treatments
-pub fn proper_ancestors<'a>(
+pub fn get_proper_ancestors<'a>(
     dag: &PDAG,
     treatments: impl Iterator<Item = &'a usize>,
     responses: impl Iterator<Item = &'a usize>,
@@ -65,7 +65,7 @@ mod test {
 
     use crate::PDAG;
 
-    use super::proper_ancestors;
+    use super::get_proper_ancestors;
 
     #[test]
     fn proper_ancestors_search() {
@@ -78,15 +78,15 @@ mod test {
 
         let dag = PDAG::from_vecvec(v_dag);
 
-        let result = proper_ancestors(&dag, [].iter(), [2].iter());
+        let result = get_proper_ancestors(&dag, [].iter(), [2].iter());
         let expected = HashSet::from([0, 1, 2]);
         assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = proper_ancestors(&dag, [1].iter(), [2].iter());
+        let result = get_proper_ancestors(&dag, [1].iter(), [2].iter());
         let expected = HashSet::from([2]);
         assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = proper_ancestors(&dag, [0].iter(), [2].iter());
+        let result = get_proper_ancestors(&dag, [0].iter(), [2].iter());
         let expected = HashSet::from([1, 2]);
         assert_eq!(expected, HashSet::from_iter(result));
 
@@ -100,11 +100,11 @@ mod test {
 
         let dag = PDAG::from_vecvec(v_dag);
 
-        let result = proper_ancestors(&dag, [].iter(), [3].iter());
+        let result = get_proper_ancestors(&dag, [].iter(), [3].iter());
         let expected = HashSet::from([0, 1, 2, 3]);
         assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = proper_ancestors(&dag, [1].iter(), [3].iter());
+        let result = get_proper_ancestors(&dag, [1].iter(), [3].iter());
         let expected = HashSet::from([0, 2, 3]);
         assert_eq!(expected, HashSet::from_iter(result));
 
@@ -118,15 +118,15 @@ mod test {
         ];
         let dag = PDAG::from_vecvec(v_dag);
 
-        let result = proper_ancestors(&dag, [].iter(), [4].iter());
+        let result = get_proper_ancestors(&dag, [].iter(), [4].iter());
         let expected = HashSet::from([0, 1, 2, 3, 4]);
         assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = proper_ancestors(&dag, [2].iter(), [4].iter());
+        let result = get_proper_ancestors(&dag, [2].iter(), [4].iter());
         let expected = HashSet::from([0, 3, 4]);
         assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = proper_ancestors(&dag, [1].iter(), [4].iter());
+        let result = get_proper_ancestors(&dag, [1].iter(), [4].iter());
         let expected = HashSet::from([0, 2, 3, 4]);
         assert_eq!(expected, HashSet::from_iter(result));
     }

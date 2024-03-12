@@ -26,7 +26,7 @@ impl RuleTable for Parents {
 }
 
 /// Gets the union of parents of each node. This is more efficient than calling `parents_of` for each node and then joining the results.
-pub fn parents<'a>(
+pub fn get_parents<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
 ) -> FxHashSet<usize> {
@@ -41,10 +41,10 @@ mod test {
 
     use crate::PDAG;
 
-    use super::parents;
+    use super::get_parents;
 
     #[test]
-    fn get_parents() {
+    fn parents() {
         // 0 -> 1 -> 2
         let v_dag = vec![
             vec![0, 1, 0], //
@@ -54,19 +54,19 @@ mod test {
 
         let dag = PDAG::from_vecvec(v_dag);
 
-        let result = parents(&dag, [0].iter());
+        let result = get_parents(&dag, [0].iter());
         let expected = HashSet::from([]);
         assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = parents(&dag, [1].iter());
+        let result = get_parents(&dag, [1].iter());
         let expected = HashSet::from([0]);
         assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = parents(&dag, [0, 2].iter());
+        let result = get_parents(&dag, [0, 2].iter());
         let expected = HashSet::from([1]);
         assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = parents(&dag, [2].iter());
+        let result = get_parents(&dag, [2].iter());
         let expected = HashSet::from([1]);
         assert_eq!(expected, HashSet::from_iter(result));
 
@@ -84,15 +84,15 @@ mod test {
 
         let dag = PDAG::from_vecvec(v_dag);
 
-        let result = parents(&dag, [4].iter());
+        let result = get_parents(&dag, [4].iter());
         let expected = HashSet::from([]);
         assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = parents(&dag, [2].iter());
+        let result = get_parents(&dag, [2].iter());
         let expected = HashSet::from([1, 4]);
         assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = parents(&dag, [1, 3].iter());
+        let result = get_parents(&dag, [1, 3].iter());
         let expected = HashSet::from([0, 2, 4]);
         assert_eq!(expected, HashSet::from_iter(result));
     }

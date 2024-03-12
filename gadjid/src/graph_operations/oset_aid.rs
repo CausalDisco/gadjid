@@ -6,7 +6,7 @@ use rustc_hash::FxHashSet;
 
 use crate::{
     graph_operations::{
-        get_d_pd_nam, get_invalid_un_blocked, get_pd_nam, parents, proper_ancestors,
+        get_d_pd_nam, get_invalid_un_blocked, get_pd_nam, get_parents, get_proper_ancestors,
     },
     PDAG,
 };
@@ -19,10 +19,10 @@ pub fn optimal_adjustment_set(
     responses: &[usize],
     t_descendants: &FxHashSet<usize>,
 ) -> FxHashSet<usize> {
-    let response_ancestors = proper_ancestors(dag, treatments.iter(), responses.iter());
+    let response_ancestors = get_proper_ancestors(dag, treatments.iter(), responses.iter());
     let response_and_anc_hash = FxHashSet::from_iter(response_ancestors);
     let causal_nodes = response_and_anc_hash.intersection(t_descendants);
-    let causal_nodes_parents = parents(dag, causal_nodes);
+    let causal_nodes_parents = get_parents(dag, causal_nodes);
     FxHashSet::from_iter(causal_nodes_parents.difference(t_descendants).copied())
 }
 
@@ -137,7 +137,7 @@ mod test {
         treatments: &[usize],
         responses: &[usize],
     ) -> FxHashSet<usize> {
-        let t_descendants = crate::graph_operations::descendants(dag, treatments.iter());
+        let t_descendants = crate::graph_operations::get_descendants(dag, treatments.iter());
         super::optimal_adjustment_set(dag, treatments, responses, &t_descendants)
     }
 
