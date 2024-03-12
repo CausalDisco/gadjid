@@ -93,8 +93,6 @@ structural intervention distance for directed acyclic graphs as a special case. 
 
 * Feedback is very welcome! Just [open an issue](https://github.com/CausalDisco/gadjid/issues/new/choose) on here.
 * We are working on making 𝚐𝚊𝚍𝚓𝚒𝚍 available also for R.
-* 𝚐𝚊𝚍𝚓𝚒𝚍 is extensively tested (tests at bottom of each `/gadjid/src/**.rs` file) and validated against SID for DAG inputs.
-We are working on further extending and future-proofing the test suite.
 * The code is well documented. We plan on making a user and developer documentation available. 📃
 
 
@@ -149,6 +147,9 @@ __Maximum graph size feasible within 1 minute__
 | Oset-AID     |    546 |   250 |
 | SID in R     |    255 |   239 |
 
+Results obtained with 𝚐𝚊𝚍𝚓𝚒𝚍 v0.0.1 using the Python interface
+and the SID R package v1.1 from CRAN.
+
 __Average runtime__
 | Method       | x-sparse ($p=1000$) | sparse ($p=256$) | dense ($p=239$) |
 |--------------|--------------------:|-----------------:|----------------:|
@@ -157,23 +158,31 @@ __Average runtime__
 | Oset-AID     |              3.2 ms |          4.69 s  |         47.3 s  |
 | SID in R     |             ~1–2 h  |           ~60 s  |          ~60 s  |
 
+Results obtained with 𝚐𝚊𝚍𝚓𝚒𝚍 v0.0.1 using the Python interface
+and the SID R package v1.1 from CRAN.
+
 
 ## Project Structure Overview
 
 * [.github/workflows/](./.github/workflows) – github actions for linting/testing/packaging
 * [__gadjid/__](./gadjid/) – Rust core package, which implements
     a graph memory layout purposefully designed for fast memory access in reachability algorithms,
-    a new reachability algorithm to check the validity of an adjustment set,
+    new reachability algorithms to check the validity of an adjustment set,
     and all DAG/CPDAG distances discussed in the accompanying article
+    * [gadjid/src/snapshots](./gadjid/src/snapshots) –
+      𝚐𝚊𝚍𝚓𝚒𝚍 is extensively tested (tests at bottom of each `/gadjid/src/**.rs` file)
+      and validated against the R implementation of the SID on pairs of DAG inputs (cf. bottom of `parent_aid.rs`);
+      this folder holds [insta snapshots](https://insta.rs/) for testing graph and reachability algorithms and all distances against
+      (cf. [gadjid/src/lib.rs](./gadjid/src/lib.rs))
 * [gadjid_python/](./gadjid_python/) –
     python wrapper that accepts numpy and scipy int8 matrices as graph adjacency matrices
     * [gadjid_python/tests/](./gadjid_python/tests/) – runs tests of and via the python 𝚐𝚊𝚍𝚓𝚒𝚍 wrapper:
         1. tests the loading of numpy arrays and views as well as scipy sparse csr/csc matrices
-        2. tests `parent_aid` against the R implementation of the SID on pairs of testgraphs;
+        2. tests `parent_aid` against the R implementation of the SID on pairs of DAG inputs;
         since in the special case of DAG inputs the Parent-AID coincides with the SID,
-        this end-to-end tests the check for validity of adjustment sets implemented via a new reachability algorithm
+        this end-to-end tests the check for validity of adjustment sets implemented via new reachability algorithms
 * [gadjid_r/](./gadjid_r/) – placeholder for the R wrapper to come!
-* [testgraphs/](./testgraphs/) – testgraphs in .mtx files (Matrix Market Exchange Format), a csv file with the SHD/SID between the testgraphs to test against, checksums
+* [testgraphs/](./testgraphs/) – testgraphs in .mtx files (Matrix Market Exchange Format), csv files with the SHD/SID between the testgraphs to test against, checksums
 
 
 ## LICENSE
