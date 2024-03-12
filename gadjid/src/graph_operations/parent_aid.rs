@@ -43,7 +43,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             //  that is, the validity of the adjustment set is also checked
             //  for the additional non-effect nodes in NonParents\NonDescendants)
             let claim_possible_effect = FxHashSet::from_iter(
-                (0..truth.n_nodes).filter(|v| !guess.parents_of(treatment).contains(v)),
+                (0..truth.n_nodes).filter(|v| !adjustment_set.contains(v)),
             );
             // --- to here
 
@@ -71,13 +71,12 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     // if they disagree on amenability:
                     if y_am_in_guess != y_am_in_true {
                         mistakes += 1;
-                        continue;
                     }
 
                     // if we reach this point, y has a VAS in guess
                     // now, if the adjustment set is not valid in truth
                     // (either because the pair (t,y) is not amenable or because the VAS is not valid)
-                    if y_am_in_guess && nva_in_true.contains(&y) {
+                    else if y_am_in_guess && nva_in_true.contains(&y) {
                         // we count a mistake
                         mistakes += 1;
                     }
