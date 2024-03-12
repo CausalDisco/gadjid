@@ -648,8 +648,8 @@ mod test {
     use rustc_hash::FxHashSet;
 
     use crate::graph_operations::{
-        ancestor_aid, get_descendants, gensearch, get_nam_nva, oset_aid, parent_aid,
-        get_possible_descendants, ruletables,
+        ancestor_aid, gensearch, get_descendants, get_nam_nva, get_possible_descendants, oset_aid,
+        parent_aid, ruletables,
     };
     use crate::PDAG;
 

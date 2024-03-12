@@ -6,7 +6,7 @@ use rustc_hash::FxHashSet;
 
 use crate::{
     graph_operations::{
-        get_d_pd_nam, get_invalid_un_blocked, get_pd_nam, get_parents, get_proper_ancestors,
+        get_d_pd_nam, get_invalid_un_blocked, get_parents, get_pd_nam, get_proper_ancestors,
     },
     PDAG,
 };

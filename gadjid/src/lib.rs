@@ -21,8 +21,8 @@ mod test {
 
     use crate::{
         graph_operations::{
-            ancestor_aid, gensearch, get_nam, get_nam_nva, optimal_adjustment_set, oset_aid,
-            parent_aid, get_possible_descendants, get_proper_ancestors, ruletables, shd,
+            ancestor_aid, gensearch, get_nam, get_nam_nva, get_possible_descendants,
+            get_proper_ancestors, optimal_adjustment_set, oset_aid, parent_aid, ruletables, shd,
         },
         PDAG,
     };
