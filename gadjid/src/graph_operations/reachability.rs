@@ -682,10 +682,10 @@ mod test {
             #[cfg(test)]
             assert!(nam_expected.is_subset(&nva_expected));
 
-            let (pd, nam, nva) = super::get_pd_nam_nva(&pdag, &t, adjust.clone());
+            let (d, pd, nam) = super::get_d_pd_nam(&pdag, &t);
+            assert_eq!(d_expected, d);
             assert_eq!(pd_expected, pd);
             assert_eq!(nam_expected, nam);
-            assert_eq!(nva_expected, nva);
 
             let (pd, nam) = super::get_pd_nam(&pdag, &t);
             assert_eq!(nam_expected, nam);
@@ -694,10 +694,10 @@ mod test {
             let nam = super::get_nam(&pdag, &t);
             assert_eq!(nam_expected, nam);
 
-            let (d, pd, nam) = super::get_d_pd_nam(&pdag, &t);
-            assert_eq!(d_expected, d);
+            let (pd, nam, nva) = super::get_pd_nam_nva(&pdag, &t, adjust.clone());
             assert_eq!(pd_expected, pd);
             assert_eq!(nam_expected, nam);
+            assert_eq!(nva_expected, nva);
 
             let ivb = super::get_invalid_un_blocked(&pdag, &t, adjust.clone());
             assert!(ivb.is_subset(&nva_expected));
