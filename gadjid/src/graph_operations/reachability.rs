@@ -149,8 +149,6 @@ pub fn get_nam_nva(
 /// Validate Z as adjustment set relative to (T, Y) for a given set T of treatment
 /// nodes and all possible Y in G.
 ///
-/// Follows Algorithm 4 in https://doi.org/10.48550/arXiv.2402.08616
-///
 /// Returns tuple of:<br>
 /// - Set PD of possible descendants of T in G
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
@@ -282,8 +280,6 @@ pub fn get_pd_nam_nva(
 /// Checks amenability of a (CP)DAG relative to (T, Y) for a given set T of treatment
 /// nodes and all possible Y.
 ///
-/// Follows Algorithm 5 in https://doi.org/10.48550/arXiv.2402.08616
-///
 /// Returns tuple of:<br>
 /// - Set PD of possible descendants of T in G
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
@@ -366,8 +362,6 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
 
 /// Checks amenability of a (CP)DAG relative to (T, Y) for a given set T of treatment
 /// nodes and all possible Y.
-///
-/// Follows Algorithm 6 in https://doi.org/10.48550/arXiv.2402.08616
 ///
 /// Returns tuple of:<br>
 /// - Set D of descendants of T in G
@@ -467,8 +461,6 @@ pub fn get_d_pd_nam(
 
 /// Validate Z as adjustment set relative to (T, Y) for a given set T of treatment
 /// nodes and all possible Y in G.
-///
-/// Follows Algorithm 7 in https://doi.org/10.48550/arXiv.2402.08616
 ///
 /// Returns tuple of:<br>
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
