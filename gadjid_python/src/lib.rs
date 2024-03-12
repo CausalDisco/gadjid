@@ -67,7 +67,7 @@ fn gadjid(_py: Python, m: &PyModule) -> PyResult<()> {
 const ROW_TO_COL: &str = "from row to col";
 const COL_TO_ROW: &str = "from col to row";
 
-fn edge_direction_semantics_is_row_to_col(edge_direction: &str) -> PyResult<bool> {
+fn edge_direction_is_row_to_col(edge_direction: &str) -> PyResult<bool> {
     match edge_direction {
         ROW_TO_COL => Ok(true),
         COL_TO_ROW => Ok(false),
@@ -83,9 +83,9 @@ fn edge_direction_semantics_is_row_to_col(edge_direction: &str) -> PyResult<bool
 pub fn ancestor_aid(
     g_true: &PyAny,
     g_guess: &PyAny,
-    edge_semantics: &str,
+    edge_direction: &str,
 ) -> PyResult<(f64, usize)> {
-    let row_to_col = edge_direction_semantics_is_row_to_col(edge_semantics)?;
+    let row_to_col = edge_direction_is_row_to_col(edge_direction)?;
     let graph_truth = graph_from_pyobject(g_true, row_to_col)?;
     let graph_guess = graph_from_pyobject(g_guess, row_to_col)?;
     let (normalized_distance, n_errors) = rust_ancestor_aid(&graph_truth, &graph_guess);
@@ -94,8 +94,8 @@ pub fn ancestor_aid(
 
 /// Optimal Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[pyfunction]
-pub fn oset_aid(g_true: &PyAny, g_guess: &PyAny, edge_semantics: &str) -> PyResult<(f64, usize)> {
-    let row_to_col = edge_direction_semantics_is_row_to_col(edge_semantics)?;
+pub fn oset_aid(g_true: &PyAny, g_guess: &PyAny, edge_direction: &str) -> PyResult<(f64, usize)> {
+    let row_to_col = edge_direction_is_row_to_col(edge_direction)?;
     let graph_truth = graph_from_pyobject(g_true, row_to_col)?;
     let graph_guess = graph_from_pyobject(g_guess, row_to_col)?;
     let (normalized_distance, n_errors) = rust_oset_aid(&graph_truth, &graph_guess);
@@ -107,9 +107,9 @@ pub fn oset_aid(g_true: &PyAny, g_guess: &PyAny, edge_semantics: &str) -> PyResu
 pub fn parent_aid(
     g_true: &PyAny,
     g_guess: &PyAny,
-    edge_semantics: &str,
+    edge_direction: &str,
 ) -> PyResult<(f64, usize)> {
-    let row_to_col = edge_direction_semantics_is_row_to_col(edge_semantics)?;
+    let row_to_col = edge_direction_is_row_to_col(edge_direction)?;
     let graph_truth = graph_from_pyobject(g_true, row_to_col)?;
     let graph_guess = graph_from_pyobject(g_guess, row_to_col)?;
     let (normalized_distance, n_errors) = rust_parent_aid(&graph_truth, &graph_guess);
@@ -118,8 +118,8 @@ pub fn parent_aid(
 
 /// Structural Hamming Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[pyfunction]
-pub fn shd(g_true: &PyAny, g_guess: &PyAny, edge_semantics: &str) -> PyResult<(f64, usize)> {
-    let row_to_col = edge_direction_semantics_is_row_to_col(edge_semantics)?;
+pub fn shd(g_true: &PyAny, g_guess: &PyAny, edge_direction: &str) -> PyResult<(f64, usize)> {
+    let row_to_col = edge_direction_is_row_to_col(edge_direction)?;
     let graph_truth = graph_from_pyobject(g_true, row_to_col)?;
     let graph_guess = graph_from_pyobject(g_guess, row_to_col)?;
     let (normalized_distance, n_errors) = rust_shd(&graph_truth, &graph_guess);
@@ -131,9 +131,9 @@ pub fn shd(g_true: &PyAny, g_guess: &PyAny, edge_semantics: &str) -> PyResult<(f
 pub fn sid(
     g_true: &PyAny,
     g_guess: &PyAny,
-    edge_semantics: &str,
+    edge_direction: &str,
 ) -> anyhow::Result<(f64, usize)> {
-    let row_to_col = edge_direction_semantics_is_row_to_col(edge_semantics)?;
+    let row_to_col = edge_direction_is_row_to_col(edge_direction)?;
     let dag_truth = graph_from_pyobject(g_true, row_to_col)?;
     let dag_guess = graph_from_pyobject(g_guess, row_to_col)?;
     let (normalized_distance, n_errors) = rust_sid(&dag_truth, &dag_guess)?;
