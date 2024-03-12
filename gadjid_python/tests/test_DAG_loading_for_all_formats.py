@@ -2,7 +2,7 @@
 import numpy as np
 import scipy
 
-import gadjid as aid
+import gadjid
 
 
 def make_dag(size, density, seed) -> np.ndarray:
@@ -46,7 +46,8 @@ def test_DAG_loading_for_all_formats():
 
         last_result = None
         for i, matrix in enumerate(matrices):
-            current_result = aid.shd(matrix, matrices[0])
+            current_result = gadjid.shd(
+                matrix, matrices[0], edge_direction="from row to col")
             assert (
                 last_result is None or last_result == current_result
             ), f"failed for {names[i]}"
