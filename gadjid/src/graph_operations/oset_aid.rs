@@ -74,7 +74,7 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                         let o_set_adjustment =
                             optimal_adjustment_set(guess, &[treatment], &[y], &t_desc_in_guess);
 
-                        // (because the VAS is not valid, by blocking too much or too)
+                        // (because the VAS is not valid, by blocking too much or too little)
                         if get_invalid_un_blocked(truth, &[treatment], o_set_adjustment)
                             .contains(&y)
                         {
