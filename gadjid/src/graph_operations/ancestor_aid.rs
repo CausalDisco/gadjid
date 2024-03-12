@@ -30,6 +30,8 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     let verifier_mistakes_found = (0..guess.n_nodes)
         .into_par_iter()
         .map(|treatment| {
+            
+            // --- this function differs from parent_aid.rs only in the imports and from here
             let (claim_possible_effect, nam_in_guess) = if matches!(
                 guess.pdag_type,
                 crate::partially_directed_acyclic_graph::Structure::CPDAG
@@ -42,7 +44,6 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                 )
             };
 
-            // --- this function differs from parent_aid.rs only in the imports and from here
             let ruletable = crate::graph_operations::ruletables::ancestors::Ancestors {};
             let adjustment_set = gensearch(
                 // gensearch yield_starting_vertices 'false' because Ancestors(T)\T is the adjustment set

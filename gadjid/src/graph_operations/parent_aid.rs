@@ -25,6 +25,8 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     let verifier_mistakes_found = (0..guess.n_nodes)
         .into_par_iter()
         .map(|treatment| {
+            
+            // --- this function differs from ancestor_aid.rs only in the imports and from here
             let nam_in_guess = if matches!(
                 guess.pdag_type,
                 crate::partially_directed_acyclic_graph::Structure::CPDAG
@@ -32,9 +34,8 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                 get_nam(guess, &[treatment])
             } else {
                 FxHashSet::<usize>::default()
-            };
+            }; 
 
-            // --- this function differs from ancestor_aid.rs only in the imports and from here
             let adjustment_set = FxHashSet::from_iter(guess.parents_of(treatment).to_vec());
 
             // in line with the original SID, claim all NonParents may be effects
