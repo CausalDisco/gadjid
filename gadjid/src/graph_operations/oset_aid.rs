@@ -6,7 +6,7 @@ use rustc_hash::FxHashSet;
 
 use crate::{
     graph_operations::{
-        get_d_pd_nam, get_invalid_unblocked, get_pd_nam, parents, proper_ancestors,
+        get_d_pd_nam, get_invalid_un_blocked, get_pd_nam, parents, proper_ancestors,
     },
     PDAG,
 };
@@ -78,7 +78,7 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                             optimal_adjustment_set(guess, &[treatment], &[y], &t_desc_in_guess);
 
                         // (because the VAS is not valid, by blocking too much or too)
-                        if get_invalid_unblocked(truth, &[treatment], o_set_adjustment).contains(&y)
+                        if get_invalid_un_blocked(truth, &[treatment], o_set_adjustment).contains(&y)
                         {
                             // we count a mistake
                             mistakes += 1;

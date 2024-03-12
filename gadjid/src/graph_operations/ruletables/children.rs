@@ -26,7 +26,7 @@ impl RuleTable for Children {
 }
 
 /// Gets the union of children of each node. This is more efficient than calling `children_of` for each node and then joining the results.
-#[allow(dead_code)]
+#[allow(unused)]
 pub fn children<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
