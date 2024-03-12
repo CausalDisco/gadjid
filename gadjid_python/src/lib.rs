@@ -51,8 +51,8 @@ use scipy_sparse_handler::try_from as try_from_sparse;
 ///     [0, 0, 0, 0, 0]
 /// ], dtype=np.int8)
 ///
-/// print(ancestor_aid(Gtrue, Gguess))
-/// print(shd(Gtrue, Gguess))
+/// print(ancestor_aid(Gtrue, Gguess, edge_direction="from row to col"))
+/// print(shd(Gtrue, Gguess, edge_direction="from row to col"))
 /// ```
 #[pymodule]
 fn gadjid(_py: Python, m: &PyModule) -> PyResult<()> {
