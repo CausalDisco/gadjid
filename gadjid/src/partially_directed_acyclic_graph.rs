@@ -11,8 +11,19 @@ use crate::{
     graph_loading::edgelist::{ColumnMajorOrder, Edgelist, RowMajorOrder},
 };
 
-/// If having traversed from some node `X` to a current `Y` along edge `e`, specifies the relation `e`
-/// has to `Y`. For example, in the case of `X -> Y`, we have `e` = `Incoming`.
+/// PDAG edge enum defined from a graph traversal perspective.
+///
+/// If traversing from some node `X` along edge `e` to a node of interest `Y` ,
+/// defines `e` as the direction it has to `Y`.
+///
+/// Examples:
+///
+/// When traversing from X to its child Y, `X -> Y`, we have `e` = `Incoming`.
+///
+/// It can be instructive to think of associating the edge and node of interest with
+/// a parenthesis, like `X (-> Y)`, making it clear that the edge is `Incoming`.
+///
+/// In the case of `X (<- Y)` <=> `(Y ->) X`, the edge would be `Outgoing`.
 ///
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Edge {
