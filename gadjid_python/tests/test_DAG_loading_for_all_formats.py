@@ -5,7 +5,8 @@ import scipy
 import gadjid as aid
 
 
-def make_dag(size, density) -> np.ndarray:
+def make_dag(size, density, seed) -> np.ndarray:
+    np.random.seed(seed)
     dense: np.ndarray = np.random.binomial(
         1, density, size=(size, size)).astype(np.int8)
     # fill lower triangle+diagonal with zeros
@@ -15,12 +16,12 @@ def make_dag(size, density) -> np.ndarray:
 
 
 def test_DAG_loading_for_all_formats():
-    exps = 10
-    for _exp in range(exps):
+    reps = 10
+    for rep in range(reps):
         size = 10
 
         # make random dag:
-        dag = make_dag(size + 1, 0.5)
+        dag = make_dag(size + 1, 0.5, seed=rep)
         dag_copy = dag[:size, :size].copy()
         dag_view = dag[:size, :size]
 
@@ -50,3 +51,6 @@ def test_DAG_loading_for_all_formats():
                 last_result is None or last_result == current_result
             ), f"failed for {names[i]}"
             last_result = current_result
+
+if __name__ == "__main__":
+    test_DAG_loading_for_all_formats()

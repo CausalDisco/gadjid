@@ -118,7 +118,6 @@ mod test {
         }
     }
 
-    
     #[test]
     #[ignore]
     fn random_inputs_no_crash() {
