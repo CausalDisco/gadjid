@@ -582,46 +582,64 @@ mod test {
     }
 
     #[test]
-    #[ignore]
-    pub fn reachability_algos_agree() {
+    pub fn reachability_algos_agree_on_random_pdag() {
         let reps = 30;
         let mut rng = rand_chacha::ChaChaRng::seed_from_u64(5);
         (0..reps).for_each(|_rep| {
             let pdag = PDAG::random_pdag(0.5, 100, &mut rng);
-            let t = [0];
-            let adjust = gensearch(&pdag, ruletables::Parents {}, t.iter(), false);
-
-            let d_expected = get_descendants(&pdag, t.iter());
-            let pd_expected = get_possible_descendants(&pdag, t.iter());
-            let (nam_expected, nva_expected) = get_nam_nva(&pdag, &t, &adjust);
-
-            #[cfg(test)]
-            assert!(d_expected.is_subset(&pd_expected));
-            #[cfg(test)]
-            assert!(nam_expected.is_subset(&pd_expected));
-            #[cfg(test)]
-            assert!(nam_expected.is_subset(&nva_expected));
-
-            let (d, pd, nam) = super::get_d_pd_nam(&pdag, &t);
-            assert_eq!(d_expected, d);
-            assert_eq!(pd_expected, pd);
-            assert_eq!(nam_expected, nam);
-
-            let (pd, nam) = super::get_pd_nam(&pdag, &t);
-            assert_eq!(nam_expected, nam);
-            assert_eq!(pd_expected, pd);
-
-            let nam = super::get_nam(&pdag, &t);
-            assert_eq!(nam_expected, nam);
-
-            let (pd, nam, nva) = super::get_pd_nam_nva(&pdag, &t, &adjust);
-            assert_eq!(pd_expected, pd);
-            assert_eq!(nam_expected, nam);
-            assert_eq!(nva_expected, nva);
-
-            let ivb = super::get_invalidly_un_blocked(&pdag, &t, &adjust);
-            assert!(ivb.is_subset(&nva_expected));
-            assert_eq!(nva_expected, &ivb | &nam_expected);
+            assert_reachability_algos_agree_on_graph(&pdag);
         });
+    }
+
+    fn assert_reachability_algos_agree_on_graph(pdag: &PDAG) {
+        let t = [0];
+        let adjust = gensearch(&pdag, ruletables::Parents {}, t.iter(), false);
+
+        let d_expected = get_descendants(&pdag, t.iter());
+        let pd_expected = get_possible_descendants(&pdag, t.iter());
+        let (nam_expected, nva_expected) = get_nam_nva(&pdag, &t, &adjust);
+
+        #[cfg(test)]
+        assert!(d_expected.is_subset(&pd_expected));
+        #[cfg(test)]
+        assert!(nam_expected.is_subset(&pd_expected));
+        #[cfg(test)]
+        assert!(nam_expected.is_subset(&nva_expected));
+
+        let (d, pd, nam) = super::get_d_pd_nam(&pdag, &t);
+        assert_eq!(d_expected, d);
+        assert_eq!(pd_expected, pd);
+        assert_eq!(nam_expected, nam);
+
+        let (pd, nam) = super::get_pd_nam(&pdag, &t);
+        assert_eq!(nam_expected, nam);
+        assert_eq!(pd_expected, pd);
+
+        let nam = super::get_nam(&pdag, &t);
+        assert_eq!(nam_expected, nam);
+
+        let (pd, nam, nva) = super::get_pd_nam_nva(&pdag, &t, &adjust);
+        assert_eq!(pd_expected, pd);
+        assert_eq!(nam_expected, nam);
+        assert_eq!(nva_expected, nva);
+
+        let ivb = super::get_invalidly_un_blocked(&pdag, &t, &adjust);
+        assert!(ivb.is_subset(&nva_expected));
+        assert_eq!(nva_expected, &ivb | &nam_expected);
+    }
+
+    #[test]
+    #[ignore]
+    fn reachability_algos_agree_on_cpdags() {
+        // anchors at parent directory of Cargo.toml
+        let mut testgraphs = std::path::PathBuf::new();
+        testgraphs.push("..");
+        testgraphs.push("testgraphs");
+
+        for pdag in 10001..=10010 {
+            let full_path_to_pdag = testgraphs.join(format!("{}.CPDAG-100.mtx", pdag));
+            let pdag = crate::test::load_pdag_from_mtx(full_path_to_pdag.to_str().unwrap());
+            assert_reachability_algos_agree_on_graph(&pdag);
+        }
     }
 }
