@@ -24,6 +24,7 @@ pub(crate) use reachability::{
 };
 pub(crate) use ruletables::parents::get_parents;
 pub(crate) use ruletables::proper_ancestors::get_proper_ancestors;
+pub(crate) use ruletables::descendants::get_descendants;
 
 #[cfg(test)]
 pub(crate) use oset_aid::optimal_adjustment_set;
@@ -31,8 +32,6 @@ pub(crate) use oset_aid::optimal_adjustment_set;
 pub(crate) use possible_descendants::get_possible_descendants;
 #[cfg(test)]
 pub(crate) use reachability::get_nam_nva;
-#[cfg(test)]
-pub(crate) use ruletables::descendants::get_descendants;
 
 #[allow(unused)]
 pub(crate) use ruletables::ancestors::get_ancestors;
