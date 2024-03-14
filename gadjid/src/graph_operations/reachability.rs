@@ -5,23 +5,6 @@ use rustc_hash::FxHashSet;
 
 use crate::{partially_directed_acyclic_graph::Edge, PDAG};
 
-#[allow(non_camel_case_types)]
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-enum WalkStatus {
-    /// Possible Descendant / Partially Directed, Amenable (starts T→), and Open Walk
-    PD_OPEN_AM,
-    /// Possible Descendant / Partially Directed, Amenable (starts T→), and Blocked Walk
-    PD_BLOCK_AM,
-    /// Possible Descendant / Partially Directed, Not Amenable (starts T—), and Open Walk
-    PD_OPEN_NAM,
-    /// Possible Descendant / Partially Directed, Not Amenable (starts T–), and Blocked Walk
-    PD_BLOCK_NAM,
-    /// Non-Causal walk that has not been blocked
-    NON_CAUSAL_OPEN,
-    /// Initial status
-    Init,
-}
-
 /// Returns possible children of the node `v` and the shared edge. `v (-> c)` or `v (-- c)`. See the [`Edge`] enum for a more detailed explanation of this notation.
 /// Will not return treatment nodes.
 fn get_next_steps(graph: &PDAG, t: &[usize], v: usize) -> Vec<(Edge, usize)> {
@@ -191,7 +174,7 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
 /// Returns set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 ///
 /// Follows Algorithm 2 in https://doi.org/10.48550/arXiv.2402.08616
-pub fn get_nam(graph: &PDAG, t: &[usize]) -> FxHashSet<usize> {
+pub fn get_nam(graph: &PDAG, t: &[usize]) -> FxHashSet<usize> {    
     let mut not_amenable = FxHashSet::<usize>::default();
 
     let mut visited = FxHashSet::<usize>::default();
@@ -284,6 +267,25 @@ pub fn get_pd_nam_nva(
     t: &[usize],
     z: &FxHashSet<usize>,
 ) -> (FxHashSet<usize>, FxHashSet<usize>, FxHashSet<usize>) {
+    
+    #[allow(non_camel_case_types)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+enum WalkStatus {
+    /// Possible Descendant / Partially Directed, Amenable (starts T→), and Open Walk
+    PD_OPEN_AM,
+    /// Possible Descendant / Partially Directed, Amenable (starts T→), and Blocked Walk
+    PD_BLOCKED_AM,
+    /// Possible Descendant / Partially Directed, Not Amenable (starts T—), and Open Walk
+    PD_OPEN_NAM,
+    /// Possible Descendant / Partially Directed, Not Amenable (starts T–), and Blocked Walk
+    PD_BLOCKED_NAM,
+    /// Non-Causal walk that has not been blocked
+    NON_CAUSAL_OPEN,
+    /// Initial status
+    Init,
+}
+    
+    
     let mut poss_de = FxHashSet::from_iter(t.iter().copied());
     let mut not_amenable = FxHashSet::<usize>::default();
     let mut not_vas = z.clone();
@@ -295,7 +297,7 @@ pub fn get_pd_nam_nva(
         visited.insert((arrived_by, node, walkstatus));
 
         match walkstatus {
-            WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCK_NAM => {
+            WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCKED_NAM => {
                 not_amenable.insert(node);
                 // we want the property that not_amenable is a subset of not_vas
                 // so, if we insert a node into not_amenable, we also insert it into not_vas
@@ -305,7 +307,7 @@ pub fn get_pd_nam_nva(
             WalkStatus::NON_CAUSAL_OPEN => {
                 not_vas.insert(node);
             }
-            WalkStatus::PD_BLOCK_AM => {
+            WalkStatus::PD_BLOCKED_AM => {
                 not_vas.insert(node);
                 poss_de.insert(node);
             }
@@ -326,20 +328,20 @@ pub fn get_pd_nam_nva(
                     Edge::Undirected => Some((move_on_by, w, WalkStatus::PD_OPEN_NAM)),
                     _ => None,
                 },
-                WalkStatus::PD_OPEN_AM | WalkStatus::PD_BLOCK_AM => match move_on_by {
+                WalkStatus::PD_OPEN_AM | WalkStatus::PD_BLOCKED_AM => match move_on_by {
                     Edge::Incoming | Edge::Undirected => match blocked {
                         false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, WalkStatus::PD_BLOCK_AM)),
+                        true => Some((move_on_by, w, WalkStatus::PD_BLOCKED_AM)),
                     },
                     Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_AM) => {
                         Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
                     }
                     _ => None,
                 },
-                WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCK_NAM => match move_on_by {
+                WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCKED_NAM => match move_on_by {
                     Edge::Incoming | Edge::Undirected => match blocked {
                         false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, WalkStatus::PD_BLOCK_NAM)),
+                        true => Some((move_on_by, w, WalkStatus::PD_BLOCKED_NAM)),
                     },
                     Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_NAM) => {
                         Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
@@ -378,6 +380,24 @@ pub fn get_nam_nva(
     t: &[usize],
     z: &FxHashSet<usize>,
 ) -> (FxHashSet<usize>, FxHashSet<usize>) {
+    
+    #[allow(non_camel_case_types)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+enum WalkStatus {
+    /// Possible Descendant / Partially Directed, Amenable (starts T→), and Open Walk
+    PD_OPEN_AM,
+    /// Possible Descendant / Partially Directed, Amenable (starts T→), and Blocked Walk
+    PD_BLOCKED_AM,
+    /// Possible Descendant / Partially Directed, Not Amenable (starts T—), and Open Walk
+    PD_OPEN_NAM,
+    /// Possible Descendant / Partially Directed, Not Amenable (starts T–), and Blocked Walk
+    PD_BLOCKED_NAM,
+    /// Non-Causal walk that has not been blocked
+    NON_CAUSAL_OPEN,
+    /// Initial status
+    Init,
+}
+    
     let mut not_amenable = FxHashSet::<usize>::default();
     let mut not_vas = z.clone();
 
@@ -388,13 +408,13 @@ pub fn get_nam_nva(
         visited.insert((arrived_by, node, walkstatus));
 
         match walkstatus {
-            WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCK_NAM => {
+            WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCKED_NAM => {
                 not_amenable.insert(node);
                 // we want the property that not_amenable is a subset of not_vas
                 // so, if we insert a node into not_amenable, we also insert it into not_vas
                 not_vas.insert(node);
             }
-            WalkStatus::NON_CAUSAL_OPEN | WalkStatus::PD_BLOCK_AM => {
+            WalkStatus::NON_CAUSAL_OPEN | WalkStatus::PD_BLOCKED_AM => {
                 not_vas.insert(node);
             }
             _ => (),
@@ -411,20 +431,20 @@ pub fn get_nam_nva(
                     Edge::Undirected => Some((move_on_by, w, WalkStatus::PD_OPEN_NAM)),
                     _ => None,
                 },
-                WalkStatus::PD_OPEN_AM | WalkStatus::PD_BLOCK_AM => match move_on_by {
+                WalkStatus::PD_OPEN_AM | WalkStatus::PD_BLOCKED_AM => match move_on_by {
                     Edge::Incoming | Edge::Undirected => match blocked {
                         false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, WalkStatus::PD_BLOCK_AM)),
+                        true => Some((move_on_by, w, WalkStatus::PD_BLOCKED_AM)),
                     },
                     Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_AM) => {
                         Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
                     }
                     _ => None,
                 },
-                WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCK_NAM => match move_on_by {
+                WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCKED_NAM => match move_on_by {
                     Edge::Incoming | Edge::Undirected => match blocked {
                         false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, WalkStatus::PD_BLOCK_NAM)),
+                        true => Some((move_on_by, w, WalkStatus::PD_BLOCKED_NAM)),
                     },
                     Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_NAM) => {
                         Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
@@ -468,7 +488,7 @@ pub fn get_invalidly_un_blocked(
         /// Possible Descendant / Partially Directed, and Open Walk
         PD_OPEN,
         /// Possible Descendant / Partially Directed, and Blocked Walk
-        PD_BLOCK,
+        PD_BLOCKED,
         /// Non-Causal walk that has not been blocked
         NON_CAUSAL_OPEN,
         /// Initial status
@@ -485,7 +505,7 @@ pub fn get_invalidly_un_blocked(
 
         match walkstatus {
             // when the node is reached on a causal path but blocked, or an unblocked non-causal path
-            WalkStatus::PD_BLOCK | WalkStatus::NON_CAUSAL_OPEN => {
+            WalkStatus::PD_BLOCKED | WalkStatus::NON_CAUSAL_OPEN => {
                 ivb.insert(node);
             }
             _ => (),
@@ -501,10 +521,10 @@ pub fn get_invalidly_un_blocked(
                     Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
                     _ => None,
                 },
-                WalkStatus::PD_OPEN | WalkStatus::PD_BLOCK => match move_on_by {
+                WalkStatus::PD_OPEN | WalkStatus::PD_BLOCKED => match move_on_by {
                     Edge::Incoming | Edge::Undirected => match blocked {
                         false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, WalkStatus::PD_BLOCK)),
+                        true => Some((move_on_by, w, WalkStatus::PD_BLOCKED)),
                     },
                     Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN) => {
                         Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
