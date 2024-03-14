@@ -48,7 +48,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
             let (t_poss_desc_in_truth, nam_in_true, nva_in_true) =
-                get_pd_nam_nva(truth, &[treatment], adjustment_set);
+                get_pd_nam_nva(truth, &[treatment], &adjustment_set);
 
             let mut mistakes = 0;
             for y in 0..truth.n_nodes {

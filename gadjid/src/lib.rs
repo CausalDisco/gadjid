@@ -22,7 +22,7 @@ mod test {
     use crate::{
         graph_operations::{
             ancestor_aid, gensearch, get_nam, get_nam_nva, get_possible_descendants,
-            get_proper_ancestors, optimal_adjustment_set, oset_aid, parent_aid, ruletables, shd,
+            get_proper_ancestors, optimal_adjustment_set, oset_aid, parent_aid, shd,
         },
         PDAG,
     };
@@ -76,7 +76,7 @@ mod test {
         vec
     }
 
-    fn get_nva_sorted_vec(graph: &PDAG, t: &[usize], z: FxHashSet<usize>) -> Vec<usize> {
+    fn get_nva_sorted_vec(graph: &PDAG, t: &[usize], z: &FxHashSet<usize>) -> Vec<usize> {
         let (_, nva) = get_nam_nva(graph, t, z);
         hashset_to_sorted_vec(nva)
     }
@@ -142,7 +142,7 @@ mod test {
         random_z.sort();
 
         let oset_for_t_onto_y_in_g_guess = {
-            let t_descendants = gensearch(&g_guess, ruletables::Descendants {}, t.iter(), false);
+            let t_descendants = gensearch(&g_guess, crate::graph_operations::Descendants {}, t.iter(), false);
             optimal_adjustment_set(&g_guess, &t, &[y], &t_descendants)
         };
 
@@ -155,7 +155,7 @@ mod test {
             shd: shd(&g_true, &g_guess),
             t: t.clone(),
             y,
-            z: random_z.clone(),
+            z: random_z,
             possible_descendants_of_t_in_g_guess: hashset_to_sorted_vec(get_possible_descendants(
                 &g_guess,
                 t.iter(),
@@ -167,27 +167,27 @@ mod test {
                 [y].iter(),
             )),
             oset_for_t_onto_y_in_g_guess: hashset_to_sorted_vec(
-                oset_for_t_onto_y_in_g_guess.clone(),
+                oset_for_t_onto_y_in_g_guess,
             ),
             not_validly_adjusted_for_in_g_guess_by_parents_of_t: get_nva_sorted_vec(
                 &g_guess,
                 &t,
-                gensearch(&g_guess, ruletables::Parents {}, t.iter(), false),
+                &gensearch(&g_guess, ruletables::Parents {}, t.iter(), false),
             ),
             not_validly_adjusted_for_in_g_guess_by_oset_for_t_onto_y: get_nva_sorted_vec(
                 &g_guess,
                 &t,
-                oset_for_t_onto_y_in_g_guess,
+                &oset_for_t_onto_y_in_g_guess,
             ),
             not_validly_adjusted_for_in_g_guess_by_empty_set: get_nva_sorted_vec(
                 &g_guess,
                 &t,
-                FxHashSet::default(),
+                &FxHashSet::default(),
             ),
             not_validly_adjusted_for_in_g_guess_by_z: get_nva_sorted_vec(
                 &g_guess,
                 &t,
-                FxHashSet::from_iter(random_z),
+                &FxHashSet::from_iter(random_z),
             ),
         }
     }

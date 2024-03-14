@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Implements the Ancestor Adjustment Intervention Distance (Ancestor-AID) algorithm
 
-use descendants::get_descendants;
 use rayon::prelude::*;
 use rustc_hash::FxHashSet;
 
@@ -9,7 +8,6 @@ use crate::{
     graph_operations::{
         gensearch,
         reachability::{get_pd_nam, get_pd_nam_nva},
-        ruletables::descendants,
     },
     PDAG,
 };
@@ -50,7 +48,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                 get_pd_nam(guess, &[treatment])
             } else {
                 (
-                    get_descendants(guess, [treatment].iter()),
+                    crate::graph_operations::get_descendants(guess, [treatment].iter()),
                     FxHashSet::<usize>::default(),
                 )
             };
@@ -58,7 +56,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
             let (t_poss_desc_in_truth, nam_in_true, nva_in_true) =
-                get_pd_nam_nva(truth, &[treatment], adjustment_set);
+                get_pd_nam_nva(truth, &[treatment], &adjustment_set);
 
             let mut mistakes = 0;
             for y in 0..truth.n_nodes {
