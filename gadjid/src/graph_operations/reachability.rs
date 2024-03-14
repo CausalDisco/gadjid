@@ -174,7 +174,7 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
 /// Returns set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 ///
 /// Follows Algorithm 2 in https://doi.org/10.48550/arXiv.2402.08616
-pub fn get_nam(graph: &PDAG, t: &[usize]) -> FxHashSet<usize> {    
+pub fn get_nam(graph: &PDAG, t: &[usize]) -> FxHashSet<usize> {
     let mut not_amenable = FxHashSet::<usize>::default();
 
     let mut visited = FxHashSet::<usize>::default();
@@ -267,25 +267,23 @@ pub fn get_pd_nam_nva(
     t: &[usize],
     z: &FxHashSet<usize>,
 ) -> (FxHashSet<usize>, FxHashSet<usize>, FxHashSet<usize>) {
-    
     #[allow(non_camel_case_types)]
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-enum WalkStatus {
-    /// Possible Descendant / Partially Directed, Amenable (starts T→), and Open Walk
-    PD_OPEN_AM,
-    /// Possible Descendant / Partially Directed, Amenable (starts T→), and Blocked Walk
-    PD_BLOCKED_AM,
-    /// Possible Descendant / Partially Directed, Not Amenable (starts T—), and Open Walk
-    PD_OPEN_NAM,
-    /// Possible Descendant / Partially Directed, Not Amenable (starts T–), and Blocked Walk
-    PD_BLOCKED_NAM,
-    /// Non-Causal walk that has not been blocked
-    NON_CAUSAL_OPEN,
-    /// Initial status
-    Init,
-}
-    
-    
+    #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+    enum WalkStatus {
+        /// Possible Descendant / Partially Directed, Amenable (starts T→), and Open Walk
+        PD_OPEN_AM,
+        /// Possible Descendant / Partially Directed, Amenable (starts T→), and Blocked Walk
+        PD_BLOCKED_AM,
+        /// Possible Descendant / Partially Directed, Not Amenable (starts T—), and Open Walk
+        PD_OPEN_NAM,
+        /// Possible Descendant / Partially Directed, Not Amenable (starts T–), and Blocked Walk
+        PD_BLOCKED_NAM,
+        /// Non-Causal walk that has not been blocked
+        NON_CAUSAL_OPEN,
+        /// Initial status
+        Init,
+    }
+
     let mut poss_de = FxHashSet::from_iter(t.iter().copied());
     let mut not_amenable = FxHashSet::<usize>::default();
     let mut not_vas = z.clone();
@@ -380,24 +378,23 @@ pub fn get_nam_nva(
     t: &[usize],
     z: &FxHashSet<usize>,
 ) -> (FxHashSet<usize>, FxHashSet<usize>) {
-    
     #[allow(non_camel_case_types)]
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-enum WalkStatus {
-    /// Possible Descendant / Partially Directed, Amenable (starts T→), and Open Walk
-    PD_OPEN_AM,
-    /// Possible Descendant / Partially Directed, Amenable (starts T→), and Blocked Walk
-    PD_BLOCKED_AM,
-    /// Possible Descendant / Partially Directed, Not Amenable (starts T—), and Open Walk
-    PD_OPEN_NAM,
-    /// Possible Descendant / Partially Directed, Not Amenable (starts T–), and Blocked Walk
-    PD_BLOCKED_NAM,
-    /// Non-Causal walk that has not been blocked
-    NON_CAUSAL_OPEN,
-    /// Initial status
-    Init,
-}
-    
+    #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+    enum WalkStatus {
+        /// Possible Descendant / Partially Directed, Amenable (starts T→), and Open Walk
+        PD_OPEN_AM,
+        /// Possible Descendant / Partially Directed, Amenable (starts T→), and Blocked Walk
+        PD_BLOCKED_AM,
+        /// Possible Descendant / Partially Directed, Not Amenable (starts T—), and Open Walk
+        PD_OPEN_NAM,
+        /// Possible Descendant / Partially Directed, Not Amenable (starts T–), and Blocked Walk
+        PD_BLOCKED_NAM,
+        /// Non-Causal walk that has not been blocked
+        NON_CAUSAL_OPEN,
+        /// Initial status
+        Init,
+    }
+
     let mut not_amenable = FxHashSet::<usize>::default();
     let mut not_vas = z.clone();
 
