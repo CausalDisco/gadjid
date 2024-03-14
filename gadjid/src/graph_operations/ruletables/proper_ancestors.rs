@@ -3,7 +3,7 @@
 
 use rustc_hash::FxHashSet;
 
-use crate::{partially_directed_acyclic_graph::Edge, PDAG};
+use crate::partially_directed_acyclic_graph::Edge;
 
 use super::ruletable::RuleTable;
 
@@ -45,27 +45,11 @@ impl RuleTable for ProperAncestors {
     }
 }
 
-/// Gets all proper ancestors of responses given them and the treatments
-pub fn get_proper_ancestors<'a>(
-    dag: &PDAG,
-    treatments: impl Iterator<Item = &'a usize>,
-    responses: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
-    let treatment_hashset = FxHashSet::from_iter(treatments.copied());
-    let ruletable = ProperAncestors {
-        treatments: treatment_hashset,
-    };
-    // gensearch yield_starting_vertices 'true' because $a \in ProperAncestors(a)$
-    crate::graph_operations::gensearch(dag, ruletable, responses, true)
-}
-
 #[cfg(test)]
 mod test {
     use std::collections::HashSet;
 
-    use crate::PDAG;
-
-    use super::get_proper_ancestors;
+    use crate::{graph_operations::get_proper_ancestors, PDAG};
 
     #[test]
     fn proper_ancestors_search() {

@@ -75,8 +75,6 @@ pub fn get_d_pd_nam(
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
-    
-
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
         visited.insert((arrived_by, node, walkstatus));
 
@@ -148,8 +146,6 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
-    
-
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
         visited.insert((arrived_by, node, walkstatus));
 
@@ -216,22 +212,26 @@ pub fn get_nam(graph: &PDAG, t: &[usize]) -> FxHashSet<usize> {
             // Edge::Incoming | Edge::Outgoing | Edge::Undirected
             _ => {
                 not_amenable.insert(node);
-                get_next_steps(graph, t, node).into_iter().for_each(|(move_on_by, w)| {
-                    if !visited.contains(&w) {
-                        to_visit_stack.push((move_on_by, w));
-                    }
-                });
+                get_next_steps(graph, t, node)
+                    .into_iter()
+                    .for_each(|(move_on_by, w)| {
+                        if !visited.contains(&w) {
+                            to_visit_stack.push((move_on_by, w));
+                        }
+                    });
             }
         }
     }
     not_amenable
 }
 
-
-fn get_next_steps_conditioned (
+fn get_next_steps_conditioned(
     graph: &PDAG,
     t: &[usize],
-    arrived_by: Edge, v: usize, node_is_adjustment: bool) -> Vec<(Edge, usize, bool)> {
+    arrived_by: Edge,
+    v: usize,
+    node_is_adjustment: bool,
+) -> Vec<(Edge, usize, bool)> {
     let mut next = Vec::<(Edge, usize, bool)>::new();
     match arrived_by {
         Edge::Incoming => {
@@ -270,7 +270,6 @@ fn get_next_steps_conditioned (
         });
     next
 }
-
 
 /// Validate Z as adjustment set relative to (T, Y) for a given set T of treatment
 /// nodes and all possible Y in G.
@@ -317,7 +316,9 @@ pub fn get_pd_nam_nva(
         }
         let node_is_adjustment = z.contains(&node);
 
-        for (move_on_by, w, blocked) in get_next_steps_conditioned(&graph, t, arrived_by, node, node_is_adjustment) {
+        for (move_on_by, w, blocked) in
+            get_next_steps_conditioned(graph, t, arrived_by, node, node_is_adjustment)
+        {
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
                     Edge::Incoming => Some((move_on_by, w, WalkStatus::PD_OPEN_AM)),
@@ -398,7 +399,9 @@ pub fn get_nam_nva(
         }
         let node_is_adjustment = z.contains(&node);
 
-        for (move_on_by, w, blocked) in get_next_steps_conditioned(graph, t, arrived_by, node, node_is_adjustment) {
+        for (move_on_by, w, blocked) in
+            get_next_steps_conditioned(graph, t, arrived_by, node, node_is_adjustment)
+        {
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
                     Edge::Incoming => Some((move_on_by, w, WalkStatus::PD_OPEN_AM)),
@@ -469,8 +472,6 @@ pub fn get_invalid_un_blocked(graph: &PDAG, t: &[usize], z: &FxHashSet<usize>) -
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
-    
-
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
         visited.insert((arrived_by, node, walkstatus));
 
@@ -483,7 +484,9 @@ pub fn get_invalid_un_blocked(graph: &PDAG, t: &[usize], z: &FxHashSet<usize>) -
         }
         let node_is_adjustment = z.contains(&node);
 
-        for (move_on_by, w, blocked) in get_next_steps_conditioned(graph, t, arrived_by, node, node_is_adjustment) {
+        for (move_on_by, w, blocked) in
+            get_next_steps_conditioned(graph, t, arrived_by, node, node_is_adjustment)
+        {
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
                     Edge::Incoming | Edge::Undirected => Some((move_on_by, w, WalkStatus::PD_OPEN)),

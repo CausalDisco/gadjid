@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Ruletable for getting all descendants of a set of nodes
 
-use rustc_hash::FxHashSet;
-
-use crate::{partially_directed_acyclic_graph::Edge, PDAG};
+use crate::partially_directed_acyclic_graph::Edge;
 
 use super::ruletable::RuleTable;
 
@@ -35,24 +33,11 @@ impl RuleTable for Descendants {
     }
 }
 
-/// Gets all descendants of a set of nodes. Will also return the starting nodes.
-pub fn get_descendants<'a>(
-    dag: &PDAG,
-    starting_vertices: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
-    let start: Vec<usize> = starting_vertices.copied().collect();
-    let ruletable = Descendants {};
-    // gensearch yield_starting_vertices 'true' because $a \in Descendants(a)$
-    crate::graph_operations::gensearch(dag, ruletable, start.iter(), true)
-}
-
 #[cfg(test)]
 mod test {
     use std::collections::HashSet;
 
-    use crate::PDAG;
-
-    use super::get_descendants;
+    use crate::{graph_operations::get_descendants, PDAG};
 
     #[test]
     fn descendants_search() {

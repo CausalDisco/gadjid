@@ -11,10 +11,10 @@ pub mod descendants;
 pub mod parents;
 pub mod proper_ancestors;
 
+pub(crate) use ancestors::Ancestors;
+pub(crate) use descendants::Descendants;
+pub(crate) use parents::Parents;
 pub(crate) use ruletable::RuleTable;
 
-pub(crate) use ancestors::Ancestors;
-#[cfg(test)]
-pub(crate) use descendants::Descendants;
-#[cfg(test)]
-pub(crate) use parents::Parents;
+#[allow(unused)]
+pub(crate) use children::Children;

@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Ruletable for getting all parents of a set of nodes
-
-use rustc_hash::FxHashSet;
-
-use crate::{partially_directed_acyclic_graph::Edge, PDAG};
+use crate::partially_directed_acyclic_graph::Edge;
 
 use super::ruletable::RuleTable;
 
@@ -25,23 +22,11 @@ impl RuleTable for Parents {
     }
 }
 
-/// Gets the union of parents of each node. This is more efficient than calling `parents_of` for each node and then joining the results.
-pub fn get_parents<'a>(
-    dag: &PDAG,
-    starting_vertices: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
-    let ruletable = Parents {};
-    // gensearch yield_starting_vertices 'false' because $a \notin Parents(a)$
-    crate::graph_operations::gensearch(dag, ruletable, starting_vertices, false)
-}
-
 #[cfg(test)]
 mod test {
     use std::collections::HashSet;
 
-    use crate::PDAG;
-
-    use super::get_parents;
+    use crate::{graph_operations::get_parents, PDAG};
 
     #[test]
     fn parents() {

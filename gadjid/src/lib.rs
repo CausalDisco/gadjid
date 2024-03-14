@@ -21,7 +21,8 @@ mod test {
 
     use crate::{
         graph_operations::{
-            ancestor_aid, gensearch, get_nam, get_nam_nva, get_possible_descendants, get_proper_ancestors, optimal_adjustment_set, oset_aid, parent_aid, ruletables, shd
+            ancestor_aid, gensearch, get_nam, get_nam_nva, get_possible_descendants,
+            get_proper_ancestors, optimal_adjustment_set, oset_aid, parent_aid, ruletables, shd,
         },
         PDAG,
     };
@@ -141,7 +142,12 @@ mod test {
         random_z.sort();
 
         let oset_for_t_onto_y_in_g_guess = {
-            let t_descendants = gensearch(&g_guess, crate::graph_operations::ruletables::Descendants {}, t.iter(), false);
+            let t_descendants = gensearch(
+                &g_guess,
+                crate::graph_operations::ruletables::Descendants {},
+                t.iter(),
+                false,
+            );
             optimal_adjustment_set(&g_guess, &t, &[y], &t_descendants)
         };
 
@@ -165,9 +171,7 @@ mod test {
                 t.iter(),
                 [y].iter(),
             )),
-            oset_for_t_onto_y_in_g_guess: hashset_to_sorted_vec(
-                &oset_for_t_onto_y_in_g_guess,
-            ),
+            oset_for_t_onto_y_in_g_guess: hashset_to_sorted_vec(&oset_for_t_onto_y_in_g_guess),
             not_validly_adjusted_for_in_g_guess_by_parents_of_t: get_nva_sorted_vec(
                 &g_guess,
                 &t,

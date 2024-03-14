@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Ruletable for getting all ancestors of a set of nodes. Unused for now, but kept in the codebase for convenience.
 
-use rustc_hash::FxHashSet;
-
-use crate::{partially_directed_acyclic_graph::Edge, PDAG};
+use crate::partially_directed_acyclic_graph::Edge;
 
 use super::ruletable::RuleTable;
 
@@ -35,24 +33,11 @@ impl RuleTable for Ancestors {
     }
 }
 
-/// Gets all ancestors of a set of nodes. Will also return the starting nodes.
-#[allow(unused)]
-pub fn get_ancestors<'a>(
-    dag: &PDAG,
-    starting_vertices: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
-    let ruletable = Ancestors {};
-    // gensearch yield_starting_vertices 'true' because $a \in Ancestors(a)$
-    crate::graph_operations::gensearch(dag, ruletable, starting_vertices, true)
-}
-
 #[cfg(test)]
 mod test {
     use std::collections::HashSet;
 
-    use crate::PDAG;
-
-    use super::get_ancestors;
+    use crate::{graph_operations::get_ancestors, PDAG};
 
     #[test]
     fn ancestors_search() {
