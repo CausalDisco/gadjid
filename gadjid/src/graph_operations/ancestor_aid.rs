@@ -104,6 +104,8 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 
 #[cfg(test)]
 mod test {
+    use rand::SeedableRng;
+
     use crate::PDAG;
 
     use super::ancestor_aid;
@@ -111,8 +113,9 @@ mod test {
     #[test]
     fn property_equal_dags_zero_distance() {
         for n in 2..40 {
+            let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
             for _rep in 0..2 {
-                let dag = PDAG::random_dag(0.5, n);
+                let dag = PDAG::random_dag(0.5, n, &mut rng);
                 assert_eq!(
                     (0.0, 0),
                     ancestor_aid(&dag, &dag),
@@ -126,10 +129,11 @@ mod test {
     #[test]
     #[ignore]
     fn random_inputs_no_crash() {
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(1);
         for n in 2..40 {
             for _rep in 0..2 {
-                let dag1 = PDAG::random_dag(1.0, n);
-                let dag2 = PDAG::random_dag(1.0, n);
+                let dag1 = PDAG::random_dag(1.0, n, &mut rng);
+                let dag2 = PDAG::random_dag(1.0, n, &mut rng);
                 ancestor_aid(&dag1, &dag2);
             }
         }

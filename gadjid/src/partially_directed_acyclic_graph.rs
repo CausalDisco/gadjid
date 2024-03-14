@@ -533,14 +533,13 @@ impl PDAG {
     }
 
     /// Creates a random DAG with the given edge density and size.
-    pub fn random_dag(edge_density: f64, graph_size: usize) -> PDAG {
+    pub fn random_dag(edge_density: f64, graph_size: usize, mut rng: impl rand::RngCore) -> PDAG {
         assert!(graph_size > 0, "Graph size must be larger than 0");
         assert!(
             (0.0..=1.0).contains(&edge_density),
             "edge probability must be in [0, 1]"
         );
         let edge_dist = rand::distributions::Bernoulli::new(edge_density).unwrap();
-        let mut rng = rand::thread_rng();
 
         let mut adjacency = vec![vec![0; graph_size]; graph_size];
         let permutation = rand::seq::index::sample(&mut rng, graph_size, graph_size);
@@ -554,7 +553,7 @@ impl PDAG {
         PDAG::from_vecvec(adjacency)
     }
     /// Creates a random PDAG with random edges with the given edge density and size.
-    pub fn random_pdag(edge_density: f64, graph_size: usize) -> PDAG {
+    pub fn random_pdag(edge_density: f64, graph_size: usize, mut rng: impl rand::RngCore) -> PDAG {
         assert!(graph_size > 0, "Graph size must be larger than 0");
         assert!(
             (0.0..=1.0).contains(&edge_density),
@@ -564,8 +563,6 @@ impl PDAG {
         // P(edge between X and Y is directed) given that there is an edge between X and Y
         let p_directedness = 0.8;
         let directionality_dist = rand::distributions::Bernoulli::new(p_directedness).unwrap();
-        let mut rng = rand::thread_rng();
-
         let mut adjacency = vec![vec![0; graph_size]; graph_size];
         let permutation = rand::seq::index::sample(&mut rng, graph_size, graph_size);
         for y in 0..graph_size {
@@ -638,7 +635,7 @@ pub fn has_cycle(graph: &PDAG) -> bool {
 
 #[cfg(test)]
 mod test {
-    use rand::distributions::Distribution;
+    use rand::{distributions::Distribution, SeedableRng};
     use std::collections::HashSet;
 
     use crate::PDAG;
@@ -887,15 +884,17 @@ mod test {
 
     #[test]
     pub fn random_pdags_no_failure_load() {
+        let mut rng = rand::thread_rng();
         for n in 1..40 {
-            PDAG::random_pdag(0.5, n);
+            PDAG::random_pdag(0.5, n, &mut rng);
         }
     }
 
     #[test]
     pub fn property_random_dags_acyclic() {
+        let mut rng = rand_chacha::ChaChaRng::seed_from_u64(7);
         for n in 1..40 {
-            PDAG::random_dag(0.5, n);
+            PDAG::random_dag(0.5, n, &mut rng);
         }
     }
 
