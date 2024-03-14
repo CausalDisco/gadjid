@@ -8,8 +8,8 @@ mod possible_descendants;
 mod reachability;
 mod shd;
 mod sid;
+mod gensearch;
 
-pub(crate) mod gensearch;
 pub(crate) mod ruletables;
 
 pub use ancestor_aid::ancestor_aid;
@@ -33,3 +33,8 @@ pub(crate) use possible_descendants::get_possible_descendants;
 pub(crate) use reachability::get_nam_nva;
 #[cfg(test)]
 pub(crate) use ruletables::descendants::get_descendants;
+
+#[allow(unused)]
+pub(crate) use ruletables::ancestors::get_ancestors;
+#[allow(unused)]
+pub(crate) use ruletables::children::get_children;
