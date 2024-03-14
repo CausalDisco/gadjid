@@ -586,7 +586,7 @@ mod test {
     pub fn reachability_algos_agree() {
         let reps = 30;
         let mut rng = rand_chacha::ChaChaRng::seed_from_u64(5);
-        (0..reps).for_each(|rep| {
+        (0..reps).for_each(|_rep| {
             let pdag = PDAG::random_pdag(0.5, 100, &mut rng);
             let t = [0];
             let adjust = gensearch(&pdag, ruletables::Parents {}, t.iter(), false);
