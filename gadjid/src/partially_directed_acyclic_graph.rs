@@ -145,7 +145,7 @@ impl PDAG {
         &nb[parents_end..children_start]
     }
 
-    /// Given a node, return all nodes reachable by a possibly incoming edge (undirected or incoming).
+    /// Given a node, return all nodes reachable in one step along a possibly incoming edge (undirected or incoming).
     /// Not yielded in any particular order.
     pub fn possible_parents_of(&self, node: usize) -> &[usize] {
         let start = self.node_edge_ranges[node];
@@ -158,7 +158,7 @@ impl PDAG {
         &nb[..children_start]
     }
 
-    /// Given a node, return all nodes reachable by a possibly outgoing edge (undirected or outgoing).
+    /// Given a node, return all nodes reachable in one step along a possibly outgoing edge (undirected or outgoing).
     /// Not yielded in any particular order.
     pub fn possible_children_of(&self, node: usize) -> &[usize] {
         let start = self.node_edge_ranges[node];

@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
-//! Holds functions that simplify calls to the generalized search algorithm [`gensearch`].
+//! Holds functions that simplify calls to the generalized search algorithm [`gensearch`]. 
+//! The real logic is happening in the intersection of `gensearch` and the chosen `ruletables`. 
+// (The latter of which also holds the relevant tests).
+
 
 use rustc_hash::FxHashSet;
 

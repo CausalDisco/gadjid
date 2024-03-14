@@ -6,7 +6,7 @@ use rustc_hash::FxHashSet;
 use crate::PDAG;
 
 #[allow(unused)]
-/// Gets all the possible descendants (reachable via combinations of (-- and ->) of a set of nodes.
+/// Gets all the possible descendants of a set of nodes.
 /// The input nodes are also included in the output.
 pub(crate) fn get_possible_descendants<'a>(
     pdag: &PDAG,
