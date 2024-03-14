@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Algorithm for getting all possible descendants of a set of nodes
 
-
 #[cfg(test)]
 #[allow(unused)]
 /// Gets all the possible descendants of a set of nodes.
