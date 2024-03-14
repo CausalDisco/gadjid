@@ -346,7 +346,9 @@ pub fn get_pd_nam_nva(
                     }
                     _ => None,
                 },
-                WalkStatus::NON_CAUSAL_OPEN if !blocked => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
+                WalkStatus::NON_CAUSAL_OPEN if !blocked => {
+                    Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
+                }
                 _ => None,
             };
 
@@ -429,7 +431,9 @@ pub fn get_nam_nva(
                     }
                     _ => None,
                 },
-                WalkStatus::NON_CAUSAL_OPEN if !blocked => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
+                WalkStatus::NON_CAUSAL_OPEN if !blocked => {
+                    Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
+                }
                 _ => None,
             };
 
@@ -453,7 +457,11 @@ pub fn get_nam_nva(
 /// instead, NVA contains Y for which condition 2. or 3.
 /// of the modified adjustment criterion for walk-based verification
 /// in https://doi.org/10.48550/arXiv.2402.08616 are violated
-pub fn get_invalidly_un_blocked(graph: &PDAG, t: &[usize], z: &FxHashSet<usize>) -> FxHashSet<usize> {
+pub fn get_invalidly_un_blocked(
+    graph: &PDAG,
+    t: &[usize],
+    z: &FxHashSet<usize>,
+) -> FxHashSet<usize> {
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum WalkStatus {
@@ -503,7 +511,9 @@ pub fn get_invalidly_un_blocked(graph: &PDAG, t: &[usize], z: &FxHashSet<usize>)
                     }
                     _ => None,
                 },
-                WalkStatus::NON_CAUSAL_OPEN if !blocked => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
+                WalkStatus::NON_CAUSAL_OPEN if !blocked => {
+                    Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
+                }
                 _ => None,
             };
 
