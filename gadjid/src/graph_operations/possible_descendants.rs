@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Algorithm for getting all possible descendants of a set of nodes
 
-use rustc_hash::FxHashSet;
 
-use crate::PDAG;
-
+#[cfg(test)]
 #[allow(unused)]
 /// Gets all the possible descendants of a set of nodes.
 /// The input nodes are also included in the output.
 pub(crate) fn get_possible_descendants<'a>(
-    pdag: &PDAG,
+    pdag: &crate::PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
+) -> rustc_hash::FxHashSet<usize> {
+    use rustc_hash::FxHashSet;
+
     let mut to_visit_stack = Vec::from_iter(starting_vertices.copied());
 
     let mut result = FxHashSet::from_iter(to_visit_stack.iter().copied());
