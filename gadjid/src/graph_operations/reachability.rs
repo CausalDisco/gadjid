@@ -22,6 +22,27 @@ enum WalkStatus {
     Init,
 }
 
+/// Returns possible children of the node `v` and the shared edge. `v (-> c)` or `v (-- c)`. See the [`Edge`] enum for a more detailed explanation of this notation.
+/// Will not return treatment nodes.
+fn get_next_steps(graph: &PDAG, t: &[usize], v: usize) -> Vec<(Edge, usize)> {
+    let mut next = Vec::<(Edge, usize)>::new();
+    graph
+        .adjacent_undirected_of(v)
+        .iter()
+        .filter(|u| !t.contains(*u))
+        .for_each(|u| {
+            next.push((Edge::Undirected, *u));
+        });
+    graph
+        .children_of(v)
+        .iter()
+        .filter(|c| !t.contains(*c))
+        .for_each(|c| {
+            next.push((Edge::Incoming, *c));
+        });
+    next
+}
+
 /// Checks amenability of a (CP)DAG relative to (T, Y) for a given set T of treatment
 /// nodes and all possible Y.
 ///
@@ -54,24 +75,7 @@ pub fn get_d_pd_nam(
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
-    let get_next_steps = |v: usize| {
-        let mut next = Vec::<(Edge, usize)>::new();
-        graph
-            .adjacent_undirected_of(v)
-            .iter()
-            .filter(|u| !t.contains(*u))
-            .for_each(|u| {
-                next.push((Edge::Undirected, *u));
-            });
-        graph
-            .children_of(v)
-            .iter()
-            .filter(|c| !t.contains(*c))
-            .for_each(|c| {
-                next.push((Edge::Incoming, *c));
-            });
-        next
-    };
+    
 
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
         visited.insert((arrived_by, node, walkstatus));
@@ -91,7 +95,7 @@ pub fn get_d_pd_nam(
             _ => (),
         }
 
-        for (move_on_by, w) in get_next_steps(node) {
+        for (move_on_by, w) in get_next_steps(graph, t, node) {
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
                     Edge::Incoming => Some((move_on_by, w, WalkStatus::D)),
@@ -144,24 +148,7 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
-    let get_next_steps = |v: usize| {
-        let mut next = Vec::<(Edge, usize)>::new();
-        graph
-            .adjacent_undirected_of(v)
-            .iter()
-            .filter(|u| !t.contains(*u))
-            .for_each(|u| {
-                next.push((Edge::Undirected, *u));
-            });
-        graph
-            .children_of(v)
-            .iter()
-            .filter(|c| !t.contains(*c))
-            .for_each(|c| {
-                next.push((Edge::Incoming, *c));
-            });
-        next
-    };
+    
 
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
         visited.insert((arrived_by, node, walkstatus));
@@ -178,7 +165,7 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
             _ => (),
         }
 
-        for (move_on_by, w) in get_next_steps(node) {
+        for (move_on_by, w) in get_next_steps(graph, t, node) {
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
                     Edge::Incoming => Some((move_on_by, w, WalkStatus::PD_AM)),
@@ -208,7 +195,7 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
 /// Returns set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 ///
 /// Follows Algorithm 2 in https://doi.org/10.48550/arXiv.2402.08616
-pub fn get_nam(cpdag: &PDAG, t: &[usize]) -> FxHashSet<usize> {
+pub fn get_nam(graph: &PDAG, t: &[usize]) -> FxHashSet<usize> {
     let mut not_amenable = FxHashSet::<usize>::default();
 
     let mut visited = FxHashSet::<usize>::default();
@@ -218,7 +205,7 @@ pub fn get_nam(cpdag: &PDAG, t: &[usize]) -> FxHashSet<usize> {
         visited.insert(node);
         match arrived_by {
             Edge::Init => {
-                cpdag
+                graph
                     .adjacent_undirected_of(node)
                     .iter()
                     .filter(|p| !visited.contains(p) && !t.contains(p))
@@ -229,20 +216,11 @@ pub fn get_nam(cpdag: &PDAG, t: &[usize]) -> FxHashSet<usize> {
             // Edge::Incoming | Edge::Outgoing | Edge::Undirected
             _ => {
                 not_amenable.insert(node);
-                cpdag
-                    .adjacent_undirected_of(node)
-                    .iter()
-                    .filter(|p| !visited.contains(p) && !t.contains(p))
-                    .for_each(|p| {
-                        to_visit_stack.push((Edge::Undirected, *p));
-                    });
-                cpdag
-                    .children_of(node)
-                    .iter()
-                    .filter(|p| !visited.contains(p) && !t.contains(p))
-                    .for_each(|p| {
-                        to_visit_stack.push((Edge::Incoming, *p));
-                    });
+                get_next_steps(graph, t, node).into_iter().for_each(|(move_on_by, w)| {
+                    if !visited.contains(&w) {
+                        to_visit_stack.push((move_on_by, w));
+                    }
+                });
             }
         }
     }
@@ -250,11 +228,9 @@ pub fn get_nam(cpdag: &PDAG, t: &[usize]) -> FxHashSet<usize> {
 }
 
 
-
 fn get_next_steps_conditioned (
     graph: &PDAG,
     t: &[usize],
-    z: &FxHashSet<usize>,
     arrived_by: Edge, v: usize, node_is_adjustment: bool) -> Vec<(Edge, usize, bool)> {
     let mut next = Vec::<(Edge, usize, bool)>::new();
     match arrived_by {
@@ -341,7 +317,7 @@ pub fn get_pd_nam_nva(
         }
         let node_is_adjustment = z.contains(&node);
 
-        for (move_on_by, w, blocked) in get_next_steps_conditioned(&graph, t, z, arrived_by, node, node_is_adjustment) {
+        for (move_on_by, w, blocked) in get_next_steps_conditioned(&graph, t, arrived_by, node, node_is_adjustment) {
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
                     Edge::Incoming => Some((move_on_by, w, WalkStatus::PD_OPEN_AM)),
@@ -422,7 +398,7 @@ pub fn get_nam_nva(
         }
         let node_is_adjustment = z.contains(&node);
 
-        for (move_on_by, w, blocked) in get_next_steps_conditioned(graph, t, z, arrived_by, node, node_is_adjustment) {
+        for (move_on_by, w, blocked) in get_next_steps_conditioned(graph, t, arrived_by, node, node_is_adjustment) {
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
                     Edge::Incoming => Some((move_on_by, w, WalkStatus::PD_OPEN_AM)),
@@ -507,7 +483,7 @@ pub fn get_invalid_un_blocked(graph: &PDAG, t: &[usize], z: &FxHashSet<usize>) -
         }
         let node_is_adjustment = z.contains(&node);
 
-        for (move_on_by, w, blocked) in get_next_steps_conditioned(graph, t, &z, arrived_by, node, node_is_adjustment) {
+        for (move_on_by, w, blocked) in get_next_steps_conditioned(graph, t, arrived_by, node, node_is_adjustment) {
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
                     Edge::Incoming | Edge::Undirected => Some((move_on_by, w, WalkStatus::PD_OPEN)),
