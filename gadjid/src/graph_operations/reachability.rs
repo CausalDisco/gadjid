@@ -453,7 +453,7 @@ pub fn get_nam_nva(
 /// instead, NVA contains Y for which condition 2. or 3.
 /// of the modified adjustment criterion for walk-based verification
 /// in https://doi.org/10.48550/arXiv.2402.08616 are violated
-pub fn get_invalid_un_blocked(graph: &PDAG, t: &[usize], z: &FxHashSet<usize>) -> FxHashSet<usize> {
+pub fn get_invalidly_un_blocked(graph: &PDAG, t: &[usize], z: &FxHashSet<usize>) -> FxHashSet<usize> {
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum WalkStatus {
@@ -607,7 +607,7 @@ mod test {
             assert_eq!(nam_expected, nam);
             assert_eq!(nva_expected, nva);
 
-            let ivb = super::get_invalid_un_blocked(&pdag, &t, &adjust);
+            let ivb = super::get_invalidly_un_blocked(&pdag, &t, &adjust);
             assert!(ivb.is_subset(&nva_expected));
             assert_eq!(nva_expected, &ivb | &nam_expected);
         });

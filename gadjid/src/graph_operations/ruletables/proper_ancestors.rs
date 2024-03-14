@@ -52,7 +52,7 @@ mod test {
     use crate::{graph_operations::get_proper_ancestors, PDAG};
 
     #[test]
-    fn proper_ancestors_search() {
+    fn proper_ancestors() {
         // 0 -> 1 -> 2
         let v_dag = vec![
             vec![0, 1, 0], //

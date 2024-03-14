@@ -40,7 +40,7 @@ mod test {
     use crate::{graph_operations::get_descendants, PDAG};
 
     #[test]
-    fn descendants_search() {
+    fn descendants() {
         // 0 -> 1 -> 2
         let v_dag = vec![
             vec![0, 1, 0], //

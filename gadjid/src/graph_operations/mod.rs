@@ -24,8 +24,13 @@ pub(crate) use gensearch_wrappers::get_descendants;
 pub(crate) use gensearch_wrappers::get_parents;
 pub(crate) use gensearch_wrappers::get_proper_ancestors;
 pub(crate) use reachability::{
-    get_d_pd_nam, get_invalid_un_blocked, get_nam, get_pd_nam, get_pd_nam_nva,
+    get_d_pd_nam,
+    get_pd_nam,
+    get_nam,
+    get_pd_nam_nva,
+    get_invalidly_un_blocked,
 };
+
 
 #[cfg(test)]
 pub(crate) use oset_aid::optimal_adjustment_set;
@@ -33,8 +38,7 @@ pub(crate) use oset_aid::optimal_adjustment_set;
 pub(crate) use possible_descendants::get_possible_descendants;
 #[cfg(test)]
 pub(crate) use reachability::get_nam_nva;
-
-#[allow(unused)]
+#[cfg(test)]
 pub(crate) use gensearch_wrappers::get_ancestors;
-#[allow(unused)]
+#[cfg(test)]
 pub(crate) use gensearch_wrappers::get_children;
