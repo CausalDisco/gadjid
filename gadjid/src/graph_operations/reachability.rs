@@ -17,7 +17,7 @@ enum WalkStatus {
     /// Possible Descendant / Partially Directed, Not Amenable (starts T–), and Blocked Walk
     PD_BLOCK_NAM,
     /// Non-Causal walk that has not been blocked
-    NON_CAUSAL,
+    NON_CAUSAL_OPEN,
     /// Initial status
     Init,
 }
@@ -302,7 +302,7 @@ pub fn get_pd_nam_nva(
                 not_vas.insert(node);
                 poss_de.insert(node);
             }
-            WalkStatus::NON_CAUSAL => {
+            WalkStatus::NON_CAUSAL_OPEN => {
                 not_vas.insert(node);
             }
             WalkStatus::PD_BLOCK_AM => {
@@ -322,7 +322,7 @@ pub fn get_pd_nam_nva(
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
                     Edge::Incoming => Some((move_on_by, w, WalkStatus::PD_OPEN_AM)),
-                    Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL)),
+                    Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
                     Edge::Undirected => Some((move_on_by, w, WalkStatus::PD_OPEN_NAM)),
                     _ => None,
                 },
@@ -332,7 +332,7 @@ pub fn get_pd_nam_nva(
                         true => Some((move_on_by, w, WalkStatus::PD_BLOCK_AM)),
                     },
                     Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_AM) => {
-                        Some((move_on_by, w, WalkStatus::NON_CAUSAL))
+                        Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
                     }
                     _ => None,
                 },
@@ -342,11 +342,11 @@ pub fn get_pd_nam_nva(
                         true => Some((move_on_by, w, WalkStatus::PD_BLOCK_NAM)),
                     },
                     Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_NAM) => {
-                        Some((move_on_by, w, WalkStatus::NON_CAUSAL))
+                        Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
                     }
                     _ => None,
                 },
-                WalkStatus::NON_CAUSAL if !blocked => Some((move_on_by, w, WalkStatus::NON_CAUSAL)),
+                WalkStatus::NON_CAUSAL_OPEN if !blocked => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
                 _ => None,
             };
 
@@ -392,7 +392,7 @@ pub fn get_nam_nva(
                 // so, if we insert a node into not_amenable, we also insert it into not_vas
                 not_vas.insert(node);
             }
-            WalkStatus::NON_CAUSAL | WalkStatus::PD_BLOCK_AM => {
+            WalkStatus::NON_CAUSAL_OPEN | WalkStatus::PD_BLOCK_AM => {
                 not_vas.insert(node);
             }
             _ => (),
@@ -405,7 +405,7 @@ pub fn get_nam_nva(
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
                     Edge::Incoming => Some((move_on_by, w, WalkStatus::PD_OPEN_AM)),
-                    Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL)),
+                    Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
                     Edge::Undirected => Some((move_on_by, w, WalkStatus::PD_OPEN_NAM)),
                     _ => None,
                 },
@@ -415,7 +415,7 @@ pub fn get_nam_nva(
                         true => Some((move_on_by, w, WalkStatus::PD_BLOCK_AM)),
                     },
                     Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_AM) => {
-                        Some((move_on_by, w, WalkStatus::NON_CAUSAL))
+                        Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
                     }
                     _ => None,
                 },
@@ -425,11 +425,11 @@ pub fn get_nam_nva(
                         true => Some((move_on_by, w, WalkStatus::PD_BLOCK_NAM)),
                     },
                     Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_NAM) => {
-                        Some((move_on_by, w, WalkStatus::NON_CAUSAL))
+                        Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
                     }
                     _ => None,
                 },
-                WalkStatus::NON_CAUSAL if !blocked => Some((move_on_by, w, WalkStatus::NON_CAUSAL)),
+                WalkStatus::NON_CAUSAL_OPEN if !blocked => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
                 _ => None,
             };
 
@@ -462,7 +462,7 @@ pub fn get_invalidly_un_blocked(graph: &PDAG, t: &[usize], z: &FxHashSet<usize>)
         /// Possible Descendant / Partially Directed, and Blocked Walk
         PD_BLOCK,
         /// Non-Causal walk that has not been blocked
-        NON_CAUSAL,
+        NON_CAUSAL_OPEN,
         /// Initial status
         Init,
     }
@@ -477,7 +477,7 @@ pub fn get_invalidly_un_blocked(graph: &PDAG, t: &[usize], z: &FxHashSet<usize>)
 
         match walkstatus {
             // when the node is reached on a causal path but blocked, or an unblocked non-causal path
-            WalkStatus::PD_BLOCK | WalkStatus::NON_CAUSAL => {
+            WalkStatus::PD_BLOCK | WalkStatus::NON_CAUSAL_OPEN => {
                 ivb.insert(node);
             }
             _ => (),
@@ -490,7 +490,7 @@ pub fn get_invalidly_un_blocked(graph: &PDAG, t: &[usize], z: &FxHashSet<usize>)
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
                     Edge::Incoming | Edge::Undirected => Some((move_on_by, w, WalkStatus::PD_OPEN)),
-                    Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL)),
+                    Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
                     _ => None,
                 },
                 WalkStatus::PD_OPEN | WalkStatus::PD_BLOCK => match move_on_by {
@@ -499,11 +499,11 @@ pub fn get_invalidly_un_blocked(graph: &PDAG, t: &[usize], z: &FxHashSet<usize>)
                         true => Some((move_on_by, w, WalkStatus::PD_BLOCK)),
                     },
                     Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN) => {
-                        Some((move_on_by, w, WalkStatus::NON_CAUSAL))
+                        Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
                     }
                     _ => None,
                 },
-                WalkStatus::NON_CAUSAL if !blocked => Some((move_on_by, w, WalkStatus::NON_CAUSAL)),
+                WalkStatus::NON_CAUSAL_OPEN if !blocked => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
                 _ => None,
             };
 
