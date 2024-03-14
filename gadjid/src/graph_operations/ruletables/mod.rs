@@ -13,6 +13,7 @@ pub mod proper_ancestors;
 
 pub(crate) use ruletable::RuleTable;
 
+pub(crate) use ancestors::Ancestors;
 #[cfg(test)]
 pub(crate) use descendants::Descendants;
 #[cfg(test)]
