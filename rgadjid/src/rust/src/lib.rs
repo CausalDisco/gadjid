@@ -130,6 +130,8 @@ pub fn parent_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction : 
 
 /// @export
 /// Structural Hamming Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
+/// Does not take `edge_direction` argument, because SHD only considers the adjacency matrix,
+/// irrespective of the edge direction interpretation.
 #[extendr]
 pub fn shd(true_adjacency: Robj, guess_adjacency: Robj, ) -> List {
     // set to 'true' as default, the edge direction does not matter for SHD
@@ -154,8 +156,6 @@ pub fn sid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction : &str) -
 }
 
 
-
-/// Helper to avoid repetition, used by the numpy and scipy sparse loading files.
 /// Will load an edgelist iterator into a PDAG, automatically loading into a DAG and checking
 /// acyclicity. If undirected edges present, assumes that it encodes as valid CPDAG
 pub(crate) fn graph_from_iterator(
