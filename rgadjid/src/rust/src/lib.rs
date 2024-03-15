@@ -42,8 +42,8 @@ fn r_load_matrix(m: &Robj, row_to_col : bool) -> anyhow::Result<PDAG> {
 /// @export
 /// Gets the children of the first node, sanity check for row/column major loading
 #[extendr]
-pub fn children_of_first_node(true_adjacency: Robj, edge_semantics : &str) -> Vec<usize> {
-    let row_to_col = edge_direction_semantics_is_row_to_col(edge_semantics);
+pub fn children_of_first_node(true_adjacency: Robj, edge_direction : &str) -> Vec<usize> {
+    let row_to_col = edge_direction_is_row_to_col(edge_direction);
     let graph_truth = graph_from_robject(true_adjacency, row_to_col);
     graph_truth.children_of(0).iter().copied().collect()
 }
@@ -81,15 +81,15 @@ fn graph_from_robject(robj: Robj, row_to_col : bool) -> PDAG {
     }
 }
 
-const ROW_TO_COL: &str = "row->col";
-const COL_TO_ROW: &str = "col->row";
+const ROW_TO_COL: &str = "from row to col";
+const COL_TO_ROW: &str = "from col to row";
 
-fn edge_direction_semantics_is_row_to_col(edge_direction: &str) -> bool {
+fn edge_direction_is_row_to_col(edge_direction: &str) -> bool {
     match edge_direction {
         ROW_TO_COL => true,
         COL_TO_ROW => false,
         _ => panic!(
-            "edge_direction argument must be either a string containing (exactly) '{}' or '{}'",
+            "edge_direction argument must be a string containing (exactly) either '{}' or '{}'",
             ROW_TO_COL, COL_TO_ROW
         ),
     }
@@ -98,8 +98,8 @@ fn edge_direction_semantics_is_row_to_col(edge_direction: &str) -> bool {
 /// @export
 /// Ancestor Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[extendr]
-pub fn ancestor_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_semantics : &str) -> List {
-    let row_to_col = edge_direction_semantics_is_row_to_col(edge_semantics);
+pub fn ancestor_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction : &str) -> List {
+    let row_to_col = edge_direction_is_row_to_col(edge_direction);
     let graph_truth = graph_from_robject(true_adjacency, row_to_col);
     let graph_guess = graph_from_robject(guess_adjacency, row_to_col);
     let (normalized_distance, n_errors) = rust_an_aid(&graph_truth, &graph_guess);
@@ -109,8 +109,8 @@ pub fn ancestor_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_semantics 
 /// @export
 /// Optimal Adjustment Intervention Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[extendr]
-pub fn oset_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_semantics : &str) -> List {
-    let row_to_col = edge_direction_semantics_is_row_to_col(edge_semantics);
+pub fn oset_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction : &str) -> List {
+    let row_to_col = edge_direction_is_row_to_col(edge_direction);
     let graph_truth = graph_from_robject(true_adjacency, row_to_col);
     let graph_guess = graph_from_robject(guess_adjacency, row_to_col);
     let (normalized_distance, n_errors) = rust_o_aid(&graph_truth, &graph_guess);
@@ -120,8 +120,8 @@ pub fn oset_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_semantics : &s
 /// @export
 /// Parent Adjustment Intervention Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[extendr]
-pub fn parent_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_semantics : &str) -> List {
-    let row_to_col = edge_direction_semantics_is_row_to_col(edge_semantics);
+pub fn parent_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction : &str) -> List {
+    let row_to_col = edge_direction_is_row_to_col(edge_direction);
     let graph_truth = graph_from_robject(true_adjacency, row_to_col);
     let graph_guess = graph_from_robject(guess_adjacency, row_to_col);
     let (normalized_distance, n_errors) = rust_pa_aid(&graph_truth, &graph_guess);
@@ -131,8 +131,9 @@ pub fn parent_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_semantics : 
 /// @export
 /// Structural Hamming Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[extendr]
-pub fn shd(true_adjacency: Robj, guess_adjacency: Robj, edge_semantics : &str) -> List {
-    let row_to_col = edge_direction_semantics_is_row_to_col(edge_semantics);
+pub fn shd(true_adjacency: Robj, guess_adjacency: Robj, ) -> List {
+    // set to 'true' as default, the edge direction does not matter for SHD
+    let row_to_col = true;
     let graph_truth = graph_from_robject(true_adjacency, row_to_col);
     let graph_guess = graph_from_robject(guess_adjacency, row_to_col);
     let (normalized_distance, n_errors) = rust_shd(&graph_truth, &graph_guess);
@@ -141,8 +142,8 @@ pub fn shd(true_adjacency: Robj, guess_adjacency: Robj, edge_semantics : &str) -
 /// @export
 /// Structural Intervention Distance between two DAG adjacency matrices (sparse or dense)
 #[extendr]
-pub fn sid(true_adjacency: Robj, guess_adjacency: Robj, edge_semantics : &str) -> List {
-    let row_to_col = edge_direction_semantics_is_row_to_col(edge_semantics);
+pub fn sid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction : &str) -> List {
+    let row_to_col = edge_direction_is_row_to_col(edge_direction);
     let dag_truth = graph_from_robject(true_adjacency, row_to_col);
     let dag_guess = graph_from_robject(guess_adjacency, row_to_col);
     let sid_result = rust_sid(&dag_truth, &dag_guess);
