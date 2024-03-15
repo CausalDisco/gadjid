@@ -14,7 +14,6 @@ use super::ruletables::{Ancestors, Children, Descendants};
 
 /// Gets all ancestors of a set of nodes. Will also return the starting nodes.
 #[cfg(test)]
-#[allow(unused)]
 pub fn get_ancestors<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
@@ -26,7 +25,6 @@ pub fn get_ancestors<'a>(
 
 /// Gets the union of children of each node. This is more efficient than calling `children_of` for each node and then joining the results.
 #[cfg(test)]
-#[allow(unused)]
 pub fn get_children<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
