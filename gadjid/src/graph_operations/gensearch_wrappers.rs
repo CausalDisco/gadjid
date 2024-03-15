@@ -5,12 +5,13 @@ use rustc_hash::FxHashSet;
 
 use crate::PDAG;
 
-use super::ruletables::{
-    children::Children, proper_ancestors::ProperAncestors, Ancestors, Descendants, Parents,
-};
+use super::ruletables::{proper_ancestors::ProperAncestors, Descendants, Parents};
+
+#[cfg(test)]
+use super::ruletables::{Ancestors, Children};
 
 /// Gets all ancestors of a set of nodes. Will also return the starting nodes.
-#[allow(unused)]
+#[cfg(test)]
 pub fn get_ancestors<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
@@ -21,7 +22,7 @@ pub fn get_ancestors<'a>(
 }
 
 /// Gets the union of children of each node. This is more efficient than calling `children_of` for each node and then joining the results.
-#[allow(unused)]
+#[cfg(test)]
 pub fn get_children<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,

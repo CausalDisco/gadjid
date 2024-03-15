@@ -6,7 +6,6 @@ mod gensearch;
 mod gensearch_wrappers;
 mod oset_aid;
 mod parent_aid;
-mod possible_descendants;
 mod reachability;
 mod shd;
 mod sid;
@@ -26,6 +25,9 @@ pub(crate) use gensearch_wrappers::get_proper_ancestors;
 pub(crate) use reachability::{
     get_d_pd_nam, get_invalidly_un_blocked, get_nam, get_pd_nam, get_pd_nam_nva,
 };
+
+#[cfg(test)]
+mod possible_descendants;
 
 #[cfg(test)]
 pub(crate) use gensearch_wrappers::get_ancestors;
