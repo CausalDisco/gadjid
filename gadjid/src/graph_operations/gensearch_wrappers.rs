@@ -7,9 +7,10 @@ use rustc_hash::FxHashSet;
 
 use crate::PDAG;
 
-use super::ruletables::{
-    children::Children, proper_ancestors::ProperAncestors, Ancestors, Descendants, Parents,
-};
+use super::ruletables::{proper_ancestors::ProperAncestors, Parents};
+
+#[cfg(test)]
+use super::ruletables::{Ancestors, Children, Descendants};
 
 /// Gets all ancestors of a set of nodes. Will also return the starting nodes.
 #[cfg(test)]
@@ -36,6 +37,7 @@ pub fn get_children<'a>(
 }
 
 /// Gets all descendants of a set of nodes. Will also return the starting nodes.
+#[cfg(test)]
 pub fn get_descendants<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,

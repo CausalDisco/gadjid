@@ -36,14 +36,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             //  for the additional non-effect nodes in NonParents\NonDescendants)
             let claim_possible_effect =
                 FxHashSet::from_iter((0..truth.n_nodes).filter(|v| !adjustment_set.contains(v)));
-            let nam_in_guess = if matches!(
-                guess.pdag_type,
-                crate::partially_directed_acyclic_graph::Structure::CPDAG
-            ) {
-                get_nam(guess, &[treatment])
-            } else {
-                FxHashSet::<usize>::default()
-            };
+            let nam_in_guess = get_nam(guess, &[treatment]);
             // --- to here
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
@@ -104,7 +97,7 @@ mod test {
 
     #[test]
     fn property_equal_dags_zero_distance() {
-        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(6);
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
         for n in 2..40 {
             for _rep in 0..2 {
                 let dag = PDAG::random_dag(0.5, n, &mut rng);
@@ -121,7 +114,7 @@ mod test {
     #[test]
     #[ignore]
     fn random_inputs_no_crash() {
-        let mut rng = rand_chacha::ChaChaRng::seed_from_u64(3);
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
         for n in 2..40 {
             for _rep in 0..2 {
                 let dag1 = PDAG::random_dag(1.0, n, &mut rng);

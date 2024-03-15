@@ -606,6 +606,58 @@ mod test {
             let pdag = PDAG::random_pdag(0.5, 100, &mut rng);
             assert_reachability_algos_agree_on_graph(&pdag);
         });
+    #[ignore]
+    pub fn reachability_algos_agree() {
+        // anchors at parent directory of Cargo.toml
+        let mut testgraphs = std::path::PathBuf::new();
+        testgraphs.push("..");
+        testgraphs.push("testgraphs");
+
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
+        for graph_id in 1..=10 {
+            // load the cpdag
+            let cpdag = crate::test::load_pdag_from_mtx(
+                testgraphs
+                    .join(format!("100{:0>2}.CPDAG-100.mtx", graph_id))
+                    .to_str()
+                    .unwrap(),
+            );
+            let t = rand::seq::index::sample(&mut rng, 100, 1).into_vec();
+            // let t = rng.gen_range(0..=pdag.n_nodes);
+            let adjust = gensearch(&cpdag, ruletables::Parents {}, t.iter(), false);
+
+            let d_expected = get_descendants(&cpdag, t.iter());
+            let pd_expected = get_possible_descendants(&cpdag, t.iter());
+            let (nam_expected, nva_expected) = get_nam_nva(&cpdag, &t, &adjust);
+
+            #[cfg(test)]
+            assert!(d_expected.is_subset(&pd_expected));
+            #[cfg(test)]
+            assert!(nam_expected.is_subset(&pd_expected));
+            #[cfg(test)]
+            assert!(nam_expected.is_subset(&nva_expected));
+
+            let (d, pd, nam) = super::get_d_pd_nam(&cpdag, &t);
+            assert_eq!(d_expected, d);
+            assert_eq!(pd_expected, pd);
+            assert_eq!(nam_expected, nam);
+
+            let (pd, nam) = super::get_pd_nam(&cpdag, &t);
+            assert_eq!(nam_expected, nam);
+            assert_eq!(pd_expected, pd);
+
+            let nam = super::get_nam(&cpdag, &t);
+            assert_eq!(nam_expected, nam);
+
+            let (pd, nam, nva) = super::get_pd_nam_nva(&cpdag, &t, &adjust);
+            assert_eq!(pd_expected, pd);
+            assert_eq!(nam_expected, nam);
+            assert_eq!(nva_expected, nva);
+
+            let ivb = super::get_invalidly_un_blocked(&cpdag, &t, &adjust);
+            assert!(ivb.is_subset(&nva_expected));
+            assert_eq!(nva_expected, &ivb | &nam_expected);
+        }
     }
 
     fn assert_reachability_algos_agree_on_graph(pdag: &PDAG) {

@@ -52,5 +52,6 @@ def test_DAG_loading_for_all_formats():
             ), f"failed for {names[i]}"
             last_result = current_result
 
+
 if __name__ == "__main__":
     test_DAG_loading_for_all_formats()
