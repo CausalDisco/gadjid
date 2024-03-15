@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MPL-2.0
 //! Holds functions that simplify calls to the generalized search algorithm [`gensearch`].
 
 use rustc_hash::FxHashSet;
