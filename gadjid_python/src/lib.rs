@@ -114,8 +114,9 @@ pub fn parent_aid(g_true: &PyAny, g_guess: &PyAny, edge_direction: &str) -> PyRe
 
 /// Structural Hamming Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[pyfunction]
-pub fn shd(g_true: &PyAny, g_guess: &PyAny, edge_direction: &str) -> PyResult<(f64, usize)> {
-    let row_to_col = edge_direction_is_row_to_col(edge_direction)?;
+pub fn shd(g_true: &PyAny, g_guess: &PyAny) -> PyResult<(f64, usize)> {
+    // set row_to_col variable to 'true', but it doesn't matter
+    let row_to_col = true;
     let graph_truth = graph_from_pyobject(g_true, row_to_col)?;
     let graph_guess = graph_from_pyobject(g_guess, row_to_col)?;
     let (normalized_distance, n_errors) = rust_shd(&graph_truth, &graph_guess);
