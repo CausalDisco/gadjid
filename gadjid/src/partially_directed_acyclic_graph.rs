@@ -866,23 +866,20 @@ mod test {
             let edge_density = 0.5;
             let adjacency = PDAG::_random_pdag_vecvec(edge_density, size, &mut rng);
 
-            let adjacency_clone = adjacency.clone();
-
-            let row_major_dag = PDAG::from_vecvec(adjacency);
-
-            // now transpose the adjacency matrix
+            // transpose the adjacency matrix
             let mut transpose_adjacency = vec![vec![0; size]; size];
 
             for (x, row) in transpose_adjacency.iter_mut().enumerate() {
                 for (y, entry) in row.iter_mut().enumerate() {
-                    *entry = adjacency_clone[y][x];
+                    *entry = adjacency[y][x];
                 }
             }
 
-            // and construct the DAG from the transposed adjacency matrix
+            // construct the DAG from the original and transposed adjacency matrix
+            let row_major_dag = PDAG::from_vecvec(adjacency);
             let col_major_dag = PDAG::from_transposed_vecvec(transpose_adjacency);
 
-            // the final representation of the DAG should be 100% equal
+            // the final representations of the DAG should be 100% equal
             assert_eq!(row_major_dag, col_major_dag);
         }
     }
