@@ -104,7 +104,7 @@ mod test {
 
     #[test]
     fn property_equal_dags_zero_distance() {
-        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(6);
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
         for n in 2..40 {
             for _rep in 0..2 {
                 let dag = PDAG::random_dag(0.5, n, &mut rng);
@@ -121,7 +121,7 @@ mod test {
     #[test]
     #[ignore]
     fn random_inputs_no_crash() {
-        let mut rng = rand_chacha::ChaChaRng::seed_from_u64(3);
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
         for n in 2..40 {
             for _rep in 0..2 {
                 let dag1 = PDAG::random_dag(1.0, n, &mut rng);

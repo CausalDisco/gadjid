@@ -132,7 +132,7 @@ mod test {
 
     #[test]
     fn property_equal_dags_zero_distance() {
-        let mut rng = rand_chacha::ChaChaRng::seed_from_u64(4);
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
         for n in 2..40 {
             let dag = PDAG::random_dag(0.5, n, &mut rng);
             assert_eq!(
