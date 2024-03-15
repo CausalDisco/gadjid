@@ -19,7 +19,6 @@ pub use shd::shd;
 pub use sid::sid;
 
 pub(crate) use gensearch::gensearch;
-pub(crate) use gensearch_wrappers::get_descendants;
 pub(crate) use gensearch_wrappers::get_parents;
 pub(crate) use gensearch_wrappers::get_proper_ancestors;
 pub(crate) use reachability::{
@@ -33,6 +32,8 @@ mod possible_descendants;
 pub(crate) use gensearch_wrappers::get_ancestors;
 #[cfg(test)]
 pub(crate) use gensearch_wrappers::get_children;
+#[cfg(test)]
+pub(crate) use gensearch_wrappers::get_descendants;
 #[cfg(test)]
 pub(crate) use oset_aid::optimal_adjustment_set;
 #[cfg(test)]
