@@ -16,7 +16,6 @@ pub(crate) use parents::Parents;
 pub(crate) use ruletable::RuleTable;
 
 #[cfg(test)]
-#[allow(unused)]
 pub(crate) use children::Children;
 #[cfg(test)]
 pub(crate) use descendants::Descendants;

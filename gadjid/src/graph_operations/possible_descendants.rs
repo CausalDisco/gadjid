@@ -2,7 +2,6 @@
 //! Algorithm for getting all possible descendants of a set of nodes
 
 #[cfg(test)]
-#[allow(unused)]
 /// Gets all the possible descendants of a set of nodes.
 /// The input nodes are also included in the output.
 pub(crate) fn get_possible_descendants<'a>(
