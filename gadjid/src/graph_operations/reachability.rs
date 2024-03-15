@@ -13,7 +13,7 @@ This file contains functions that calculate the reachability of nodes in a (CP)D
 The algorithms in general consist of the following parts:
 
 - The types of reachability we care about are tracked in the locally defined `WalkStatus` enum.
-  Between the functions, some of these walk-stati are completely identical, some of them only very similar. 
+  Between the functions, some of these walk-stati are completely identical, some of them only very similar.
   A local re-definition to prevent indirection was considered most readable and maintainable.
 
 - Some initial nodes from which to start the walk, in this case always treatment nodes.
@@ -25,23 +25,23 @@ The algorithms in general consist of the following parts:
   The `get_next_steps` and `get_next_steps_conditioned` functions are responsible for this. Respectively,
   they return possible children, or neighbors that are not independent of the current node.
 
-  - A transition function, that, given the current walk status and the next node to visit and how to reach it, 
-  returns the status of the walk when continuing along to this new node. 
-  
+  - A transition function, that, given the current walk status and the next node to visit and how to reach it,
+  returns the status of the walk when continuing along to this new node.
+
 With these parts in place, the algorithms are quite simple:
 
-- We empty-initialize some sets of interest. 
+- We empty-initialize some sets of interest.
   At termination time they will returned, containing the nodes that are reachable in the desired way.
 
-  We also initialize a set to contain visited edge-node-walkstatus triplets, to guarantee termination and prevent redoing work. 
+  We also initialize a set to contain visited edge-node-walkstatus triplets, to guarantee termination and prevent redoing work.
 
 - We enter a loop, popping edge, node and walkstatus from the stack and visiting them, until the stack is empty.
-  
+
   The `match walkstatus` block in the beginning will add the node to the correct set, and then continue the walk.
-  
-  Afterwards we then use either `get_next_steps` or `get_next_steps_conditioned`, to iterate through all the ways 
-  in which the walk could continue. 
-  For each of these possible continuations, the transition function is applied, and the resulting  new 
+
+  Afterwards we then use either `get_next_steps` or `get_next_steps_conditioned`, to iterate through all the ways
+  in which the walk could continue.
+  For each of these possible continuations, the transition function is applied, and the resulting  new
   (edge_to_reach, new_node, new_walkstatus) triplet is pushed onto the stack, unless it had been visited before.
 
 - When the loop terminates, all reachable nodes have been visited and the sets contain the correct nodes.
