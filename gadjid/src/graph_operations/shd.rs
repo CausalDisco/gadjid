@@ -76,7 +76,7 @@ pub fn shd(g_truth: &PDAG, g_guess: &PDAG) -> (f64, usize) {
 
 #[cfg(test)]
 mod test {
-    use rand::{SeedableRng};
+    use rand::SeedableRng;
 
     use crate::PDAG;
 
