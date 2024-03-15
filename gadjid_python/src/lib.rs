@@ -113,6 +113,8 @@ pub fn parent_aid(g_true: &PyAny, g_guess: &PyAny, edge_direction: &str) -> PyRe
 }
 
 /// Structural Hamming Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
+/// Does not take `edge_direction` argument, because SHD only considers the adjacency matrix,
+/// irrespective of the edge direction interpretation.
 #[pyfunction]
 pub fn shd(g_true: &PyAny, g_guess: &PyAny) -> PyResult<(f64, usize)> {
     // set row_to_col variable to 'true', but it doesn't matter
