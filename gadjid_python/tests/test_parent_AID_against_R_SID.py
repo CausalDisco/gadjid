@@ -11,7 +11,7 @@ TESTGRAPHS_DIR = Path(__file__).parent.parent.parent / "testgraphs"
 
 def load_trlpt(name):
     trplt = np.loadtxt(
-        TESTGRAPHS_DIR / f"{name:.0f}.DAG-100.mtx",
+        TESTGRAPHS_DIR / f"100-node-DAG-{name:.0f}.mtx",
         skiprows=2,
     )
     size = 100
@@ -23,7 +23,7 @@ def load_trlpt(name):
 
 def test_parent_AID_against_R_SID():
     testcases = np.loadtxt(
-        TESTGRAPHS_DIR / "SID.DAG-100.csv",
+        TESTGRAPHS_DIR / "SID-100-node-DAGs.csv",
         delimiter=",",
         skiprows=1,
     )
