@@ -169,7 +169,8 @@ mod test {
         testgraphs.push("..");
         testgraphs.push("testgraphs");
 
-        let testcases_file = std::fs::read_to_string(testgraphs.join("SID.DAG-100.csv")).unwrap();
+        let testcases_file =
+            std::fs::read_to_string(testgraphs.join("SID-100-node-DAGs.csv")).unwrap();
         let mut testcases = testcases_file.lines();
         testcases.next(); // skip header
 
@@ -186,8 +187,8 @@ mod test {
         // go through all testcases, load the DAGs from the mtx files and
         // compare the computed Parent-AID=SID with the SID in the csv file (computed via R SID package)
         for (gtrue, gguess, rsid) in tests {
-            let full_path_true = testgraphs.join(format!("{}.DAG-100.mtx", gtrue));
-            let full_path_guess = testgraphs.join(format!("{}.DAG-100.mtx", gguess));
+            let full_path_true = testgraphs.join(format!("100-node-DAG-{}.mtx", gtrue));
+            let full_path_guess = testgraphs.join(format!("100-node-DAG-{}.mtx", gguess));
             let g_true = crate::test::load_pdag_from_mtx(full_path_true.to_str().unwrap());
             let g_guess = crate::test::load_pdag_from_mtx(full_path_guess.to_str().unwrap());
 
