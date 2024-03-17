@@ -38,4 +38,3 @@ def test_parent_AID_against_R_SID():
             f"failed for sid({true_name}, {guess_name}):"
             f" {sid[1]} vs {int(rsid)}"
         )
-
