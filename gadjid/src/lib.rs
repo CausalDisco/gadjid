@@ -234,17 +234,17 @@ mod test {
     #[test]
     fn insta_snapshots_small() {
         // loops through (1, 2), (2, 3), ..., (9, 10), (10, 1) and creates snapshots for each pair
-        for (true_id, guess_id) in (1..=10).map(|x| (x, (x % 10) + 1)) {
-            let g_true = &format!("200{:0>2}.DAG-10", true_id);
-            let g_guess = &format!("200{:0>2}.DAG-10", guess_id);
+        for (true_id, guess_id) in (1..=10).map(|x| (x + 9, (x % 10) + 10)) {
+            let g_true = &format!("10-node-DAG-{}", true_id);
+            let g_guess = &format!("10-node-DAG-{}", guess_id);
             insta::assert_yaml_snapshot!(
-                format!("small-DAG{:0>2}-vs-DAG{:0>2}", true_id, guess_id),
+                format!("small-DAG{}-vs-DAG{}", true_id, guess_id),
                 test(g_true, g_guess)
             );
-            let g_true = &format!("200{:0>2}.CPDAG-10", true_id);
-            let g_guess = &format!("200{:0>2}.CPDAG-10", guess_id);
+            let g_true = &format!("10-node-CPDAG-{}", true_id);
+            let g_guess = &format!("10-node-CPDAG-{}", guess_id);
             insta::assert_yaml_snapshot!(
-                format!("small-CPDAG{:0>2}-vs-CPDAG{:0>2}", true_id, guess_id),
+                format!("small-CPDAG{}-vs-CPDAG{}", true_id, guess_id),
                 test(g_true, g_guess)
             );
         }
@@ -254,17 +254,17 @@ mod test {
     #[ignore]
     fn insta_snapshots_large() {
         // loops through (1, 2), (2, 3), ..., (9, 10), (10, 1) and creates snapshots for each pair
-        for (true_id, guess_id) in (1..=10).map(|x| (x, (x % 10) + 1)) {
-            let g_true = &format!("100{:0>2}.DAG-100", true_id);
-            let g_guess = &format!("100{:0>2}.DAG-100", guess_id);
+        for (true_id, guess_id) in (1..=10).map(|x| (x + 19, (x % 10) + 20)) {
+            let g_true = &format!("100-node-DAG-{}", true_id);
+            let g_guess = &format!("100-node-DAG-{}", guess_id);
             insta::assert_yaml_snapshot!(
-                format!("large-DAG{:0>2}-vs-DAG{:0>2}", true_id, guess_id),
+                format!("large-DAG{}-vs-DAG{}", true_id, guess_id),
                 test(g_true, g_guess)
             );
-            let g_true = &format!("100{:0>2}.CPDAG-100", true_id);
-            let g_guess = &format!("100{:0>2}.CPDAG-100", guess_id);
+            let g_true = &format!("100-node-CPDAG-{}", true_id);
+            let g_guess = &format!("100-node-CPDAG-{}", guess_id);
             insta::assert_yaml_snapshot!(
-                format!("large-CPDAG{:0>2}-vs-CPDAG{:0>2}", true_id, guess_id),
+                format!("large-CPDAG{}-vs-CPDAG{}", true_id, guess_id),
                 test(g_true, g_guess)
             );
         }

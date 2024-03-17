@@ -1,0 +1,36 @@
+---
+source: src/lib.rs
+expression: "test(g_true, g_guess)"
+---
+g_true: 10-node-CPDAG-15
+g_guess: 10-node-CPDAG-16
+ancestor_aid:
+  - 0.12222222222222222
+  - 11
+oset_aid:
+  - 0.12222222222222222
+  - 11
+parent_aid:
+  - 0.13333333333333333
+  - 12
+shd:
+  - 0.13333333333333333
+  - 6
+t:
+  - 4
+y: 5
+z:
+  - 0
+  - 1
+possible_descendants_of_t_in_g_guess:
+  - 4
+not_amenable_in_g_guess_wrt_t: []
+proper_ancestors_of_y_in_g_guess_wrt_t:
+  - 5
+oset_for_t_onto_y_in_g_guess: []
+not_validly_adjusted_for_in_g_guess_by_parents_of_t: []
+not_validly_adjusted_for_in_g_guess_by_oset_for_t_onto_y: []
+not_validly_adjusted_for_in_g_guess_by_empty_set: []
+not_validly_adjusted_for_in_g_guess_by_z:
+  - 0
+  - 1
