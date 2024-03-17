@@ -660,11 +660,11 @@ mod test {
         testgraphs.push("testgraphs");
 
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
-        for graph_id in 1..=10 {
+        for graph_id in 20..=29 {
             // load the cpdag
             let cpdag = crate::test::load_pdag_from_mtx(
                 testgraphs
-                    .join(format!("100{:0>2}.CPDAG-100.mtx", graph_id))
+                    .join(format!("100-node-CPDAG-{}.mtx", graph_id))
                     .to_str()
                     .unwrap(),
             );
