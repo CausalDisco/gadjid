@@ -46,7 +46,7 @@ def test_DAG_loading_for_all_formats():
         last_result = None
         for i, matrix in enumerate(matrices):
             current_result = gadjid.shd(
-                matrix, matrices[0], edge_direction="from row to col")
+                matrix, matrices[0])
             assert (
                 last_result is None or last_result == current_result
             ), f"failed for {names[i]}"
