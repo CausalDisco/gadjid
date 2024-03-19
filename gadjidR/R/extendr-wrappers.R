@@ -27,7 +27,7 @@ oset_aid <- function(true_adjacency, guess_adjacency, edge_direction) .Call(wrap
 #' @export
 sid <- function(true_adjacency, guess_adjacency, edge_direction) .Call(wrap__sid, true_adjacency, guess_adjacency, edge_direction)
 
-#' Structural Hamming Distance between two DAG / CPDAG adjacency matrices (dense). 
+#' Structural Hamming Distance between two DAG / CPDAG adjacency matrices (dense).
 #' Does not take `edge_direction` argument, as SHD reads the matrix 1:1.
 #' @export
 shd <- function(true_adjacency, guess_adjacency) .Call(wrap__shd, true_adjacency, guess_adjacency)
