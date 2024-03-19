@@ -9,3 +9,4 @@
 # ignore custom local-only folders
 sketch
 venv
+.Rproj.user

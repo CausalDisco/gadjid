@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: MPL-2.0
 
-use anyhow::ensure;
+// Allow non snake case so the 'R' can be distinguished as referring to the R language
+// We cannot use '_' to separate words in the function names, because the R language does not allow naming
+// packages with underscores.
+#![allow(non_snake_case)]
+
 use ::gadjid::graph_operations::ancestor_aid as rust_an_aid;
 use ::gadjid::graph_operations::oset_aid as rust_o_aid;
 use ::gadjid::graph_operations::parent_aid as rust_pa_aid;
 use ::gadjid::graph_operations::shd as rust_shd;
 use ::gadjid::graph_operations::sid as rust_sid;
+use anyhow::ensure;
 use extendr_api::prelude::*;
 use gadjid::{self, EdgelistIterator, PDAG};
 
@@ -13,7 +18,7 @@ use gadjid::{self, EdgelistIterator, PDAG};
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
 extendr_module! {
-    mod rgadjid;
+    mod gadjidR;
     fn parent_aid;
     fn ancestor_aid;
     fn oset_aid;
@@ -24,7 +29,7 @@ extendr_module! {
 
 #[allow(non_snake_case)]
 /// Loads a `matrix` of i32 into a triplet iterator for use with gadjid
-fn r_load_matrix(m: &Robj, row_to_col : bool) -> anyhow::Result<PDAG> {
+fn r_load_matrix(m: &Robj, row_to_col: bool) -> anyhow::Result<PDAG> {
     ensure!(m.is_real(), "expected real numbers!");
     let data = m.as_real_slice().expect("Could not get data as slice");
     let matrix_size = isqrt(data.len());
@@ -41,10 +46,10 @@ fn r_load_matrix(m: &Robj, row_to_col : bool) -> anyhow::Result<PDAG> {
     graph_from_iterator(triplet_iter, row_to_col, matrix_size)
 }
 
-/// @export
 /// Gets the children of the first node, sanity check for row/column major loading
+/// @export
 #[extendr]
-pub fn children_of_first_node(true_adjacency: Robj, edge_direction : &str) -> Vec<usize> {
+pub fn children_of_first_node(true_adjacency: Robj, edge_direction: &str) -> Vec<usize> {
     let row_to_col = edge_direction_is_row_to_col(edge_direction);
     let graph_truth = graph_from_robject(true_adjacency, row_to_col);
     graph_truth.children_of(0).iter().copied().collect()
@@ -63,7 +68,7 @@ fn isqrt(n: usize) -> usize {
 }
 
 #[allow(non_snake_case)]
-fn graph_from_robject(robj: Robj, row_to_col : bool) -> PDAG {
+fn graph_from_robject(robj: Robj, row_to_col: bool) -> PDAG {
     // holds a list of transformations that we want to apply to the object to get a PDAG.
     let mut g = [r_load_matrix].iter();
 
@@ -97,10 +102,10 @@ fn edge_direction_is_row_to_col(edge_direction: &str) -> bool {
     }
 }
 
+/// Ancestor Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (dense)
 /// @export
-/// Ancestor Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[extendr]
-pub fn ancestor_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction : &str) -> List {
+pub fn ancestor_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction: &str) -> List {
     let row_to_col = edge_direction_is_row_to_col(edge_direction);
     let graph_truth = graph_from_robject(true_adjacency, row_to_col);
     let graph_guess = graph_from_robject(guess_adjacency, row_to_col);
@@ -108,10 +113,10 @@ pub fn ancestor_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction 
     list!(normalized_distance, n_errors)
 }
 
+/// Optimal Adjustment Intervention Distance between two DAG / CPDAG adjacency matrices (dense)
 /// @export
-/// Optimal Adjustment Intervention Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[extendr]
-pub fn oset_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction : &str) -> List {
+pub fn oset_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction: &str) -> List {
     let row_to_col = edge_direction_is_row_to_col(edge_direction);
     let graph_truth = graph_from_robject(true_adjacency, row_to_col);
     let graph_guess = graph_from_robject(guess_adjacency, row_to_col);
@@ -119,10 +124,10 @@ pub fn oset_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction : &s
     list!(normalized_distance, n_errors)
 }
 
+/// Parent Adjustment Intervention Distance between two DAG / CPDAG adjacency matrices (dense)
 /// @export
-/// Parent Adjustment Intervention Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[extendr]
-pub fn parent_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction : &str) -> List {
+pub fn parent_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction: &str) -> List {
     let row_to_col = edge_direction_is_row_to_col(edge_direction);
     let graph_truth = graph_from_robject(true_adjacency, row_to_col);
     let graph_guess = graph_from_robject(guess_adjacency, row_to_col);
@@ -130,12 +135,14 @@ pub fn parent_aid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction : 
     list!(normalized_distance, n_errors)
 }
 
+// The documentation below has to be in one line for it to compile, and at most around 180 characters.
+// Applies not only to this docstring, however this one was long enough for it to be a problem previously.
+
+/// Structural Hamming Distance between two DAG / CPDAG adjacency matrices (dense).
+/// Does not take `edge_direction` argument, as SHD reads the matrix 1:1.
 /// @export
-/// Structural Hamming Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
-/// Does not take `edge_direction` argument, because SHD only considers the adjacency matrix,
-/// irrespective of the edge direction interpretation.
 #[extendr]
-pub fn shd(true_adjacency: Robj, guess_adjacency: Robj, ) -> List {
+pub fn shd(true_adjacency: Robj, guess_adjacency: Robj) -> List {
     // set to 'true' as default, the edge direction does not matter for SHD
     let row_to_col = true;
     let graph_truth = graph_from_robject(true_adjacency, row_to_col);
@@ -143,10 +150,11 @@ pub fn shd(true_adjacency: Robj, guess_adjacency: Robj, ) -> List {
     let (normalized_distance, n_errors) = rust_shd(&graph_truth, &graph_guess);
     list!(normalized_distance, n_errors)
 }
+
+/// Structural Intervention Distance between two DAG adjacency matrices (dense)
 /// @export
-/// Structural Intervention Distance between two DAG adjacency matrices (sparse or dense)
 #[extendr]
-pub fn sid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction : &str) -> List {
+pub fn sid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction: &str) -> List {
     let row_to_col = edge_direction_is_row_to_col(edge_direction);
     let dag_truth = graph_from_robject(true_adjacency, row_to_col);
     let dag_guess = graph_from_robject(guess_adjacency, row_to_col);
@@ -156,7 +164,6 @@ pub fn sid(true_adjacency: Robj, guess_adjacency: Robj, edge_direction : &str) -
         Err(e) => panic!("SID error: {}", e),
     }
 }
-
 
 /// Will load an edgelist iterator into a PDAG, automatically loading into a DAG and checking
 /// acyclicity. If undirected edges present, assumes that it encodes as valid CPDAG
