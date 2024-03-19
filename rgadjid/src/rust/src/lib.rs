@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MPL-2.0
+
 use anyhow::ensure;
 use ::gadjid::graph_operations::ancestor_aid as rust_an_aid;
 use ::gadjid::graph_operations::oset_aid as rust_o_aid;
