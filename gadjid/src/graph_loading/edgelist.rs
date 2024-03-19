@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MPL-2.0
 //! This module contains the Edgelist struct, which is an iterator over the edges of a graph.
 
-/// An iterator over the edges of a graph, yielding `(from/to, to/from, edgetype)` tuples.
-/// The choice between `from/to` is indicated by the associated implementation of `Order` ([`IterationLayoutTag`]).
-/// Will skip over all 0's in the inner iterator, yielding only nonzero checks.
+/// An iterator over the edges of a graph, yielding `(from, to, edgetype)` tuples.
+
+/// Example yield: `(4, 7, 1)`, which is to be interpreted as `4 -> 7`.
+
+/// Will skip over all 0's in the inner iterator, yielding only nonzero entries.
 /// Will panic during load if the inner iterator yields edges in a non-row-by-row or non-column-by-column order.
 pub struct Edgelist<Order: IterationLayoutTag, I>
 where
@@ -76,15 +78,12 @@ where
 /// associated with this trait, it is purely for strong type checking.
 pub trait IterationLayoutTag: Sized {}
 
-/// Implementation of [`IterationLayoutTag`] for row-major order. Fed as type parameter when
-/// constructing [`Edgelist`]. This indicates that the edgelist returns edges in a row-major order.
 /// This indicates that the outermost index is the row, and the innermost index is the column. The
-/// column index will vary the fastest. The iterator will yield triples of `(row, column, value)`.
+/// column index will vary the fastest. The iterator will yield triples of `(row, column, edge_type)`.
 pub struct RowMajorOrder;
-/// Implementation of [`IterationLayoutTag`] for column-major order. Fed as type parameter when
-/// constructing [`Edgelist`]. This indicates that the edgelist returns edges in a column-major order.
+
 /// This indicates that the outermost index is the column, and the innermost index is the row. The
-/// row index will vary the fastest. The iterator will yield triples of `(column, row, value)`.
+/// row index will vary the fastest. The iterator will yield triples of `(column, row, edge_type)`.
 pub struct ColumnMajorOrder;
 
 // There is no actual functionality associated with the trait implementation, it is purely for strong type checking.

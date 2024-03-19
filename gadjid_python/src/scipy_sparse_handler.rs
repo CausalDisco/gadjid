@@ -39,13 +39,13 @@ impl Iterator for CSMatrix<'_> {
 }
 
 /// Load a PDAG from a scipy sparse matrix in csr or csc format.
-pub fn try_from(ob: &PyAny) -> anyhow::Result<PDAG> {
+pub fn try_from(ob: &PyAny, row_to_col: bool) -> anyhow::Result<PDAG> {
     // get the encoding format
     let format = ob.getattr(intern!(ob.py(), "format"))?;
     let format = format.extract()?;
 
     // determine whether the matrix is row or column major
-    let row_major = match format {
+    let row_major_iteration = match format {
         // Compressed Sparse Row matrix
         "csr" => true,
         // Compressed Sparse Column matrix
@@ -54,19 +54,27 @@ pub fn try_from(ob: &PyAny) -> anyhow::Result<PDAG> {
         _ => false,
     };
 
+    // load as row-major if it's in row-major order and we want to interpret it as row_to_col,
+    // or if it's in column-major order and we want to interpret it as col_to_row (so transpose by interpreting as row-major)
+    let interpret_as_row_major = row_to_col == row_major_iteration;
+
     // get the shape to make sure it is square and for later CSR / CSC iteration
     let shape = ob.getattr(intern!(ob.py(), "shape"))?;
     let shape = shape.extract::<(usize, usize)>()?;
     anyhow::ensure!(shape.0 == shape.1, "Matrix must be square");
 
     if format == "csr" || format == "csc" {
-        graph_from_csc_or_csr(ob, row_major, shape.0)
+        graph_from_csc_or_csr(ob, interpret_as_row_major, shape.0)
     } else {
         bail!("Unsupported sparse matrix format received: '{:?}'. The package currently only supports 'csr' and 'csc'.", format);
     }
 }
 
-fn graph_from_csc_or_csr(ob: &PyAny, row_major: bool, shape: usize) -> anyhow::Result<PDAG> {
+fn graph_from_csc_or_csr(
+    ob: &PyAny,
+    interpret_as_row_major: bool,
+    shape: usize,
+) -> anyhow::Result<PDAG> {
     // these explanations assume a csr matrix
     // element at index `r` and `r+1` hold the indices of the first (inclusive) and last
     // (exclusive) nonzero entries in row `r`
@@ -94,5 +102,5 @@ fn graph_from_csc_or_csr(ob: &PyAny, row_major: bool, shape: usize) -> anyhow::R
         current_outer_dim: 0,
     };
 
-    graph_from_iterator(iterator, row_major, shape)
+    graph_from_iterator(iterator, interpret_as_row_major, shape)
 }

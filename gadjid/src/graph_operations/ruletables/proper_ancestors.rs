@@ -76,7 +76,7 @@ mod test {
             vec![0, 0, 0],
         ];
 
-        let dag = PDAG::from_vecvec(v_dag);
+        let dag = PDAG::from_row_to_col_vecvec(v_dag);
 
         let result = proper_ancestors(&dag, [].iter(), [2].iter());
         let expected = HashSet::from([0, 1, 2]);
@@ -98,7 +98,7 @@ mod test {
             vec![0, 0, 0, 0],
         ];
 
-        let dag = PDAG::from_vecvec(v_dag);
+        let dag = PDAG::from_row_to_col_vecvec(v_dag);
 
         let result = proper_ancestors(&dag, [].iter(), [3].iter());
         let expected = HashSet::from([0, 1, 2, 3]);
@@ -116,7 +116,7 @@ mod test {
             vec![0, 0, 0, 0, 1],
             vec![0, 0, 0, 0, 0],
         ];
-        let dag = PDAG::from_vecvec(v_dag);
+        let dag = PDAG::from_row_to_col_vecvec(v_dag);
 
         let result = proper_ancestors(&dag, [].iter(), [4].iter());
         let expected = HashSet::from([0, 1, 2, 3, 4]);
