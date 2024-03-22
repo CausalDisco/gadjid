@@ -6,36 +6,41 @@ use rustc_hash::FxHashSet;
 use crate::{partially_directed_acyclic_graph::Edge, PDAG};
 
 /*
-Developer's guide to this file and the algorithms it contains:
+Developer's guide to the functions in this file (see also Appendix D of https://doi.org/10.48550/arXiv.2402.08616)
 
-This file contains functions that calculate the reachability of nodes in a (CP)DAG relative to a set of treatment nodes T.
+The functions in this file return nodes reachable (for different reachability-conditions) in a (CP)DAG relative to a set of treatment nodes T.
 
-The algorithms in general consist of the following parts:
+In general, the algorithms comprise the following parts:
 
-- The types of reachability we care about are tracked in the locally defined `WalkStatus` enum.
-  Between the functions, some of these walk-stati are completely identical, some of them only very similar.
-  A local re-definition to prevent indirection was considered most readable and maintainable.
+- The kind of reachability considered in the different algorithms is tracked via the locally defined `WalkStatus` enum.
+  Between the functions, these walk-stati are similar and sometimes identical.
+  We re-define the WalkStatus locally, to avoid indirection and make it easier to read and maintain the functions.
 
-- Some initial nodes from which to start the walk, in this case always treatment nodes.
+- Some initial nodes from which to start the walks, in this case always treatment nodes.
 
-- A stack holding the next nodes to visit, alongside the edge that into to them and their current walk-status.
+- A stack holding the next nodes to visit, alongside the edge to get to them and the current walk's status.
 
 - A function that, given a node (and possibly how it was reached and whether it is part of an adjustment set),
-  returns the next nodes to continue the walk along and the edge through which they are reachable.
-  The `get_next_steps` and `get_next_steps_conditioned` functions are responsible for this. Respectively,
-  they return possible children, or neighbors that are not independent of the current node.
+  returns the next nodes to continue to walk along and the edge through which those next nodes are reachable.
+  The `get_next_steps` and `get_next_steps_conditioned` functions are responsible for this;
+  `get_next_steps` returns possible children;
+  `get_next_steps_conditioned` returns possible neighbors and a local separation status relative to the provided node set z
 
-  - A transition function, that, given the current walk status and the next node to visit and how to reach it,
-  returns the status of the walk when continuing along to this new node.
+- A transition function that, given the current walk status and the next node to visit and how to reach it,
+  returns the status of the walk when continuing along to this next node.
 
-With these parts in place, the algorithms are quite simple:
+With these in place, the algorithms proceed as follows:
 
 - We empty-initialize some sets of interest.
-  At termination time they will returned, containing the nodes that are reachable in the desired way.
+  When the algorithm terminates, these sets are returned and contain the nodes that are reachable in a certain way.
+  For example, some algorithms return a set NAM of all nodes y such that the graph is not amenable relative to (t,y).
 
-  We also initialize a set to contain visited edge-node-walkstatus triplets, to guarantee termination and prevent redoing work.
+  We also initialize a set to track visited edge-node-walkstatus triplets, to guarantee termination and prevent redoing work.
 
-- We enter a loop, popping edge, node and walkstatus from the stack and visiting them, until the stack is empty.
+- We enter a loop, popping (edge, node, walkstatus) triplets from a stack of to-be-visited nodes until the stack is empty.
+  As the algorithm proceeds, new triplets may be appended to the end of the to-be-visited stack;
+  since to-be-visited elements are popped from the end, the stack is processed LIFO,
+  which corresponds to traversing the graph in depth first.
 
   The `match walkstatus` block in the beginning will add the node to the correct set, and then continue the walk.
 
@@ -46,6 +51,31 @@ With these parts in place, the algorithms are quite simple:
 
 - When the loop terminates, all reachable nodes have been visited and the sets contain the correct nodes.
   These sets are returned.
+
+The following reachability algorithms take a graph and a set of nodes t as input (and use `get_next_steps`):
+- `get_d_pd_nam`
+    – walks directed, possibly directed walks starting T→, possibly directed walks starting T— (linked to non-amenability, NAM)
+    - returns descendants (d), possible descendants (pd), and nam (not amenable) nodes y such that G is not amenable relative to (t,y)
+- `get_pd_nam`
+    - as above, but needs to distinguish between directed and possibly directed walks
+    - returns d and nam
+- `get_nam`
+    - as above, but only needs to walk possibly directed walks starting T–
+    - returns nam
+
+The following reachability algorithms take a graph, a set of nodes t, and a set of nodes z as input (and use `get_next_steps_conditioned`):
+- `get_pd_nam_nva`
+    - walks possibly directed walks that are either open or blocked and either starting T→ or T–, and open non-causal walks
+    - returns possible descendants (pd), nam (not amenable) nodes y such that G is not amenable relative to (t,y)
+      and nva (not validly adjusted for) nodes y such that z is not a valid adjustment set for (t,y) in the graph
+- `get_nam_nva`
+    - as above
+    - returns nam and nva
+- `get_invalidly_un_blocked`
+    - walks possibly directed walks that are either open or blocked (ignoring whether they start T→ or T–)
+    - returns nodes y such that z is not a valid adjustment set for (t,y) in the graph
+      since one of the (non-)blocking conditions is violated while non-amenability is ignored
+      (which is why here the walk status does not track whether a walk started T→ or T–)
 */
 
 /// Returns possible children of the node `v` and the shared edge. `v (-> c)` or `v (-- c)`. See the [`Edge`] enum for a more detailed explanation of this notation.
@@ -86,9 +116,9 @@ pub fn get_d_pd_nam(
     enum WalkStatus {
         /// Descendant / Directed (always amenable)
         D,
-        /// Possible Descendant / Partially Directed, Amenable (starts T→)
+        /// Possible Descendant / Possibly Directed, Amenable (starts T→)
         PD_AM,
-        /// Possible Descendant / Partially Directed, Not Amenable (starts T—)
+        /// Possible Descendant / Possibly Directed, Not Amenable (starts T—)
         PD_NAM,
         /// Initial status
         Init,
@@ -158,9 +188,9 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum WalkStatus {
-        /// Possible Descendant / Partially Directed, Amenable (starts T→)
+        /// Possible Descendant / Possibly Directed, Amenable (starts T→)
         PD_AM,
-        /// Possible Descendant / Partially Directed, Not Amenable (starts T—)
+        /// Possible Descendant / Possibly Directed, Not Amenable (starts T—)
         PD_NAM,
         /// Initial status
         Init,
@@ -313,13 +343,13 @@ pub fn get_pd_nam_nva(
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum WalkStatus {
-        /// Possible Descendant / Partially Directed, Amenable (starts T→), and Open Walk
+        /// Possible Descendant / Possibly Directed, Amenable (starts T→), and Open Walk
         PD_OPEN_AM,
-        /// Possible Descendant / Partially Directed, Amenable (starts T→), and Blocked Walk
+        /// Possible Descendant / Possibly Directed, Amenable (starts T→), and Blocked Walk
         PD_BLOCKED_AM,
-        /// Possible Descendant / Partially Directed, Not Amenable (starts T—), and Open Walk
+        /// Possible Descendant / Possibly Directed, Not Amenable (starts T—), and Open Walk
         PD_OPEN_NAM,
-        /// Possible Descendant / Partially Directed, Not Amenable (starts T–), and Blocked Walk
+        /// Possible Descendant / Possibly Directed, Not Amenable (starts T–), and Blocked Walk
         PD_BLOCKED_NAM,
         /// Non-Causal walk that has not been blocked
         NON_CAUSAL_OPEN,
@@ -424,13 +454,13 @@ pub fn get_nam_nva(
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum WalkStatus {
-        /// Possible Descendant / Partially Directed, Amenable (starts T→), and Open Walk
+        /// Possible Descendant / Possibly Directed, Amenable (starts T→), and Open Walk
         PD_OPEN_AM,
-        /// Possible Descendant / Partially Directed, Amenable (starts T→), and Blocked Walk
+        /// Possible Descendant / Possibly Directed, Amenable (starts T→), and Blocked Walk
         PD_BLOCKED_AM,
-        /// Possible Descendant / Partially Directed, Not Amenable (starts T—), and Open Walk
+        /// Possible Descendant / Possibly Directed, Not Amenable (starts T—), and Open Walk
         PD_OPEN_NAM,
-        /// Possible Descendant / Partially Directed, Not Amenable (starts T–), and Blocked Walk
+        /// Possible Descendant / Possibly Directed, Not Amenable (starts T–), and Blocked Walk
         PD_BLOCKED_NAM,
         /// Non-Causal walk that has not been blocked
         NON_CAUSAL_OPEN,
@@ -525,9 +555,9 @@ pub fn get_invalidly_un_blocked(
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum WalkStatus {
-        /// Possible Descendant / Partially Directed, and Open Walk
+        /// Possible Descendant / Possibly Directed, and Open Walk
         PD_OPEN,
-        /// Possible Descendant / Partially Directed, and Blocked Walk
+        /// Possible Descendant / Possibly Directed, and Blocked Walk
         PD_BLOCKED,
         /// Non-Causal walk that has not been blocked
         NON_CAUSAL_OPEN,
@@ -644,7 +674,7 @@ mod test {
     #[test]
     pub fn reachability_algos_agree_on_random_pdag() {
         let reps = 30;
-        let mut rng = rand_chacha::ChaChaRng::seed_from_u64(5);
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
         (0..reps).for_each(|_rep| {
             let pdag = PDAG::random_pdag(0.5, 100, &mut rng);
             assert_reachability_algos_agree_on_graph(&pdag, &mut rng);

@@ -65,10 +65,9 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     if y_nam_in_guess != y_nam_in_true {
                         mistakes += 1;
                     }
-                    // if we reach this point, y has a VAS in guess
-                    // now, if the adjustment set is not valid in truth
-                    // (either because the pair (t,y) is not amenable or because the VAS is not valid)
-                    else if !y_nam_in_guess && nva_in_true.contains(&y) {
+                    // if we reach this point, (t,y) is either amenable or non-amenable in both graphs;
+                    // now, if it is amenable but the adjustment set is not valid in the true graph (only in the guess graph)
+                    else if !y_nam_in_true && nva_in_true.contains(&y) {
                         // we count a mistake
                         mistakes += 1;
                     }
