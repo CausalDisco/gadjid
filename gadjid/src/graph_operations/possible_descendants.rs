@@ -34,7 +34,7 @@ pub(crate) fn get_possible_descendants<'a>(
 mod test {
     use rustc_hash::FxHashSet;
 
-    use crate::{graph_operations::possible_descendants, PDAG};
+    use crate::PDAG;
 
     #[test]
     pub fn test_possible_descendants() {
