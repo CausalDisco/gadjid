@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Ruletable for getting all descendants of a set of nodes
 
-use rustc_hash::FxHashSet;
-
-use crate::{partially_directed_acyclic_graph::Edge, PDAG};
+use crate::partially_directed_acyclic_graph::Edge;
 
 use super::ruletable::RuleTable;
 
@@ -35,27 +33,14 @@ impl RuleTable for Descendants {
     }
 }
 
-/// Gets all descendants of a set of nodes. Will also return the starting nodes.
-pub fn descendants<'a>(
-    dag: &PDAG,
-    starting_vertices: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
-    let start: Vec<usize> = starting_vertices.copied().collect();
-    let ruletable = Descendants {};
-    // gensearch yield_starting_vertices 'true' because $a \in Descendants(a)$
-    crate::graph_operations::gensearch(dag, ruletable, start.iter(), true)
-}
-
 #[cfg(test)]
 mod test {
     use std::collections::HashSet;
 
-    use crate::PDAG;
-
-    use super::descendants;
+    use crate::{graph_operations::get_descendants, PDAG};
 
     #[test]
-    fn descendants_search() {
+    fn descendants() {
         // 0 -> 1 -> 2
         let v_dag = vec![
             vec![0, 1, 0], //
@@ -66,20 +51,20 @@ mod test {
         let dag = PDAG::from_vecvec(v_dag);
 
         let expected = HashSet::from([1, 2]);
-        let result = descendants(&dag, [2, 1].iter());
-        assert_eq!(expected, result.iter().copied().collect());
+        let result = get_descendants(&dag, [2, 1].iter());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([2]);
-        let result = descendants(&dag, [2].iter());
-        assert_eq!(expected, result.iter().copied().collect());
+        let result = get_descendants(&dag, [2].iter());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([1, 2]);
-        let result = descendants(&dag, [1].iter());
-        assert_eq!(expected, result.iter().copied().collect());
+        let result = get_descendants(&dag, [1].iter());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([0, 1, 2]);
-        let result = descendants(&dag, [0].iter());
-        assert_eq!(expected, result.iter().copied().collect());
+        let result = get_descendants(&dag, [0].iter());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         // 0 -> 1 -> 2 ----> 3
         //           ^       ^
@@ -96,19 +81,19 @@ mod test {
         let dag = PDAG::from_vecvec(v_dag);
 
         let expected = HashSet::from([2, 3]);
-        let result = descendants(&dag, [2].iter());
-        assert_eq!(expected, result.iter().copied().collect());
+        let result = get_descendants(&dag, [2].iter());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([0, 1, 2, 3]);
-        let result = descendants(&dag, [0, 1].iter());
-        assert_eq!(expected, result.iter().copied().collect());
+        let result = get_descendants(&dag, [0, 1].iter());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([2, 3, 4]);
-        let result = descendants(&dag, [4].iter());
-        assert_eq!(expected, result.iter().copied().collect());
+        let result = get_descendants(&dag, [4].iter());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         let expected = HashSet::from([3]);
-        let result = descendants(&dag, [3].iter());
-        assert_eq!(expected, result.iter().copied().collect());
+        let result = get_descendants(&dag, [3].iter());
+        assert_eq!(expected, HashSet::from_iter(result));
     }
 }

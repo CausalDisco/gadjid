@@ -2,10 +2,12 @@
 //! Implements the Ancestor Adjustment Intervention Distance (Ancestor-AID) algorithm
 
 use rayon::prelude::*;
-use rustc_hash::FxHashSet;
 
 use crate::{
-    graph_operations::{gensearch, get_nam, get_nam_nva, possible_descendants},
+    graph_operations::{
+        gensearch,
+        reachability::{get_pd_nam, get_pd_nam_nva},
+    },
     PDAG,
 };
 
@@ -25,18 +27,11 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     let verifier_mistakes_found = (0..guess.n_nodes)
         .into_par_iter()
         .map(|treatment| {
-            let nam_in_guess = if matches!(
-                guess.pdag_type,
-                crate::partially_directed_acyclic_graph::Structure::CPDAG
-            ) {
-                get_nam(guess, &[treatment])
-            } else {
-                FxHashSet::<usize>::default()
-            };
-
             // --- this function differs from parent_aid.rs only in the imports and from here
-            let ruletable = crate::graph_operations::ruletables::ancestors::Ancestors {};
-            let ancestor_adjustment = gensearch(
+
+            // ancestor adjustment
+            let ruletable = crate::graph_operations::ruletables::Ancestors {};
+            let adjustment_set = gensearch(
                 // gensearch yield_starting_vertices 'false' because Ancestors(T)\T is the adjustment set
                 guess,
                 ruletable,
@@ -44,12 +39,13 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                 false,
             );
 
-            let claim_possible_effect = possible_descendants(guess, [treatment].iter());
+            // claim that all possible descendants could be affected by the treatment
+            let (claim_possible_effect, nam_in_guess) = get_pd_nam(guess, &[treatment]);
+            // --- to here
 
             // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
-            let (nam_in_true, nva_in_true) = get_nam_nva(truth, &[treatment], ancestor_adjustment);
-            // --- to here
-            let t_poss_desc_in_truth = possible_descendants(truth, [treatment].iter());
+            let (t_poss_desc_in_truth, nam_in_true, nva_in_true) =
+                get_pd_nam_nva(truth, &[treatment], &adjustment_set);
 
             let mut mistakes = 0;
             for y in 0..truth.n_nodes {
@@ -65,18 +61,17 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                         mistakes += 1;
                     }
                 } else {
-                    // if y is not amenable in guess
-                    if nam_in_guess.contains(&y) {
-                        // but it is amenable in truth
-                        if !nam_in_true.contains(&y) {
-                            // we count a mistake
-                            mistakes += 1;
-                        }
+                    let y_nam_in_guess = nam_in_guess.contains(&y);
+                    let y_nam_in_true = nam_in_true.contains(&y);
+
+                    #[allow(clippy::if_same_then_else)]
+                    // if they disagree on amenability:
+                    if y_nam_in_guess != y_nam_in_true {
+                        mistakes += 1;
                     }
-                    // if we reach this point, y has a VAS in guess
-                    // now, if the adjustment set is not valid in truth
-                    // (either because the pair (t,y) is not amenable or because the VAS is not valid)
-                    else if nva_in_true.contains(&y) {
+                    // if we reach this point, (t,y) is either amenable or non-amenable in both graphs;
+                    // now, if it is amenable but the adjustment set is not valid in the true graph (only in the guess graph)
+                    else if !y_nam_in_true && nva_in_true.contains(&y) {
                         // we count a mistake
                         mistakes += 1;
                     }
@@ -97,15 +92,18 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 
 #[cfg(test)]
 mod test {
+    use rand::SeedableRng;
+
     use crate::PDAG;
 
     use super::ancestor_aid;
 
     #[test]
     fn property_equal_dags_zero_distance() {
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
         for n in 2..40 {
             for _rep in 0..2 {
-                let dag = PDAG::random_dag(0.5, n);
+                let dag = PDAG::random_dag(0.5, n, &mut rng);
                 assert_eq!(
                     (0.0, 0),
                     ancestor_aid(&dag, &dag),
@@ -119,10 +117,11 @@ mod test {
     #[test]
     #[ignore]
     fn random_inputs_no_crash() {
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
         for n in 2..40 {
             for _rep in 0..2 {
-                let dag1 = PDAG::random_dag(1.0, n);
-                let dag2 = PDAG::random_dag(1.0, n);
+                let dag1 = PDAG::random_dag(1.0, n, &mut rng);
+                let dag2 = PDAG::random_dag(1.0, n, &mut rng);
                 ancestor_aid(&dag1, &dag2);
             }
         }

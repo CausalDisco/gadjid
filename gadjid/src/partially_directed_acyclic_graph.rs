@@ -11,8 +11,19 @@ use crate::{
     graph_loading::edgelist::{ColumnMajorOrder, Edgelist, RowMajorOrder},
 };
 
-/// If having traversed from some node `X` to a current `Y` along edge `e`, specifies the relation `e`
-/// has to `Y`. For example, in the case of `X -> Y`, we have `e` = `Incoming`.
+/// PDAG edge enum defined from a graph traversal perspective.
+///
+/// If traversing from some node `X` along edge `e` to a node of interest `Y` ,
+/// defines `e` as the direction it has to `Y`.
+///
+/// Examples:
+///
+/// When traversing from X to its child Y, `X -> Y`, we have `e` = `Incoming`.
+///
+/// It can be instructive to think of associating the edge and node of interest with
+/// a parenthesis, like `X (-> Y)`, making it clear that the edge is `Incoming`.
+///
+/// In the case of `X (<- Y)` <=> `(Y ->) X`, the edge would be `Outgoing`.
 ///
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Edge {
@@ -134,7 +145,7 @@ impl PDAG {
         &nb[parents_end..children_start]
     }
 
-    /// Given a node, return all nodes reachable by a possibly incoming edge (undirected or incoming).
+    /// Given a node, return all nodes reachable in one step along a possibly incoming edge (undirected or incoming).
     /// Not yielded in any particular order.
     pub fn possible_parents_of(&self, node: usize) -> &[usize] {
         let start = self.node_edge_ranges[node];
@@ -147,7 +158,7 @@ impl PDAG {
         &nb[..children_start]
     }
 
-    /// Given a node, return all nodes reachable by a possibly outgoing edge (undirected or outgoing).
+    /// Given a node, return all nodes reachable in one step along a possibly outgoing edge (undirected or outgoing).
     /// Not yielded in any particular order.
     pub fn possible_children_of(&self, node: usize) -> &[usize] {
         let start = self.node_edge_ranges[node];
@@ -522,14 +533,13 @@ impl PDAG {
     }
 
     /// Creates a random DAG with the given edge density and size.
-    pub fn random_dag(edge_density: f64, graph_size: usize) -> PDAG {
+    pub fn random_dag(edge_density: f64, graph_size: usize, mut rng: impl rand::RngCore) -> PDAG {
         assert!(graph_size > 0, "Graph size must be larger than 0");
         assert!(
             (0.0..=1.0).contains(&edge_density),
             "edge probability must be in [0, 1]"
         );
         let edge_dist = rand::distributions::Bernoulli::new(edge_density).unwrap();
-        let mut rng = rand::thread_rng();
 
         let mut adjacency = vec![vec![0; graph_size]; graph_size];
         let permutation = rand::seq::index::sample(&mut rng, graph_size, graph_size);
@@ -542,8 +552,13 @@ impl PDAG {
 
         PDAG::from_vecvec(adjacency)
     }
-    /// Creates a random PDAG with random edges with the given edge density and size.
-    pub fn random_pdag(edge_density: f64, graph_size: usize) -> PDAG {
+
+    /// Creates a random vecvec of a PDAG with random edges with the given edge density and size.
+    pub fn _random_pdag_vecvec(
+        edge_density: f64,
+        graph_size: usize,
+        mut rng: impl rand::RngCore,
+    ) -> Vec<Vec<i8>> {
         assert!(graph_size > 0, "Graph size must be larger than 0");
         assert!(
             (0.0..=1.0).contains(&edge_density),
@@ -553,8 +568,6 @@ impl PDAG {
         // P(edge between X and Y is directed) given that there is an edge between X and Y
         let p_directedness = 0.8;
         let directionality_dist = rand::distributions::Bernoulli::new(p_directedness).unwrap();
-        let mut rng = rand::thread_rng();
-
         let mut adjacency = vec![vec![0; graph_size]; graph_size];
         let permutation = rand::seq::index::sample(&mut rng, graph_size, graph_size);
         for y in 0..graph_size {
@@ -571,8 +584,16 @@ impl PDAG {
                     };
             }
         }
+        adjacency
+    }
 
-        PDAG::from_vecvec(adjacency)
+    /// Creates a random PDAG with random edges with the given edge density and size.
+    pub fn random_pdag(edge_density: f64, graph_size: usize, mut rng: impl rand::RngCore) -> PDAG {
+        PDAG::from_vecvec(PDAG::_random_pdag_vecvec(
+            edge_density,
+            graph_size,
+            &mut rng,
+        ))
     }
 }
 
@@ -627,7 +648,7 @@ pub fn has_cycle(graph: &PDAG) -> bool {
 
 #[cfg(test)]
 mod test {
-    use rand::distributions::Distribution;
+    use rand::SeedableRng;
     use std::collections::HashSet;
 
     use crate::PDAG;
@@ -840,51 +861,42 @@ mod test {
 
     #[test]
     pub fn property_row_major_and_col_major_loading_equal() {
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
         for size in 3..40 {
-            let edge_dist = rand::distributions::Uniform::new(0, 3);
-            let mut rng = rand::thread_rng();
+            let edge_density = 0.5;
+            let adjacency = PDAG::_random_pdag_vecvec(edge_density, size, &mut rng);
 
-            let mut adjacency = vec![vec![0; size]; size];
-            let permutation = rand::seq::index::sample(&mut rng, size, size);
-            for y in 0..size {
-                for x in y + 1..size {
-                    adjacency[permutation.index(x)][permutation.index(y)] =
-                        edge_dist.sample(&mut rng);
-                }
-            }
-
-            let adjacency_clone = adjacency.clone();
-
-            let row_major_dag = PDAG::from_vecvec(adjacency);
-
-            // now transpose the adjacency matrix
+            // transpose the adjacency matrix
             let mut transpose_adjacency = vec![vec![0; size]; size];
 
             for (x, row) in transpose_adjacency.iter_mut().enumerate() {
                 for (y, entry) in row.iter_mut().enumerate() {
-                    *entry = adjacency_clone[y][x];
+                    *entry = adjacency[y][x];
                 }
             }
 
-            // and construct the DAG from the transposed adjacency matrix
+            // construct the DAG from the original and transposed adjacency matrix
+            let row_major_dag = PDAG::from_vecvec(adjacency);
             let col_major_dag = PDAG::from_transposed_vecvec(transpose_adjacency);
 
-            // the final representation of the DAG should be 100% equal
+            // the final representations of the DAG should be 100% equal
             assert_eq!(row_major_dag, col_major_dag);
         }
     }
 
     #[test]
     pub fn random_pdags_no_failure_load() {
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
         for n in 1..40 {
-            PDAG::random_pdag(0.5, n);
+            PDAG::random_pdag(0.5, n, &mut rng);
         }
     }
 
     #[test]
     pub fn property_random_dags_acyclic() {
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
         for n in 1..40 {
-            PDAG::random_dag(0.5, n);
+            PDAG::random_dag(0.5, n, &mut rng);
         }
     }
 

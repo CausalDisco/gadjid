@@ -3,7 +3,7 @@
 
 use rustc_hash::FxHashSet;
 
-use crate::{partially_directed_acyclic_graph::Edge, PDAG};
+use crate::partially_directed_acyclic_graph::Edge;
 
 use super::ruletable::RuleTable;
 
@@ -45,30 +45,14 @@ impl RuleTable for ProperAncestors {
     }
 }
 
-/// Gets all proper ancestors of responses given them and the treatments
-pub fn proper_ancestors<'a>(
-    dag: &PDAG,
-    treatments: impl Iterator<Item = &'a usize>,
-    responses: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
-    let treatment_hashset = FxHashSet::from_iter(treatments.copied());
-    let ruletable = ProperAncestors {
-        treatments: treatment_hashset,
-    };
-    // gensearch yield_starting_vertices 'true' because $a \in ProperAncestors(a)$
-    crate::graph_operations::gensearch(dag, ruletable, responses, true)
-}
-
 #[cfg(test)]
 mod test {
     use std::collections::HashSet;
 
-    use crate::PDAG;
-
-    use super::proper_ancestors;
+    use crate::{graph_operations::get_proper_ancestors, PDAG};
 
     #[test]
-    fn proper_ancestors_search() {
+    fn proper_ancestors() {
         // 0 -> 1 -> 2
         let v_dag = vec![
             vec![0, 1, 0], //
@@ -78,17 +62,17 @@ mod test {
 
         let dag = PDAG::from_vecvec(v_dag);
 
-        let result = proper_ancestors(&dag, [].iter(), [2].iter());
+        let result = get_proper_ancestors(&dag, [].iter(), [2].iter());
         let expected = HashSet::from([0, 1, 2]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = proper_ancestors(&dag, [1].iter(), [2].iter());
+        let result = get_proper_ancestors(&dag, [1].iter(), [2].iter());
         let expected = HashSet::from([2]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = proper_ancestors(&dag, [0].iter(), [2].iter());
+        let result = get_proper_ancestors(&dag, [0].iter(), [2].iter());
         let expected = HashSet::from([1, 2]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         // 0 -> 1 -> 3 and 0 -> 2 -> 3
         let v_dag = vec![
@@ -100,13 +84,13 @@ mod test {
 
         let dag = PDAG::from_vecvec(v_dag);
 
-        let result = proper_ancestors(&dag, [].iter(), [3].iter());
+        let result = get_proper_ancestors(&dag, [].iter(), [3].iter());
         let expected = HashSet::from([0, 1, 2, 3]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = proper_ancestors(&dag, [1].iter(), [3].iter());
+        let result = get_proper_ancestors(&dag, [1].iter(), [3].iter());
         let expected = HashSet::from([0, 2, 3]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         // 0 -> 1 -> 2 -> 4 and 0 -> 3 -> 4
         let v_dag = vec![
@@ -118,16 +102,16 @@ mod test {
         ];
         let dag = PDAG::from_vecvec(v_dag);
 
-        let result = proper_ancestors(&dag, [].iter(), [4].iter());
+        let result = get_proper_ancestors(&dag, [].iter(), [4].iter());
         let expected = HashSet::from([0, 1, 2, 3, 4]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = proper_ancestors(&dag, [2].iter(), [4].iter());
+        let result = get_proper_ancestors(&dag, [2].iter(), [4].iter());
         let expected = HashSet::from([0, 3, 4]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = proper_ancestors(&dag, [1].iter(), [4].iter());
+        let result = get_proper_ancestors(&dag, [1].iter(), [4].iter());
         let expected = HashSet::from([0, 2, 3, 4]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
     }
 }

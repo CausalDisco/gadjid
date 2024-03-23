@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Ruletable for getting all parents of a set of nodes
-
-use rustc_hash::FxHashSet;
-
-use crate::{partially_directed_acyclic_graph::Edge, PDAG};
+use crate::partially_directed_acyclic_graph::Edge;
 
 use super::ruletable::RuleTable;
 
@@ -25,26 +22,14 @@ impl RuleTable for Parents {
     }
 }
 
-/// Gets the union of parents of each node. This is more efficient than calling `parents_of` for each node and then joining the results.
-pub fn parents<'a>(
-    dag: &PDAG,
-    starting_vertices: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
-    let ruletable = Parents {};
-    // gensearch yield_starting_vertices 'false' because $a \notin Parents(a)$
-    crate::graph_operations::gensearch(dag, ruletable, starting_vertices, false)
-}
-
 #[cfg(test)]
 mod test {
     use std::collections::HashSet;
 
-    use crate::PDAG;
-
-    use super::parents;
+    use crate::{graph_operations::get_parents, PDAG};
 
     #[test]
-    fn get_parents() {
+    fn parents() {
         // 0 -> 1 -> 2
         let v_dag = vec![
             vec![0, 1, 0], //
@@ -54,21 +39,21 @@ mod test {
 
         let dag = PDAG::from_vecvec(v_dag);
 
-        let result = parents(&dag, [0].iter());
+        let result = get_parents(&dag, [0].iter());
         let expected = HashSet::from([]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = parents(&dag, [1].iter());
+        let result = get_parents(&dag, [1].iter());
         let expected = HashSet::from([0]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = parents(&dag, [0, 2].iter());
+        let result = get_parents(&dag, [0, 2].iter());
         let expected = HashSet::from([1]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = parents(&dag, [2].iter());
+        let result = get_parents(&dag, [2].iter());
         let expected = HashSet::from([1]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         // 0 -> 1 -> 2 ----> 3
         //           ^       ^
@@ -84,16 +69,16 @@ mod test {
 
         let dag = PDAG::from_vecvec(v_dag);
 
-        let result = parents(&dag, [4].iter());
+        let result = get_parents(&dag, [4].iter());
         let expected = HashSet::from([]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = parents(&dag, [2].iter());
+        let result = get_parents(&dag, [2].iter());
         let expected = HashSet::from([1, 4]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = parents(&dag, [1, 3].iter());
+        let result = get_parents(&dag, [1, 3].iter());
         let expected = HashSet::from([0, 2, 4]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
     }
 }

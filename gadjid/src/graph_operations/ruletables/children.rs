@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Ruletable for getting all children of a set of nodes. Unused for now, but kept in the codebase for convenience.
 
-use rustc_hash::FxHashSet;
-
-use crate::{partially_directed_acyclic_graph::Edge, PDAG};
+use crate::partially_directed_acyclic_graph::Edge;
 
 use super::ruletable::RuleTable;
 
@@ -25,27 +23,14 @@ impl RuleTable for Children {
     }
 }
 
-/// Gets the union of children of each node. This is more efficient than calling `children_of` for each node and then joining the results.
-#[allow(dead_code)]
-pub fn children<'a>(
-    dag: &PDAG,
-    starting_vertices: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
-    let ruletable = Children {};
-    // gensearch yield_starting_vertices 'false' because $a \notin Children(a)$
-    crate::graph_operations::gensearch(dag, ruletable, starting_vertices, false)
-}
-
 #[cfg(test)]
 mod test {
     use std::collections::HashSet;
 
-    use crate::PDAG;
-
-    use super::children;
+    use crate::{graph_operations::get_children, PDAG};
 
     #[test]
-    fn get_children() {
+    fn children() {
         // 0 -> 1 -> 2
         let v_dag = vec![
             vec![0, 1, 0], //
@@ -55,21 +40,21 @@ mod test {
 
         let dag = PDAG::from_vecvec(v_dag);
 
-        let result = children(&dag, [0].iter());
+        let result = get_children(&dag, [0].iter());
         let expected = HashSet::from([1]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = children(&dag, [1].iter());
+        let result = get_children(&dag, [1].iter());
         let expected = HashSet::from([2]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = children(&dag, [0, 2].iter());
+        let result = get_children(&dag, [0, 2].iter());
         let expected = HashSet::from([1]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = children(&dag, [2].iter());
+        let result = get_children(&dag, [2].iter());
         let expected = HashSet::from([]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
         // 0 -> 1 -> 2 ----> 3
         //           ^       ^
@@ -85,16 +70,16 @@ mod test {
 
         let dag = PDAG::from_vecvec(v_dag);
 
-        let result = children(&dag, [4].iter());
+        let result = get_children(&dag, [4].iter());
         let expected = HashSet::from([2, 3]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = children(&dag, [0, 4].iter());
+        let result = get_children(&dag, [0, 4].iter());
         let expected = HashSet::from([1, 2, 3]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
 
-        let result = children(&dag, [0, 1, 2].iter());
+        let result = get_children(&dag, [0, 1, 2].iter());
         let expected = HashSet::from([1, 2, 3]);
-        assert_eq!(expected, result.iter().copied().collect());
+        assert_eq!(expected, HashSet::from_iter(result));
     }
 }

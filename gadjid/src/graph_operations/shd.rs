@@ -76,6 +76,8 @@ pub fn shd(g_truth: &PDAG, g_guess: &PDAG) -> (f64, usize) {
 
 #[cfg(test)]
 mod test {
+    use rand::SeedableRng;
+
     use crate::PDAG;
 
     use super::shd;
@@ -130,8 +132,9 @@ mod test {
 
     #[test]
     fn property_equal_dags_zero_distance() {
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
         for n in 2..40 {
-            let dag = PDAG::random_dag(0.5, n);
+            let dag = PDAG::random_dag(0.5, n, &mut rng);
             assert_eq!(
                 (0.0, 0),
                 shd(&dag, &dag),

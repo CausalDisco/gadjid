@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Algorithm for getting all possible descendants of a set of nodes
 
-use rustc_hash::FxHashSet;
-
-use crate::PDAG;
-
-/// Gets all the possible descendants (reachable via combinations of (-- and ->) of a set of nodes.
+#[cfg(test)]
+/// Gets all the possible descendants of a set of nodes.
 /// The input nodes are also included in the output.
-pub fn possible_descendants<'a>(
-    pdag: &PDAG,
+pub(crate) fn get_possible_descendants<'a>(
+    pdag: &crate::PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
+) -> rustc_hash::FxHashSet<usize> {
+    use rustc_hash::FxHashSet;
+
     let mut to_visit_stack = Vec::from_iter(starting_vertices.copied());
 
     let mut result = FxHashSet::from_iter(to_visit_stack.iter().copied());
@@ -49,7 +48,7 @@ mod test {
             vec![0, 0, 0, 0],
         ];
         let cpdag = PDAG::from_vecvec(cpdag);
-        let result = super::possible_descendants(&cpdag, [0].iter());
+        let result = super::get_possible_descendants(&cpdag, [0].iter());
         assert_eq!(result, FxHashSet::from_iter(vec![0, 1, 2, 3]));
 
         // 5 -> 4 -- 0 -> 1 -- 2
@@ -64,7 +63,7 @@ mod test {
             vec![0, 0, 0, 0, 1, 0],
         ];
         let cpdag = PDAG::from_vecvec(cpdag);
-        let result = super::possible_descendants(&cpdag, [4].iter());
+        let result = super::get_possible_descendants(&cpdag, [4].iter());
         assert_eq!(result, FxHashSet::from_iter(vec![0, 1, 2, 3, 4]));
     }
 }
