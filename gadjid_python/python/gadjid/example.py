@@ -13,7 +13,6 @@ rng = np.random.default_rng(0)
 
 ROW_TO_COL = "from row to col"
 
-
 def random_dag(size, probability):
     """Draw adjacency matrix of a random DAG."""
     adj = rng.binomial(1, probability, size=(size, size)).astype(np.int8)
