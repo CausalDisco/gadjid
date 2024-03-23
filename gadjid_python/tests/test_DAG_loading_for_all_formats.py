@@ -22,12 +22,12 @@ COL_TO_ROW = "from col to row"
 
 def test_edge_direction_argument():
     exps = 10
-    for _exp in range(exps):
+    for exp in range(exps):
         size = 10
 
         # make 2 random dags:
-        truth_dag = make_dag(size, 0.5)
-        guess_dag = make_dag(size, 0.5)
+        truth_dag = make_dag(size, 0.5, exp)
+        guess_dag = make_dag(size, 0.5, exp + exps)
 
         # for all functions that take an edge_direction argument, check that
         # the result is the same for both edge directions
