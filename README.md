@@ -73,7 +73,7 @@ Gguess = np.array([
     [0, 0, 0, 0, 0]
 ], dtype=np.int8)
 
-print(ancestor_aid(Gtrue, Gguess))
+print(ancestor_aid(Gtrue, Gguess, edge_direction="from row to column"))
 print(shd(Gtrue, Gguess))
 ```
 
@@ -98,14 +98,16 @@ structural intervention distance for directed acyclic graphs as a special case. 
 
 ## Implemented Distances
 
-* `ancestor_aid(Gtrue, Gguess)`
-* `oset_aid(Gtrue, Gguess)`
-* `parent_aid(Gtrue, Gguess)`
+* `ancestor_aid(Gtrue, Gguess, edge_direction)`
+* `oset_aid(Gtrue, Gguess, edge_direction)`
+* `parent_aid(Gtrue, Gguess, edge_direction)`
 * for convenience, the following distances are implemented, too
     * `shd(Gtrue, Gguess)`
-    * `sid(Gtrue, Gguess)` – only for DAGs!
+    * `sid(Gtrue, Gguess, edge_direction)` – only for DAGs!
 
-where Gtrue and Gguess are adjacency matrices of a DAG or CPDAG.
+where `Gtrue` and `Gguess` are adjacency matrices of a DAG or CPDAG
+and `edge_direction` determines whether a `1` at r-th row and c-th column of an adjacency matrix
+codes the edge `r → c` (`edge_direction="from row to column"`) or `c → r` (`edge_direction="from column to row"`).
 The functions are not symmetric in their input:
 To calculate a distance,
 identifying formulas for causal effects are inferred in the graph `Gguess`
@@ -118,14 +120,18 @@ and we define normalisation as  `normalised_distance = mistake_count / p(p-1)`.
 
 All graphs are assumed simple, that is, at most one edge is allowed between any two nodes.
 An adjacency matrix for a DAG may only contain 0s and 1s;
-a `1` in row `s` and column `t` codes a directed edge `Xₛ → Xₜ`;
+if `edge_direction="from row to column"`, then
+a `1` in row `r` and column `c` codes a directed edge `r → c`;
+if `edge_direction="from column to row"`, then
+a `1` in row `r` and column `c` codes a directed edge `c → r`;
 DAG inputs are validated for acyclicity.
 An adjacency matrix for a CPDAG may only contain 0s, 1s and 2s;
-a `2` in row `s` and column `t` codes a undirected edge `Xₛ — Xₜ`
-(an additional `2` in row `t` and column `s` is ignored; only one of the two entries is required to code an undirected edge);
+for either setting of `edge_direction`,
+a `2` in row `r` and column `c` codes an undirected edge `r — c`
+(an additional `2` in row `c` and column `r` is ignored; only one of the two entries is required to code an undirected edge);
 CPDAG inputs are not validated and __the user needs to ensure the adjacency matrix indeed codes a valid CPDAG (instead of just a PDAG)__.
-You may also calculate the SID between DAGs via `parent_aid(DAGtrue, DAGguess)`,
-but we recommend `ancestor_aid` and `oset_aid` and for CPDAG inputs our `parent_aid` does not coincide with the SID
+You may also calculate the SID between DAGs via `parent_aid(DAGtrue, DAGguess, edge_direction)`,
+but we recommend `ancestor_aid` and `oset_aid` and for CPDAG inputs the `parent_aid` does not coincide with the SID
 (see also our accompanying article).
 
 

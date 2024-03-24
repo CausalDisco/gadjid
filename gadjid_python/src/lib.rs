@@ -26,7 +26,19 @@ use scipy_sparse_handler::try_from as try_from_sparse;
 ///
 /// Adjacency matrices are accepted as either int8 numpy ndarrays
 /// or int8 scipy sparse matrices in CSR or CSC format.
-/// (The entry in row s and column t codes whether Xₛ → Xₜ.)
+/// If `edge_direction="from row to column"`, then
+/// a `1` in row `r` and column `c` codes a directed edge `r → c`;
+/// if `edge_direction="from column to row"`, then
+/// a `1` in row `r` and column `c` codes a directed edge `c → r`;
+/// for either setting of `edge_direction`,
+/// a `2` in row `r` and column `c` codes an undirected edge `r – t`
+/// (an additional `2` in row `c` and column `r` is ignored;
+/// only one of the two entries is required to code an undirected edge).
+/// An adjacency matrix for a DAG may only contain 0s and 1s;
+/// DAG inputs are validated for acyclicity.
+/// An adjacency matrix for a CPDAG may only contain 0s, 1s, and 2s;
+/// CPDAG inputs are not validated and __the user needs to ensure the adjacency matrix
+/// indeed codes a valid CPDAG (instead of just a PDAG)__.
 ///
 /// Example:
 ///
@@ -52,7 +64,7 @@ use scipy_sparse_handler::try_from as try_from_sparse;
 /// ], dtype=np.int8)
 ///
 /// print(ancestor_aid(Gtrue, Gguess, edge_direction="from row to column"))
-/// print(shd(Gtrue, Gguess, edge_direction="from row to column"))
+/// print(shd(Gtrue, Gguess))
 /// ```
 #[pymodule]
 fn gadjid(_py: Python, m: &PyModule) -> PyResult<()> {
@@ -72,7 +84,7 @@ fn edge_direction_is_row_to_col(edge_direction: &str) -> PyResult<bool> {
         ROW_TO_COL => Ok(true),
         COL_TO_ROW => Ok(false),
         _ => Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(format!(
-            "edge_direction argument must be either a string containing (exactly) '{}' or '{}'",
+            "edge_direction string argument must be either '{}' or '{}'",
             ROW_TO_COL, COL_TO_ROW
         ))),
     }

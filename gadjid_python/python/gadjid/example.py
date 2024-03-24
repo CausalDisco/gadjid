@@ -28,7 +28,8 @@ def run_parent_aid(size=500, probability=0.1):
         f"\nCalculating the Parent-AID between {size}-node DAGs "
         f"with {100 * (probability):.0f}% of all possible edges\n\n"
         f"    >>> parent_aid(random_dag({size}, {probability}), "
-        f"random_dag({size}, {probability}))"
+        f"random_dag({size}, {probability})"
+        ', edge_direction="from row to column")'
     )
 
     DAGa = random_dag(size, probability)
