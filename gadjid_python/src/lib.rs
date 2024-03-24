@@ -51,8 +51,8 @@ use scipy_sparse_handler::try_from as try_from_sparse;
 ///     [0, 0, 0, 0, 0]
 /// ], dtype=np.int8)
 ///
-/// print(ancestor_aid(Gtrue, Gguess, edge_direction="from row to col"))
-/// print(shd(Gtrue, Gguess, edge_direction="from row to col"))
+/// print(ancestor_aid(Gtrue, Gguess, edge_direction="from row to column"))
+/// print(shd(Gtrue, Gguess, edge_direction="from row to column"))
 /// ```
 #[pymodule]
 fn gadjid(_py: Python, m: &PyModule) -> PyResult<()> {
@@ -64,8 +64,8 @@ fn gadjid(_py: Python, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
-const ROW_TO_COL: &str = "from row to col";
-const COL_TO_ROW: &str = "from col to row";
+const ROW_TO_COL: &str = "from row to column";
+const COL_TO_ROW: &str = "from column to row";
 
 fn edge_direction_is_row_to_col(edge_direction: &str) -> PyResult<bool> {
     match edge_direction {

@@ -503,7 +503,7 @@ impl PDAG {
     /// An entry of 1 at position `[i,j]` indicates a directed edge `i -> j`,
     /// the opposite of how [`from_col_to_row_vecvec`] does it.
     /// An entry of 2 at position `[i,j]` and/or `[j,i]` indicates an undirected edge between `i` and `j`.
-    pub fn from_row_to_col_vecvec(dense: Vec<Vec<i8>>) -> Self {
+    pub fn from_row_to_column_vecvec(dense: Vec<Vec<i8>>) -> Self {
         let edgelist = Edgelist::from_vecvec(dense);
         let mut pdag = PDAG::try_from_row_major(edgelist).unwrap();
 
@@ -551,7 +551,7 @@ impl PDAG {
             }
         }
 
-        PDAG::from_row_to_col_vecvec(adjacency)
+        PDAG::from_row_to_column_vecvec(adjacency)
     }
 
     /// Creates a random vecvec of a PDAG with random edges with the given edge density and size.
@@ -590,7 +590,7 @@ impl PDAG {
 
     /// Creates a random PDAG with random edges with the given edge density and size.
     pub fn random_pdag(edge_density: f64, graph_size: usize, mut rng: impl rand::RngCore) -> PDAG {
-        PDAG::from_row_to_col_vecvec(PDAG::_random_pdag_vecvec(
+        PDAG::from_row_to_column_vecvec(PDAG::_random_pdag_vecvec(
             edge_density,
             graph_size,
             &mut rng,
@@ -662,7 +662,7 @@ mod test {
             vec![1, 0],
         ];
 
-        PDAG::from_row_to_col_vecvec(dense);
+        PDAG::from_row_to_column_vecvec(dense);
     }
 
     #[test]
@@ -673,7 +673,7 @@ mod test {
             vec![2, 0],
         ];
 
-        PDAG::from_row_to_col_vecvec(dense);
+        PDAG::from_row_to_column_vecvec(dense);
     }
 
     #[test]
@@ -684,7 +684,7 @@ mod test {
             vec![0, 0, 0],
         ];
 
-        PDAG::from_row_to_col_vecvec(dense);
+        PDAG::from_row_to_column_vecvec(dense);
     }
 
     #[test]
@@ -695,7 +695,7 @@ mod test {
             vec![0, 0],
         ];
 
-        let cpdag = PDAG::from_row_to_col_vecvec(dense);
+        let cpdag = PDAG::from_row_to_column_vecvec(dense);
 
         assert_eq!(cpdag.n_nodes, 2);
 
@@ -719,7 +719,7 @@ mod test {
             vec![0, 0, 0, 0],
         ];
 
-        let cpdag = PDAG::from_row_to_col_vecvec(dense);
+        let cpdag = PDAG::from_row_to_column_vecvec(dense);
 
         assert_eq!(cpdag.n_nodes, 4);
         assert_eq!(
@@ -758,7 +758,7 @@ mod test {
             vec![2, 0, 0],
         ];
 
-        let cpdag = PDAG::from_row_to_col_vecvec(dense);
+        let cpdag = PDAG::from_row_to_column_vecvec(dense);
 
         assert_eq!(cpdag.n_nodes, 3);
 
@@ -784,7 +784,7 @@ mod test {
             vec![0, 0],
         ];
 
-        let dag = PDAG::from_row_to_col_vecvec(dense);
+        let dag = PDAG::from_row_to_column_vecvec(dense);
 
         assert_eq!(dag.n_nodes, 2);
 
@@ -808,7 +808,7 @@ mod test {
             vec![0, 0, 0, 0],
         ];
 
-        let dag = PDAG::from_row_to_col_vecvec(dense);
+        let dag = PDAG::from_row_to_column_vecvec(dense);
 
         assert_eq!(dag.n_nodes, 4);
         assert_eq!(
@@ -846,7 +846,7 @@ mod test {
             vec![0, 0, 0],
         ];
 
-        let dag = PDAG::from_row_to_col_vecvec(dense);
+        let dag = PDAG::from_row_to_column_vecvec(dense);
 
         assert_eq!(dag.n_nodes, 3);
 
@@ -877,7 +877,7 @@ mod test {
             }
 
             // construct the DAG from the original and transposed adjacency matrix
-            let row_major_dag = PDAG::from_row_to_col_vecvec(adjacency);
+            let row_major_dag = PDAG::from_row_to_column_vecvec(adjacency);
             let col_major_dag = PDAG::from_col_to_row_vecvec(transpose_adjacency);
 
             // the final representations of the DAG should be 100% equal
@@ -929,7 +929,7 @@ mod test {
         ];
 
         for (i, dense) in dense_matrices.iter().enumerate() {
-            let cpdag = PDAG::from_row_to_col_vecvec(dense.clone());
+            let cpdag = PDAG::from_row_to_column_vecvec(dense.clone());
 
             for n in 0..cpdag.n_nodes {
                 let mut children = cpdag.children_of(n).to_vec();
@@ -976,7 +976,7 @@ mod test {
             vec![0, 0, 1],
             vec![0, 1, 0],
         ];
-        let _ = PDAG::from_row_to_col_vecvec(g_truth);
+        let _ = PDAG::from_row_to_column_vecvec(g_truth);
     }
 
     #[test]
@@ -987,7 +987,7 @@ mod test {
             vec![0, 0, 1],
             vec![1, 0, 0],
         ];
-        let _ = PDAG::from_row_to_col_vecvec(g_truth);
+        let _ = PDAG::from_row_to_column_vecvec(g_truth);
     }
 
     #[test]
@@ -998,6 +998,6 @@ mod test {
             vec![0, 0, 1],
             vec![1, 1, 0],
         ];
-        let _ = PDAG::from_row_to_col_vecvec(g_truth);
+        let _ = PDAG::from_row_to_column_vecvec(g_truth);
     }
 }

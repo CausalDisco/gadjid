@@ -67,7 +67,7 @@ mod test {
             }
         }
 
-        PDAG::from_row_to_col_vecvec(adj)
+        PDAG::from_row_to_column_vecvec(adj)
     }
 
     fn hashset_to_sorted_vec<V: std::cmp::Ord + Copy>(set: &FxHashSet<V>) -> Vec<V> {

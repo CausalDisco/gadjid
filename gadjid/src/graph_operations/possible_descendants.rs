@@ -47,7 +47,7 @@ mod test {
             vec![0, 0, 0, 0],
             vec![0, 0, 0, 0],
         ];
-        let cpdag = PDAG::from_row_to_col_vecvec(cpdag);
+        let cpdag = PDAG::from_row_to_column_vecvec(cpdag);
         let result = super::get_possible_descendants(&cpdag, [0].iter());
         assert_eq!(result, FxHashSet::from_iter(vec![0, 1, 2, 3]));
 
@@ -62,7 +62,7 @@ mod test {
             vec![0, 0, 0, 0, 0, 0],
             vec![0, 0, 0, 0, 1, 0],
         ];
-        let cpdag = PDAG::from_row_to_col_vecvec(cpdag);
+        let cpdag = PDAG::from_row_to_column_vecvec(cpdag);
         let result = super::get_possible_descendants(&cpdag, [4].iter());
         assert_eq!(result, FxHashSet::from_iter(vec![0, 1, 2, 3, 4]));
     }

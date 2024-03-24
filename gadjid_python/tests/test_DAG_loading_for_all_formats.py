@@ -16,8 +16,8 @@ def make_dag(size, density, seed) -> np.ndarray:
     return dense[perm, :][:, perm]
 
 
-ROW_TO_COL = "from row to col"
-COL_TO_ROW = "from col to row"
+ROW_TO_COL = "from row to column"
+COL_TO_ROW = "from column to row"
 
 
 def test_edge_direction_argument():

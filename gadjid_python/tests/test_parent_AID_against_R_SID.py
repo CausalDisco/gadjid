@@ -33,7 +33,7 @@ def test_parent_AID_against_R_SID():
         guess_name = int(guess_name)
         Gtrue = load_trlpt(true_name)
         Gguess = load_trlpt(guess_name)
-        sid = parent_aid(Gtrue, Gguess, edge_direction="from row to col")
+        sid = parent_aid(Gtrue, Gguess, edge_direction="from row to column")
         assert sid[1] == int(rsid), (
             f"failed for sid({true_name}, {guess_name}):"
             f" {sid[1]} vs {int(rsid)}"

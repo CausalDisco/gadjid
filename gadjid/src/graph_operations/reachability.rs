@@ -643,7 +643,7 @@ mod test {
             vec![0, 0, 0, 0],
             vec![0, 0, 0, 0],
         ];
-        let cpdag = PDAG::from_row_to_col_vecvec(cpdag);
+        let cpdag = PDAG::from_row_to_column_vecvec(cpdag);
 
         assert!(get_nam(&cpdag, &[0]) == FxHashSet::from_iter([3]));
     }
@@ -660,8 +660,8 @@ mod test {
             vec![0, 2], //
             vec![0, 0],
         ];
-        let dag = PDAG::from_row_to_col_vecvec(dag);
-        let cpdag = PDAG::from_row_to_col_vecvec(cpdag);
+        let dag = PDAG::from_row_to_column_vecvec(dag);
+        let cpdag = PDAG::from_row_to_column_vecvec(cpdag);
 
         assert_eq!((1.0, 2), parent_aid(&dag, &cpdag));
         assert_eq!((1.0, 2), parent_aid(&cpdag, &dag));
