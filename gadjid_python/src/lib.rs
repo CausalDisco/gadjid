@@ -84,7 +84,7 @@ fn edge_direction_is_row_to_col(edge_direction: &str) -> PyResult<bool> {
         ROW_TO_COL => Ok(true),
         COL_TO_ROW => Ok(false),
         _ => Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(format!(
-            "edge_direction string argument must be either '{}' or '{}'",
+            r#"edge_direction string argument must be either "{}" or "{}""#,
             ROW_TO_COL, COL_TO_ROW
         ))),
     }
