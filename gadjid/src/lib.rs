@@ -146,7 +146,7 @@ mod test {
                 &g_guess,
                 crate::graph_operations::ruletables::Descendants {},
                 t.iter(),
-                false,
+                true,
             );
             optimal_adjustment_set(&g_guess, &t, &[y], &t_descendants)
         };
