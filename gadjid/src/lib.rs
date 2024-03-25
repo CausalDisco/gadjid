@@ -141,15 +141,7 @@ mod test {
         let mut random_z = indices[1 + t_size..1 + t_size + random_z_size as usize].to_vec();
         random_z.sort();
 
-        let oset_for_t_onto_y_in_g_guess = {
-            let t_descendants = gensearch(
-                &g_guess,
-                crate::graph_operations::ruletables::Descendants {},
-                t.iter(),
-                true,
-            );
-            optimal_adjustment_set(&g_guess, &t, &[y], &t_descendants)
-        };
+        let oset_for_t_onto_y_in_g_guess = optimal_adjustment_set(&g_guess, &t, &[y]);
 
         Testcase {
             g_true: g_true_name.to_string(),

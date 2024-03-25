@@ -13,7 +13,7 @@ use crate::{
 
 /// This oset function takes in a precomputed t_descendants set.
 /// Returns the optimal adjustment set of the provided treatments.
-pub fn optimal_adjustment_set(
+pub fn optimal_adjustment_set_given_descendants(
     dag: &PDAG,
     treatments: &[usize],
     responses: &[usize],
@@ -71,8 +71,12 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                     // if they agree on amenability and y is amenable, we need to find the adjustment set
                     else if !y_nam_in_guess {
                         // this oset function uses the precomputed t_desc_in_guess
-                        let o_set_adjustment =
-                            optimal_adjustment_set(guess, &[treatment], &[y], &t_desc_in_guess);
+                        let o_set_adjustment = optimal_adjustment_set_given_descendants(
+                            guess,
+                            &[treatment],
+                            &[y],
+                            &t_desc_in_guess,
+                        );
 
                         // (because the VAS is not valid, by blocking too much or too little)
                         if get_invalidly_un_blocked(truth, &[treatment], &o_set_adjustment)
@@ -98,13 +102,23 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 }
 
 #[cfg(test)]
+pub fn optimal_adjustment_set(
+    dag: &PDAG,
+    treatments: &[usize],
+    responses: &[usize],
+) -> FxHashSet<usize> {
+    let t_descendants = crate::graph_operations::get_descendants(dag, treatments.iter());
+    optimal_adjustment_set_given_descendants(dag, treatments, responses, &t_descendants)
+}
+
+#[cfg(test)]
 mod test {
     use rand::SeedableRng;
     use rustc_hash::FxHashSet;
 
     use crate::PDAG;
 
-    use super::oset_aid;
+    use super::{optimal_adjustment_set, oset_aid};
 
     #[test]
     fn property_equal_dags_zero_distance() {
@@ -133,15 +147,6 @@ mod test {
                 oset_aid(&dag1, &dag2);
             }
         }
-    }
-
-    fn optimal_adjustment_set(
-        dag: &PDAG,
-        treatments: &[usize],
-        responses: &[usize],
-    ) -> FxHashSet<usize> {
-        let t_descendants = crate::graph_operations::get_descendants(dag, treatments.iter());
-        super::optimal_adjustment_set(dag, treatments, responses, &t_descendants)
     }
 
     #[test]
