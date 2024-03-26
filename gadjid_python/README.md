@@ -1,7 +1,7 @@
 # Adjustment Identification Distance: A 𝚐𝚊𝚍𝚓𝚒𝚍 for Causal Structure Learning
 
 This is an early release of 𝚐𝚊𝚍𝚓𝚒𝚍 🐥 and feedback is very welcome!
-Just [open an issue](https://github.com/CausalDisco/gadjid/issues/new/choose) on our github repository.
+Just [open an issue](https://github.com/CausalDisco/gadjid/issues/new/choose) on github.
 
 If you publish research using 𝚐𝚊𝚍𝚓𝚒𝚍, please cite
 [our article](https://doi.org/10.48550/arXiv.2402.08616)
@@ -64,15 +64,17 @@ structural intervention distance for directed acyclic graphs as a special case. 
 
 ## Implemented Distances
 
-* `ancestor_aid(Gtrue, Gguess)`
-* `oset_aid(Gtrue, Gguess)`
-* `parent_aid(Gtrue, Gguess)`
+* `ancestor_aid(Gtrue, Gguess, edge_direction)`
+* `oset_aid(Gtrue, Gguess, edge_direction)`
+* `parent_aid(Gtrue, Gguess, edge_direction)`
 * for convenience, the following distances are implemented, too
     * `shd(Gtrue, Gguess)`
-    * `sid(Gtrue, Gguess)` – only for DAGs!
+    * `sid(Gtrue, Gguess, edge_direction)` – only for DAGs!
 
-where Gtrue and Gguess are adjacency matrices of a DAG or CPDAG.
-The functions are not symmetric in their input:
+where `Gtrue` and `Gguess` are adjacency matrices of a DAG or CPDAG
+and `edge_direction` determines whether a `1` at r-th row and c-th column of an adjacency matrix
+codes the edge `r → c` (`edge_direction="from row to column"`) or `c → r` (`edge_direction="from column to row"`).
+The functions are not symmetric in their inputs:
 To calculate a distance,
 identifying formulas for causal effects are inferred in the graph `Gguess`
 and verified against the graph `Gtrue`.
@@ -82,8 +84,8 @@ and the number of wrongly inferred causal effects, `mistake_count`.
 There are $p(p-1)$ pairwise causal effects to infer in graphs with $p$ nodes
 and we define normalisation as  `normalised_distance = mistake_count / p(p-1)`.
 
-You may also calculate the SID between DAGs via `parent_aid`,
-but we recommend `ancestor_aid` and `oset_aid`, and for CPDAG inputs our `parent_aid` does not coincide with the SID
+You may also calculate the SID between DAGs via `parent_aid(DAGtrue, DAGguess, edge_direction)`,
+but we recommend `ancestor_aid` and `oset_aid` and for CPDAG inputs the `parent_aid` does not coincide with the SID
 (see also our accompanying article).
 
 If `edge_direction="from row to column"`, then
@@ -91,17 +93,15 @@ a `1` in row `r` and column `c` codes a directed edge `r → c`;
 if `edge_direction="from column to row"`, then
 a `1` in row `r` and column `c` codes a directed edge `c → r`;
 for either setting of `edge_direction`,
-a `2` in row `r` and column `c` codes an undirected edge `r – t`
+a `2` in row `r` and column `c` codes an undirected edge `r – c`
 (an additional `2` in row `c` and column `r` is ignored;
 one of the two entries is sufficient to code an undirected edge).
 
 An adjacency matrix for a DAG may only contain 0s and 1s.
 An adjacency matrix for a CPDAG may only contain 0s, 1s and 2s.
-DAG and CPDAG inputs are validated for acyclicity. 
-However, for CPDAG inputs, __the user needs to ensure the adjacency 
+DAG and CPDAG inputs are validated for acyclicity.
+However, for CPDAG inputs, __the user needs to ensure the adjacency
 matrix indeed codes a valid CPDAG (instead of just a PDAG)__.
-
-
 
 
 ## Empirical Runtime Analysis
@@ -111,7 +111,7 @@ Here, for a graph with $p$ nodes,
 sparse graphs have $10p$ edges in expectation,
 dense graphs have $0.3p(p-1)/2$ edges in expectation,
 and
-sparse graphs have $0.75p$ edges in expectation.
+x-sparse graphs have $0.75p$ edges in expectation.
 
 __Maximum graph size feasible within 1 minute__
 
@@ -122,6 +122,9 @@ __Maximum graph size feasible within 1 minute__
 | Oset-AID     |    546 |   250 |
 | SID in R     |    255 |   239 |
 
+Results obtained with 𝚐𝚊𝚍𝚓𝚒𝚍 v0.0.1 using the Python interface
+and the SID R package v1.1 from CRAN.
+
 __Average runtime__
 | Method       | x-sparse ($p=1000$) | sparse ($p=256$) | dense ($p=239$) |
 |--------------|--------------------:|-----------------:|----------------:|
@@ -129,6 +132,9 @@ __Average runtime__
 | Ancestor-AID |              2.7 ms |          38.7 ms |          226 ms |
 | Oset-AID     |              3.2 ms |          4.69 s  |         47.3 s  |
 | SID in R     |             ~1–2 h  |           ~60 s  |          ~60 s  |
+
+Results obtained with 𝚐𝚊𝚍𝚓𝚒𝚍 v0.0.1 using the Python interface
+and the SID R package v1.1 from CRAN.
 
 
 ## LICENSE

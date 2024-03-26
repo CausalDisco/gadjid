@@ -108,7 +108,7 @@ structural intervention distance for directed acyclic graphs as a special case. 
 where `Gtrue` and `Gguess` are adjacency matrices of a DAG or CPDAG
 and `edge_direction` determines whether a `1` at r-th row and c-th column of an adjacency matrix
 codes the edge `r → c` (`edge_direction="from row to column"`) or `c → r` (`edge_direction="from column to row"`).
-The functions are not symmetric in their input:
+The functions are not symmetric in their inputs:
 To calculate a distance,
 identifying formulas for causal effects are inferred in the graph `Gguess`
 and verified against the graph `Gtrue`.
@@ -127,14 +127,14 @@ a `1` in row `r` and column `c` codes a directed edge `r → c`;
 if `edge_direction="from column to row"`, then
 a `1` in row `r` and column `c` codes a directed edge `c → r`;
 for either setting of `edge_direction`,
-a `2` in row `r` and column `c` codes an undirected edge `r – t`
+a `2` in row `r` and column `c` codes an undirected edge `r – c`
 (an additional `2` in row `c` and column `r` is ignored;
 one of the two entries is sufficient to code an undirected edge).
 
 An adjacency matrix for a DAG may only contain 0s and 1s.
 An adjacency matrix for a CPDAG may only contain 0s, 1s and 2s.
-DAG and CPDAG inputs are validated for acyclicity. 
-However, for CPDAG inputs, __the user needs to ensure the adjacency 
+DAG and CPDAG inputs are validated for acyclicity.
+However, for CPDAG inputs, __the user needs to ensure the adjacency
 matrix indeed codes a valid CPDAG (instead of just a PDAG)__.
 
 
@@ -145,7 +145,7 @@ Here, for a graph with $p$ nodes,
 sparse graphs have $10p$ edges in expectation,
 dense graphs have $0.3p(p-1)/2$ edges in expectation,
 and
-sparse graphs have $0.75p$ edges in expectation.
+x-sparse graphs have $0.75p$ edges in expectation.
 
 __Maximum graph size feasible within 1 minute__
 
