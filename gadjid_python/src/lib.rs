@@ -36,12 +36,12 @@ one of the two entries is sufficient to code an undirected edge).
 
 An adjacency matrix for a DAG may only contain 0s and 1s.
 An adjacency matrix for a CPDAG may only contain 0s, 1s and 2s.
-DAG and CPDAG inputs are validated for acyclicity. 
-However, for CPDAG inputs, __the user needs to ensure the adjacency 
+DAG and CPDAG inputs are validated for acyclicity.
+However, for CPDAG inputs, __the user needs to ensure the adjacency
 matrix indeed codes a valid CPDAG (instead of just a PDAG)__.
 Example:
 ```python
-import 
+import
 from gadjid import example, ancestor_aid, oset_aid, parent_aid, shd
 import numpy as np
 
