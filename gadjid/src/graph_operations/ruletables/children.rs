@@ -38,7 +38,7 @@ mod test {
             vec![0, 0, 0],
         ];
 
-        let dag = PDAG::from_vecvec(v_dag);
+        let dag = PDAG::from_row_to_column_vecvec(v_dag);
 
         let result = get_children(&dag, [0].iter());
         let expected = HashSet::from([1]);
@@ -68,7 +68,7 @@ mod test {
             vec![0, 0, 1, 1, 0],
         ];
 
-        let dag = PDAG::from_vecvec(v_dag);
+        let dag = PDAG::from_row_to_column_vecvec(v_dag);
 
         let result = get_children(&dag, [4].iter());
         let expected = HashSet::from([2, 3]);

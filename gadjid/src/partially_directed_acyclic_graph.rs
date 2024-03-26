@@ -78,10 +78,12 @@ pub struct PDAG {
 pub enum Structure {
     /// The PDAG contains no undirected edges and is acyclic, so it is a DAG.
     DAG,
-    /// The PDAG contains undirected edges. It is however not guaranteed to be a CPDAG.
+    /// The graph contains directed and undirected edges and no directed cycles.
+    /// It is however not guaranteed to be a CPDAG.
     CPDAG,
 }
 
+/// Will display the adjacency matrix of the PDAG, encoded as row-to-column adjacency matrix.
 impl fmt::Display for PDAG {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut adjacency = vec![vec![0; self.n_nodes]; self.n_nodes];
@@ -192,11 +194,8 @@ impl fmt::Display for LoadError {
 impl PDAG {
     // TODO: from_row_major and from_col_major are very similar, unify as much as possible for clarity
 
-    /// Creates a PDAG from a adjacency matrix traversed in row-major order.
+    /// Creates a PDAG from an edgelist, yielding entries in a row-by-row order.
     ///
-    /// Extra argument `accept_only_dags` allows to specify whether to fail if the adjacency matrix
-    /// contains undirected edges (2's). This is useful to load DAGs with the same
-    /// function, as they are a subset of PDAGs.
     /// If there is an undirected edge between node i and j, the edgelist may yield
     /// (i, j, 2) and (j, i, 2). Yielding only one is also fine, but yielding
     /// (i, j, 1) and (j, i, 1), or (i, j, 1) and (j, i, 2) will cause a panic.
@@ -345,11 +344,8 @@ impl PDAG {
         Ok(pdag)
     }
 
-    /// Creates a PDAG from a adjacency matrix traversed in column-major order.
+    /// Creates a PDAG from an edgelist, yielding entries in a column-by-column order.
     ///
-    /// Extra argument `accept_only_dags` allows to specify whether to fail if the adjacency matrix
-    /// contains undirected edges (2's). This is useful to load DAGs with the same
-    /// function, as they are a subset of PDAGs.
     /// If there is an undirected edge between node i and j, the edgelist may yield
     /// (i, j, 2) and (j, i, 2). Yielding only one is also fine, but yielding
     /// (i, j, 1) and (j, i, 1), or (i, j, 1) and (j, i, 2) will cause a panic.
@@ -503,8 +499,11 @@ impl PDAG {
         Ok(pdag)
     }
 
-    /// Creates a PDAG from a adjacency matrix in row-major order.
-    pub fn from_vecvec(dense: Vec<Vec<i8>>) -> Self {
+    /// Creates a PDAG from a row-major encoded adjacency matrix.
+    /// An entry of 1 at position `[i,j]` indicates a directed edge `i -> j`,
+    /// the opposite of how [`from_col_to_row_vecvec`] does it.
+    /// An entry of 2 at position `[i,j]` and/or `[j,i]` indicates an undirected edge between `i` and `j`.
+    pub fn from_row_to_column_vecvec(dense: Vec<Vec<i8>>) -> Self {
         let edgelist = Edgelist::from_vecvec(dense);
         let mut pdag = PDAG::try_from_row_major(edgelist).unwrap();
 
@@ -517,9 +516,11 @@ impl PDAG {
         pdag
     }
 
-    /// Convenience method to create a [`DAG`] directly from a transposed vector of vectors.
-    /// Will effectively re-transpose the matrix internally in an efficient manner before loading with 0 cost.
-    pub fn from_transposed_vecvec(vecvec: Vec<Vec<i8>>) -> Self {
+    /// Creates a PDAG from a row_major adjacency matrix.
+    /// An entry of 1 at position `[i,j]` indicates a directed edge `j -> i`,
+    /// the opposite of how [`from_row_to_col_vecvec`] does it.
+    /// An entry of 2 at position `[i,j]` and/or `[j,i]` indicates an undirected edge between `i` and `j`.
+    pub fn from_col_to_row_vecvec(vecvec: Vec<Vec<i8>>) -> Self {
         let edgelist = Edgelist::from_vecvec(vecvec);
         let mut pdag = PDAG::try_from_col_major(edgelist).unwrap();
 
@@ -550,7 +551,7 @@ impl PDAG {
             }
         }
 
-        PDAG::from_vecvec(adjacency)
+        PDAG::from_row_to_column_vecvec(adjacency)
     }
 
     /// Creates a random vecvec of a PDAG with random edges with the given edge density and size.
@@ -589,7 +590,7 @@ impl PDAG {
 
     /// Creates a random PDAG with random edges with the given edge density and size.
     pub fn random_pdag(edge_density: f64, graph_size: usize, mut rng: impl rand::RngCore) -> PDAG {
-        PDAG::from_vecvec(PDAG::_random_pdag_vecvec(
+        PDAG::from_row_to_column_vecvec(PDAG::_random_pdag_vecvec(
             edge_density,
             graph_size,
             &mut rng,
@@ -661,7 +662,7 @@ mod test {
             vec![1, 0],
         ];
 
-        PDAG::from_vecvec(dense);
+        PDAG::from_row_to_column_vecvec(dense);
     }
 
     #[test]
@@ -672,7 +673,7 @@ mod test {
             vec![2, 0],
         ];
 
-        PDAG::from_vecvec(dense);
+        PDAG::from_row_to_column_vecvec(dense);
     }
 
     #[test]
@@ -683,7 +684,7 @@ mod test {
             vec![0, 0, 0],
         ];
 
-        PDAG::from_vecvec(dense);
+        PDAG::from_row_to_column_vecvec(dense);
     }
 
     #[test]
@@ -694,7 +695,7 @@ mod test {
             vec![0, 0],
         ];
 
-        let cpdag = PDAG::from_vecvec(dense);
+        let cpdag = PDAG::from_row_to_column_vecvec(dense);
 
         assert_eq!(cpdag.n_nodes, 2);
 
@@ -718,7 +719,7 @@ mod test {
             vec![0, 0, 0, 0],
         ];
 
-        let cpdag = PDAG::from_vecvec(dense);
+        let cpdag = PDAG::from_row_to_column_vecvec(dense);
 
         assert_eq!(cpdag.n_nodes, 4);
         assert_eq!(
@@ -757,7 +758,7 @@ mod test {
             vec![2, 0, 0],
         ];
 
-        let cpdag = PDAG::from_vecvec(dense);
+        let cpdag = PDAG::from_row_to_column_vecvec(dense);
 
         assert_eq!(cpdag.n_nodes, 3);
 
@@ -783,7 +784,7 @@ mod test {
             vec![0, 0],
         ];
 
-        let dag = PDAG::from_vecvec(dense);
+        let dag = PDAG::from_row_to_column_vecvec(dense);
 
         assert_eq!(dag.n_nodes, 2);
 
@@ -807,7 +808,7 @@ mod test {
             vec![0, 0, 0, 0],
         ];
 
-        let dag = PDAG::from_vecvec(dense);
+        let dag = PDAG::from_row_to_column_vecvec(dense);
 
         assert_eq!(dag.n_nodes, 4);
         assert_eq!(
@@ -845,7 +846,7 @@ mod test {
             vec![0, 0, 0],
         ];
 
-        let dag = PDAG::from_vecvec(dense);
+        let dag = PDAG::from_row_to_column_vecvec(dense);
 
         assert_eq!(dag.n_nodes, 3);
 
@@ -876,8 +877,8 @@ mod test {
             }
 
             // construct the DAG from the original and transposed adjacency matrix
-            let row_major_dag = PDAG::from_vecvec(adjacency);
-            let col_major_dag = PDAG::from_transposed_vecvec(transpose_adjacency);
+            let row_major_dag = PDAG::from_row_to_column_vecvec(adjacency);
+            let col_major_dag = PDAG::from_col_to_row_vecvec(transpose_adjacency);
 
             // the final representations of the DAG should be 100% equal
             assert_eq!(row_major_dag, col_major_dag);
@@ -928,7 +929,7 @@ mod test {
         ];
 
         for (i, dense) in dense_matrices.iter().enumerate() {
-            let cpdag = PDAG::from_vecvec(dense.clone());
+            let cpdag = PDAG::from_row_to_column_vecvec(dense.clone());
 
             for n in 0..cpdag.n_nodes {
                 let mut children = cpdag.children_of(n).to_vec();
@@ -975,7 +976,7 @@ mod test {
             vec![0, 0, 1],
             vec![0, 1, 0],
         ];
-        let _ = PDAG::from_vecvec(g_truth);
+        let _ = PDAG::from_row_to_column_vecvec(g_truth);
     }
 
     #[test]
@@ -986,7 +987,7 @@ mod test {
             vec![0, 0, 1],
             vec![1, 0, 0],
         ];
-        let _ = PDAG::from_vecvec(g_truth);
+        let _ = PDAG::from_row_to_column_vecvec(g_truth);
     }
 
     #[test]
@@ -997,6 +998,6 @@ mod test {
             vec![0, 0, 1],
             vec![1, 1, 0],
         ];
-        let _ = PDAG::from_vecvec(g_truth);
+        let _ = PDAG::from_row_to_column_vecvec(g_truth);
     }
 }

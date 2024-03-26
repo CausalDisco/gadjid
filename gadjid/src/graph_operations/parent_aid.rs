@@ -148,9 +148,9 @@ mod test {
             vec![0, 0, 0, 0, 0],
             vec![0, 0, 0, 0, 0],
         ];
-        let g_dag = PDAG::from_vecvec(g);
-        let h1_dag = PDAG::from_vecvec(h1);
-        let h2_dag = PDAG::from_vecvec(h2);
+        let g_dag = PDAG::from_row_to_column_vecvec(g);
+        let h1_dag = PDAG::from_row_to_column_vecvec(h1);
+        let h2_dag = PDAG::from_row_to_column_vecvec(h2);
 
         assert_eq!(parent_aid(&g_dag, &h1_dag), (0.0, 0));
         assert_eq!(parent_aid(&g_dag, &h2_dag), (0.4, 8));
