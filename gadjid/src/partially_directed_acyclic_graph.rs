@@ -194,7 +194,7 @@ impl fmt::Display for LoadError {
 impl PDAG {
     // TODO: from_row_major and from_col_major are very similar, unify as much as possible for clarity
 
-    /// Creates a PDAG from a adjacency matrix traversed in row-major order.
+    /// Creates a PDAG from an edgelist, yielding entries in a row-by-row order.
     ///
     /// If there is an undirected edge between node i and j, the edgelist may yield
     /// (i, j, 2) and (j, i, 2). Yielding only one is also fine, but yielding
@@ -344,7 +344,7 @@ impl PDAG {
         Ok(pdag)
     }
 
-    /// Creates a PDAG from a adjacency matrix traversed in column-major order.
+    /// Creates a PDAG from an edgelist, yielding entries in a column-by-column order.
     ///
     /// If there is an undirected edge between node i and j, the edgelist may yield
     /// (i, j, 2) and (j, i, 2). Yielding only one is also fine, but yielding
