@@ -19,57 +19,52 @@ use ::gadjid::PDAG;
 use numpy_ndarray_handler::try_from as try_from_dense;
 use scipy_sparse_handler::try_from as try_from_sparse;
 
-/// Adjustment Identification Distance: A 𝚐𝚊𝚍𝚓𝚒𝚍 for Causal Structure Learning
-///
-/// For details, see the arXiv preprint at https://doi.org/10.48550/arXiv.2402.08616
-/// The source code is available at https://github.com/CausalDisco/gadjid
-///
-/// Adjacency matrices are accepted as either int8 numpy ndarrays
-/// or int8 scipy sparse matrices in CSR or CSC format.
-/// If `edge_direction="from row to column"`, then
-/// a `1` in row `r` and column `c` codes a directed edge `r → c`;
-/// if `edge_direction="from column to row"`, then
-/// a `1` in row `r` and column `c` codes a directed edge `c → r`;
-/// for either setting of `edge_direction`,
-/// a `2` in row `r` and column `c` codes an undirected edge `r – t`
-/// (an additional `2` in row `c` and column `r` is ignored;
-/// one of the two entries is sufficient to code an undirected edge).
+/**
+Adjustment Identification Distance: A 𝚐𝚊𝚍𝚓𝚒𝚍 for Causal Structure Learning
+For details, see the arXiv preprint at https://doi.org/10.48550/arXiv.2402.08616
+The source code is available at https://github.com/CausalDisco/gadjid
+Adjacency matrices are accepted as either int8 numpy ndarrays
+or int8 scipy sparse matrices in CSR or CSC format.
+If `edge_direction="from row to column"`, then
+a `1` in row `r` and column `c` codes a directed edge `r → c`;
+if `edge_direction="from column to row"`, then
+a `1` in row `r` and column `c` codes a directed edge `c → r`;
+for either setting of `edge_direction`,
+a `2` in row `r` and column `c` codes an undirected edge `r – t`
+(an additional `2` in row `c` and column `r` is ignored;
+one of the two entries is sufficient to code an undirected edge).
 
-/// An adjacency matrix for a DAG may only contain 0s and 1s.
-/// An adjacency matrix for a CPDAG may only contain 0s, 1s and 2s.
-/// DAG and CPDAG inputs are validated for acyclicity. 
-/// However, for CPDAG inputs, __the user needs to ensure the adjacency 
-/// matrix indeed codes a valid CPDAG (instead of just a PDAG)__.
-///
-/// Example:
-///
-/// ```python
-/// import gadjid
-/// from gadjid import example, ancestor_aid, oset_aid, parent_aid, shd
-/// import numpy as np
-/// 
-/// help(gadjid)
-///
-/// example.run_parent_aid()
-///
-/// Gtrue = np.array([
-///     [0, 1, 1, 1, 1],
-///     [0, 0, 1, 1, 1],
-///     [0, 0, 0, 0, 0],
-///     [0, 0, 0, 0, 0],
-///     [0, 0, 0, 0, 0]
-/// ], dtype=np.int8)
-/// Gguess = np.array([
-///     [0, 0, 1, 1, 1],
-///     [1, 0, 1, 1, 1],
-///     [0, 0, 0, 0, 0],
-///     [0, 0, 0, 0, 0],
-///     [0, 0, 0, 0, 0]
-/// ], dtype=np.int8)
-///
-/// print(ancestor_aid(Gtrue, Gguess, edge_direction="from row to column"))
-/// print(shd(Gtrue, Gguess))
-/// ```
+An adjacency matrix for a DAG may only contain 0s and 1s.
+An adjacency matrix for a CPDAG may only contain 0s, 1s and 2s.
+DAG and CPDAG inputs are validated for acyclicity. 
+However, for CPDAG inputs, __the user needs to ensure the adjacency 
+matrix indeed codes a valid CPDAG (instead of just a PDAG)__.
+Example:
+```python
+import 
+from gadjid import example, ancestor_aid, oset_aid, parent_aid, shd
+import numpy as np
+
+help(gadjid)
+example.run_parent_aid()
+Gtrue = np.array([
+    [0, 1, 1, 1, 1],
+    [0, 0, 1, 1, 1],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0]
+], dtype=np.int8)
+Gguess = np.array([
+    [0, 0, 1, 1, 1],
+    [1, 0, 1, 1, 1],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0]
+], dtype=np.int8)
+print(ancestor_aid(Gtrue, Gguess, edge_direction="from row to column"))
+print(shd(Gtrue, Gguess))
+```
+*/
 #[pymodule]
 fn gadjid(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::ancestor_aid, m)?)?;
