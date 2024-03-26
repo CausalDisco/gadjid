@@ -232,10 +232,8 @@ oset_for_t_onto_y_in_g_guess:
   - 3
   - 5
   - 6
-  - 8
   - 10
   - 13
-  - 21
   - 23
   - 25
 not_validly_adjusted_for_in_g_guess_by_parents_of_t:
@@ -340,14 +338,12 @@ not_validly_adjusted_for_in_g_guess_by_oset_for_t_onto_y:
   - 3
   - 5
   - 6
-  - 8
   - 10
   - 13
   - 14
   - 16
   - 17
   - 18
-  - 21
   - 22
   - 23
   - 25
