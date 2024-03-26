@@ -46,7 +46,7 @@ Gguess = np.array([
     [0, 0, 0, 0, 0]
 ], dtype=np.int8)
 
-print(ancestor_aid(Gtrue, Gguess))
+print(ancestor_aid(Gtrue, Gguess, edge_direction="from row to column"))
 print(shd(Gtrue, Gguess))
 ```
 
@@ -82,17 +82,26 @@ and the number of wrongly inferred causal effects, `mistake_count`.
 There are $p(p-1)$ pairwise causal effects to infer in graphs with $p$ nodes
 and we define normalisation as  `normalised_distance = mistake_count / p(p-1)`.
 
-All graphs are assumed simple, that is, at most one edge is allowed between any two nodes.
-An adjacency matrix for a DAG may only contain 0s and 1s;
-a `1` in row `s` and column `t` codes a directed edge `Xₛ → Xₜ`;
-DAG inputs are validated for acyclicity.
-An adjacency matrix for a CPDAG may only contain 0s, 1s and 2s;
-a `2` in row `s` and column `t` codes a undirected edge `Xₛ — Xₜ`
-(an additional `2` in row `t` and column `s` is ignored; only one of the two entries is required to code an undirected edge);
-CPDAG inputs are not validated and __the user needs to ensure the adjacency matrix indeed codes a valid CPDAG (instead of just a PDAG)__.
-You may also calculate the SID between DAGs via `parent_aid(DAGtrue, DAGguess)`,
-but we recommend `ancestor_aid` and `oset_aid` and for CPDAG inputs our `parent_aid` does not coincide with the SID
+You may also calculate the SID between DAGs via `parent_aid`,
+but we recommend `ancestor_aid` and `oset_aid`, and for CPDAG inputs our `parent_aid` does not coincide with the SID
 (see also our accompanying article).
+
+If `edge_direction="from row to column"`, then
+a `1` in row `r` and column `c` codes a directed edge `r → c`;
+if `edge_direction="from column to row"`, then
+a `1` in row `r` and column `c` codes a directed edge `c → r`;
+for either setting of `edge_direction`,
+a `2` in row `r` and column `c` codes an undirected edge `r – t`
+(an additional `2` in row `c` and column `r` is ignored;
+one of the two entries is sufficient to code an undirected edge).
+
+An adjacency matrix for a DAG may only contain 0s and 1s.
+An adjacency matrix for a CPDAG may only contain 0s, 1s and 2s.
+DAG and CPDAG inputs are validated for acyclicity. 
+However, for CPDAG inputs, __the user needs to ensure the adjacency 
+matrix indeed codes a valid CPDAG (instead of just a PDAG)__.
+
+
 
 
 ## Empirical Runtime Analysis
