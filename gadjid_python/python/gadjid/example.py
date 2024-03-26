@@ -8,7 +8,6 @@ import numpy as np
 
 from gadjid import parent_aid
 
-
 rng = np.random.default_rng(0)
 
 ROW_TO_COL = "from row to column"
