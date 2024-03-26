@@ -78,7 +78,7 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                             &t_desc_in_guess,
                         );
 
-                        // (because the VAS is not valid, by blocking too much or too little)
+                        // if the o-set from the guess graph is not valid in the truth graph (by blocking too much or too little)
                         if get_invalidly_un_blocked(truth, &[treatment], &o_set_adjustment)
                             .contains(&y)
                         {
