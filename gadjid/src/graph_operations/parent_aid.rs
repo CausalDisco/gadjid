@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Implements the Parent Adjustment Intervention Distance (Parent-AID) algorithm
 
-use rayon::prelude::*;
-use rustc_hash::FxHashSet;
 use crate::{
     graph_operations::{get_nam, get_pd_nam_nva},
     PDAG,
 };
+use rayon::prelude::*;
+use rustc_hash::FxHashSet;
 
 /// Computes the parent adjustment intervention distance
 /// between an estimated `guess` DAG or CPDAG and the true `truth` DAG or CPDAG
@@ -21,7 +21,9 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     );
     assert!(guess.n_nodes >= 2, "graph must contain at least 2 nodes");
 
-    let _ = rayon::ThreadPoolBuilder::new().num_threads(num_cpus::get_physical()).build_global();
+    let _ = rayon::ThreadPoolBuilder::new()
+        .num_threads(num_cpus::get_physical())
+        .build_global();
 
     let verifier_mistakes_found = (0..guess.n_nodes)
         .into_par_iter()
