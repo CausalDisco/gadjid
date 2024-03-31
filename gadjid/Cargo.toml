@@ -9,6 +9,7 @@ repository = "https://github.com/CausalDisco/gadjid"
 publish = false
 
 [dependencies]
+num_cpus = "1.16.0"
 rand = "0.8"
 rand_chacha = "0.3"
 rayon = "1.8"
