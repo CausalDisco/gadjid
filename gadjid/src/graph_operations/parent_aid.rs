@@ -86,7 +86,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     )
 }
 
-pub fn parent_aid_custom(truth: &PDAG, guess: &PDAG, pairs : Vec<(usize, usize)>) -> (f64, usize) {
+pub fn parent_aid_selective_pairs(truth: &PDAG, guess: &PDAG, pairs : Vec<(usize, usize)>) -> (f64, usize) {
     assert!(
         guess.n_nodes == truth.n_nodes,
         "both graphs must contain the same number of nodes"
@@ -96,7 +96,9 @@ pub fn parent_aid_custom(truth: &PDAG, guess: &PDAG, pairs : Vec<(usize, usize)>
     let mut groups : FxHashMap<usize, Vec<usize>> = FxHashMap::default();
     for (treatment, effect) in pairs {
         let group = groups.entry(treatment).or_insert(Vec::new());
-        group.push(effect);
+        if !group.contains(&effect) {
+            group.push(effect);
+        }
     }
 
     let verifier_mistakes_found = groups
@@ -181,7 +183,7 @@ mod test {
                 let dag1 = PDAG::random_dag(1.0, n, &mut rng);
                 let dag2 = PDAG::random_dag(1.0, n, &mut rng);
                 let (normal, _) = parent_aid(&dag1, &dag2);
-                let (custom, _) = super::parent_aid_custom(&dag1, &dag2, non_diag_pairs.clone());
+                let (custom, _) = super::parent_aid_selective_pairs(&dag1, &dag2, non_diag_pairs.clone());
                 assert_eq!(normal, custom);
             }
         }
