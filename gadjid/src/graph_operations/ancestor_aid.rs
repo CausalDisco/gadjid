@@ -2,6 +2,7 @@
 //! Implements the Ancestor Adjustment Intervention Distance (Ancestor-AID) algorithm
 
 use rayon::prelude::*;
+use rustc_hash::FxHashMap;
 
 use crate::{
     graph_operations::{
@@ -16,17 +17,41 @@ use crate::{
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
 ///  currently distances between general PDAGs are not implemented)
 /// Returns a tuple of (normalized error (in \[0,1]), total number of errors)
-// This function largely overlaps with parent_aid in parent_aid.rs; differences ---highlighted--- below
 pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
+    let t_y_pairs_to_grade: Vec<(usize, usize)> = (0..truth.n_nodes)
+        .flat_map(|t| (0..truth.n_nodes).map(move |e| (t, e)))
+        .collect();
+    ancestor_aid_selected_pairs(truth, guess, t_y_pairs_to_grade)
+}
+
+/// Computes the ancestor adjustment intervention distance
+/// between an estimated `guess` DAG or CPDAG and the true `truth` DAG or CPDAG
+/// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
+///  currently distances between general PDAGs are not implemented)
+/// Returns a tuple of (normalized error (in \[0,1]), total number of errors)
+// This function largely overlaps with parent_aid in parent_aid.rs; differences ---highlighted--- below
+pub fn ancestor_aid_selected_pairs(
+    truth: &PDAG,
+    guess: &PDAG,
+    t_y_pairs_to_grade: Vec<(usize, usize)>,
+) -> (f64, usize) {
     assert!(
         guess.n_nodes == truth.n_nodes,
         "both graphs must contain the same number of nodes"
     );
     assert!(guess.n_nodes >= 2, "graph must contain at least 2 nodes");
 
-    let verifier_mistakes_found = (0..guess.n_nodes)
+    let mut groups: FxHashMap<usize, Vec<usize>> = FxHashMap::default();
+    for (treatment, effect) in t_y_pairs_to_grade {
+        let group = groups.entry(treatment).or_default();
+        if !group.contains(&effect) {
+            group.push(effect);
+        }
+    }
+
+    let verifier_mistakes_found = groups
         .into_par_iter()
-        .map(|treatment| {
+        .map(|(treatment, effects)| {
             // --- this function differs from parent_aid.rs only in the imports and from here
 
             // ancestor adjustment
@@ -48,7 +73,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                 get_pd_nam_nva(truth, &[treatment], &adjustment_set);
 
             let mut mistakes = 0;
-            for y in 0..truth.n_nodes {
+            for y in effects {
                 if y == treatment {
                     continue; // this case is always correct
                 }

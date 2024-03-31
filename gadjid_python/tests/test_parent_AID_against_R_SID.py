@@ -2,6 +2,7 @@
 from pathlib import Path
 
 import numpy as np
+from utils import FROM_ROW_TO_COL
 
 from gadjid import parent_aid
 
@@ -33,8 +34,13 @@ def test_parent_AID_against_R_SID():
         guess_name = int(guess_name)
         Gtrue = load_trlpt(true_name)
         Gguess = load_trlpt(guess_name)
-        sid = parent_aid(Gtrue, Gguess, edge_direction="from row to column")
+        sid = parent_aid(Gtrue, Gguess, edge_direction=FROM_ROW_TO_COL)
         assert sid[1] == int(rsid), (
             f"failed for sid({true_name}, {guess_name}):"
             f" {sid[1]} vs {int(rsid)}"
         )
+
+
+if __name__ == "__main__":
+    test_parent_AID_against_R_SID()
+    print("all tests passed")

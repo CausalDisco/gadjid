@@ -1,23 +1,9 @@
 # SPDX-License-Identifier: MPL-2.0
 import numpy as np
 import scipy
+from utils import FROM_COL_TO_ROW, FROM_ROW_TO_COL, make_dag
 
 import gadjid
-
-
-def make_dag(size, density, seed) -> np.ndarray:
-    np.random.seed(seed)
-    dense: np.ndarray = np.random.binomial(
-        1, density, size=(size, size)
-    ).astype(np.int8)
-    # fill lower triangle+diagonal with zeros
-    dense = np.triu(dense, 1)
-    perm = np.random.permutation(size)
-    return dense[perm, :][:, perm]
-
-
-ROW_TO_COL = "from row to column"
-COL_TO_ROW = "from column to row"
 
 
 def test_edge_direction_argument():
@@ -26,28 +12,30 @@ def test_edge_direction_argument():
         size = 10
 
         # make 2 random dags:
-        truth_dag = make_dag(size, 0.5, exp)
-        guess_dag = make_dag(size, 0.5, exp + exps)
+        truth_dag = make_dag(size, density=0.5, seed=exp)
+        guess_dag = make_dag(size, density=0.5, seed=exp + exps)
 
         # for all functions that take an edge_direction argument, check that
         # the result is the same for both edge directions
         assert gadjid.sid(
-            truth_dag, guess_dag, edge_direction=ROW_TO_COL
-        ) == gadjid.sid(truth_dag.T, guess_dag.T, edge_direction=COL_TO_ROW)
+            truth_dag, guess_dag, edge_direction=FROM_ROW_TO_COL
+        ) == gadjid.sid(
+            truth_dag.T, guess_dag.T, edge_direction=FROM_COL_TO_ROW
+        )
         assert gadjid.parent_aid(
-            truth_dag, guess_dag, edge_direction=ROW_TO_COL
+            truth_dag, guess_dag, edge_direction=FROM_ROW_TO_COL
         ) == gadjid.parent_aid(
-            truth_dag.T, guess_dag.T, edge_direction=COL_TO_ROW
+            truth_dag.T, guess_dag.T, edge_direction=FROM_COL_TO_ROW
         )
         assert gadjid.ancestor_aid(
-            truth_dag, guess_dag, edge_direction=ROW_TO_COL
+            truth_dag, guess_dag, edge_direction=FROM_ROW_TO_COL
         ) == gadjid.ancestor_aid(
-            truth_dag.T, guess_dag.T, edge_direction=COL_TO_ROW
+            truth_dag.T, guess_dag.T, edge_direction=FROM_COL_TO_ROW
         )
         assert gadjid.oset_aid(
-            truth_dag, guess_dag, edge_direction=ROW_TO_COL
+            truth_dag, guess_dag, edge_direction=FROM_ROW_TO_COL
         ) == gadjid.oset_aid(
-            truth_dag.T, guess_dag.T, edge_direction=COL_TO_ROW
+            truth_dag.T, guess_dag.T, edge_direction=FROM_COL_TO_ROW
         )
 
 
