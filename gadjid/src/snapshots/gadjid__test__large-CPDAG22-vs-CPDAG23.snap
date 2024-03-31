@@ -217,9 +217,7 @@ possible_descendants_of_t_in_g_guess:
 not_amenable_in_g_guess_wrt_t: []
 proper_ancestors_of_y_in_g_guess_wrt_t:
   - 21
-oset_for_t_onto_y_in_g_guess:
-  - 1
-  - 10
+oset_for_t_onto_y_in_g_guess: []
 not_validly_adjusted_for_in_g_guess_by_parents_of_t:
   - 0
   - 1
@@ -315,9 +313,7 @@ not_validly_adjusted_for_in_g_guess_by_parents_of_t:
   - 95
   - 96
 not_validly_adjusted_for_in_g_guess_by_oset_for_t_onto_y:
-  - 1
   - 6
-  - 10
   - 17
   - 21
   - 63

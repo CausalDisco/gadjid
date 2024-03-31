@@ -45,8 +45,7 @@ proper_ancestors_of_y_in_g_guess_wrt_t:
   - 2
   - 8
   - 9
-oset_for_t_onto_y_in_g_guess:
-  - 3
+oset_for_t_onto_y_in_g_guess: []
 not_validly_adjusted_for_in_g_guess_by_parents_of_t:
   - 0
   - 1
@@ -60,7 +59,6 @@ not_validly_adjusted_for_in_g_guess_by_parents_of_t:
 not_validly_adjusted_for_in_g_guess_by_oset_for_t_onto_y:
   - 1
   - 2
-  - 3
   - 8
   - 9
 not_validly_adjusted_for_in_g_guess_by_empty_set:

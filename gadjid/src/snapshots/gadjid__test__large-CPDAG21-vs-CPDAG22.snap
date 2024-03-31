@@ -276,17 +276,10 @@ proper_ancestors_of_y_in_g_guess_wrt_t:
   - 67
   - 69
 oset_for_t_onto_y_in_g_guess:
-  - 0
   - 1
   - 2
-  - 3
   - 4
-  - 7
-  - 8
-  - 9
-  - 12
   - 15
-  - 17
 not_validly_adjusted_for_in_g_guess_by_parents_of_t:
   - 0
   - 1
@@ -384,20 +377,13 @@ not_validly_adjusted_for_in_g_guess_by_parents_of_t:
   - 97
   - 99
 not_validly_adjusted_for_in_g_guess_by_oset_for_t_onto_y:
-  - 0
   - 1
   - 2
-  - 3
   - 4
   - 5
   - 6
-  - 7
-  - 8
-  - 9
-  - 12
   - 15
   - 16
-  - 17
   - 18
   - 19
   - 20
