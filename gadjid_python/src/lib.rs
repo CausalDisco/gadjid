@@ -133,15 +133,25 @@ pub fn parent_aid(g_true: &PyAny, g_guess: &PyAny, edge_direction: &str) -> PyRe
 }
 
 /// Parent Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
-/// Will additionally take two lists of treatments and effects, and grade only the pairs of nodes 
+/// Will additionally take two lists of treatments and effects, and grade only the pairs of nodes
 /// generated from the cartesian product of these two lists.
 #[pyfunction]
-pub fn parent_aid_selective_pairs(g_true: &PyAny, g_guess: &PyAny, treatments : Vec<usize>, effects : Vec<usize>, edge_direction: &str) -> PyResult<(f64, usize)> {
+pub fn parent_aid_selective_pairs(
+    g_true: &PyAny,
+    g_guess: &PyAny,
+    treatments: Vec<usize>,
+    effects: Vec<usize>,
+    edge_direction: &str,
+) -> PyResult<(f64, usize)> {
     let row_to_col = edge_direction_is_row_to_col(edge_direction)?;
     let graph_truth = graph_from_pyobject(g_true, row_to_col)?;
     let graph_guess = graph_from_pyobject(g_guess, row_to_col)?;
-    let cartesian_prod = treatments.iter().flat_map(|t| effects.iter().map(move |e| (*t, *e))).collect();
-    let (normalized_distance, n_errors) = rust_parent_aid_selective_pairs(&graph_truth, &graph_guess, cartesian_prod);
+    let cartesian_prod = treatments
+        .iter()
+        .flat_map(|t| effects.iter().map(move |e| (*t, *e)))
+        .collect();
+    let (normalized_distance, n_errors) =
+        rust_parent_aid_selective_pairs(&graph_truth, &graph_guess, cartesian_prod);
     Ok((normalized_distance, n_errors))
 }
 

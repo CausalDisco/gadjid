@@ -86,16 +86,28 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     )
 }
 
-pub fn parent_aid_selective_pairs(truth: &PDAG, guess: &PDAG, pairs : Vec<(usize, usize)>) -> (f64, usize) {
+/// Computes the parent adjustment intervention distance
+/// between an estimated `guess` DAG or CPDAG and the true `truth` DAG or CPDAG
+/// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
+///  currently distances between general PDAGs are not implemented)
+/// Returns a tuple of (normalized error (in \[0,1]), total number of errors)
+/// 
+/// Will additionally take a list of pairs of treatments and effects, and grade only these pairs of nodes
+// This function largely overlaps with ancestor_aid_selective_pairs in ancestor_aid.rs; differences ---highlighted--- below
+pub fn parent_aid_selective_pairs(
+    truth: &PDAG,
+    guess: &PDAG,
+    t_y_pairs_to_grade: Vec<(usize, usize)>,
+) -> (f64, usize) {
     assert!(
         guess.n_nodes == truth.n_nodes,
         "both graphs must contain the same number of nodes"
     );
     assert!(guess.n_nodes >= 2, "graph must contain at least 2 nodes");
 
-    let mut groups : FxHashMap<usize, Vec<usize>> = FxHashMap::default();
-    for (treatment, effect) in pairs {
-        let group = groups.entry(treatment).or_insert(Vec::new());
+    let mut groups: FxHashMap<usize, Vec<usize>> = FxHashMap::default();
+    for (treatment, effect) in t_y_pairs_to_grade {
+        let group = groups.entry(treatment).or_default();
         if !group.contains(&effect) {
             group.push(effect);
         }
@@ -173,17 +185,19 @@ mod test {
 
     use super::parent_aid;
 
-
     #[test]
     fn parent_aid_custom_is_same_as_normal() {
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
         for n in 2..40 {
-            let non_diag_pairs : Vec<(usize, usize)> = (0..n).flat_map(|t| (0..t).chain(t+1..n).map(move |e| (t, e))).collect();
+            let non_diag_pairs: Vec<(usize, usize)> = (0..n)
+                .flat_map(|t| (0..t).chain(t + 1..n).map(move |e| (t, e)))
+                .collect();
             for _rep in 0..2 {
                 let dag1 = PDAG::random_dag(1.0, n, &mut rng);
                 let dag2 = PDAG::random_dag(1.0, n, &mut rng);
                 let (normal, _) = parent_aid(&dag1, &dag2);
-                let (custom, _) = super::parent_aid_selective_pairs(&dag1, &dag2, non_diag_pairs.clone());
+                let (custom, _) =
+                    super::parent_aid_selective_pairs(&dag1, &dag2, non_diag_pairs.clone());
                 assert_eq!(normal, custom);
             }
         }

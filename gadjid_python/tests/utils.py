@@ -1,7 +1,9 @@
 import numpy as np
 
+
 FROM_ROW_TO_COL = "from row to column"
 FROM_COL_TO_ROW = "from column to row"
+
 
 def make_dag(size, density, seed) -> np.ndarray:
     np.random.seed(seed)

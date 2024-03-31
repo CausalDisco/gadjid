@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: MPL-2.0
 import numpy as np
 import scipy
+from utils import FROM_COL_TO_ROW, FROM_ROW_TO_COL, make_dag
+
 import gadjid
-from utils import FROM_ROW_TO_COL, FROM_COL_TO_ROW, make_dag
 
 
 def test_edge_direction_argument():
@@ -18,7 +19,9 @@ def test_edge_direction_argument():
         # the result is the same for both edge directions
         assert gadjid.sid(
             truth_dag, guess_dag, edge_direction=FROM_ROW_TO_COL
-        ) == gadjid.sid(truth_dag.T, guess_dag.T, edge_direction=FROM_COL_TO_ROW)
+        ) == gadjid.sid(
+            truth_dag.T, guess_dag.T, edge_direction=FROM_COL_TO_ROW
+        )
         assert gadjid.parent_aid(
             truth_dag, guess_dag, edge_direction=FROM_ROW_TO_COL
         ) == gadjid.parent_aid(

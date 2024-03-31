@@ -2,9 +2,9 @@
 from pathlib import Path
 
 import numpy as np
+from utils import FROM_ROW_TO_COL
 
 from gadjid import parent_aid
-from utils import FROM_ROW_TO_COL, FROM_COL_TO_ROW
 
 
 TESTGRAPHS_DIR = Path(__file__).parent.parent.parent / "testgraphs"
@@ -39,6 +39,7 @@ def test_parent_AID_against_R_SID():
             f"failed for sid({true_name}, {guess_name}):"
             f" {sid[1]} vs {int(rsid)}"
         )
+
 
 if __name__ == "__main__":
     test_parent_AID_against_R_SID()
