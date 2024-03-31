@@ -139,7 +139,6 @@ pub fn ancestor_aid_selected_pairs(
     Ok((normalized_distance, n_errors))
 }
 
-
 /// Optimal Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[pyfunction]
 pub fn oset_aid(g_true: &PyAny, g_guess: &PyAny, edge_direction: &str) -> PyResult<(f64, usize)> {

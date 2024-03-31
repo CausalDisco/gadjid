@@ -26,7 +26,6 @@ pub fn optimal_adjustment_set_given_descendants(
     FxHashSet::from_iter(causal_nodes_parents.difference(t_descendants).copied())
 }
 
-
 /// Computes the oset adjustment intervention distance
 /// between an estimated `guess` DAG or CPDAG and the true `truth` DAG or CPDAG
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
@@ -39,13 +38,16 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     oset_aid_selected_pairs(truth, guess, t_y_pairs_to_grade)
 }
 
-
 /// Computes the oset adjustment intervention distance
 /// between an estimated `guess` DAG or CPDAG and the true `truth` DAG or CPDAG
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
 ///  currently distances between general PDAGs are not implemented)
 /// Returns a tuple of (normalized error (in \[0,1]), total number of errors)
-pub fn oset_aid_selected_pairs(truth: &PDAG, guess: &PDAG, t_y_pairs_to_grade: Vec<(usize, usize)>) -> (f64, usize) {
+pub fn oset_aid_selected_pairs(
+    truth: &PDAG,
+    guess: &PDAG,
+    t_y_pairs_to_grade: Vec<(usize, usize)>,
+) -> (f64, usize) {
     assert!(
         guess.n_nodes == truth.n_nodes,
         "both graphs must contain the same number of nodes"

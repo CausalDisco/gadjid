@@ -26,7 +26,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
 ///  currently distances between general PDAGs are not implemented)
 /// Returns a tuple of (normalized error (in \[0,1]), total number of errors)
-/// 
+///
 /// Will additionally take a list of pairs of treatments and effects, and grade only these pairs of nodes
 // This function largely overlaps with ancestor_aid_selective_pairs in ancestor_aid.rs; differences ---highlighted--- below
 pub fn parent_aid_selected_pairs(
