@@ -79,7 +79,7 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                         );
 
                         // if the o-set from the guess graph is not valid in the truth graph (by blocking too much or too little)
-                        if get_invalidly_un_blocked(truth, &[treatment], &o_set_adjustment)
+                        if get_invalidly_un_blocked(truth, &[treatment], &o_set_adjustment, Some(y))
                             .contains(&y)
                         {
                             // we count a mistake

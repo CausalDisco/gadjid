@@ -551,6 +551,7 @@ pub fn get_invalidly_un_blocked(
     graph: &PDAG,
     t: &[usize],
     z: &FxHashSet<usize>,
+    early_stop_when_determined: Option<usize>,
 ) -> FxHashSet<usize> {
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
@@ -577,6 +578,11 @@ pub fn get_invalidly_un_blocked(
             // when the node is reached on a causal path but blocked, or an unblocked non-causal path
             WalkStatus::PD_BLOCKED | WalkStatus::NON_CAUSAL_OPEN => {
                 ivb.insert(node);
+                if let Some(early_stop) = early_stop_when_determined {
+                    if node == early_stop {
+                        return ivb;
+                    }
+                }
             }
             _ => (),
         }
@@ -735,7 +741,7 @@ mod test {
         assert_eq!(nam_expected, nam);
         assert_eq!(nva_expected, nva);
 
-        let ivb = super::get_invalidly_un_blocked(pdag, &t, &adjust);
+        let ivb = super::get_invalidly_un_blocked(pdag, &t, &adjust, None);
         assert!(ivb.is_subset(&nva_expected));
         assert_eq!(nva_expected, &ivb | &nam_expected);
     }
