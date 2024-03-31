@@ -21,7 +21,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     let t_y_pairs_to_grade: Vec<(usize, usize)> = (0..truth.n_nodes)
         .flat_map(|t| (0..truth.n_nodes).map(move |e| (t, e)))
         .collect();
-    ancestor_aid_selective_pairs(truth, guess, t_y_pairs_to_grade)
+    ancestor_aid_selected_pairs(truth, guess, t_y_pairs_to_grade)
 }
 
 /// Computes the ancestor adjustment intervention distance
@@ -30,7 +30,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 ///  currently distances between general PDAGs are not implemented)
 /// Returns a tuple of (normalized error (in \[0,1]), total number of errors)
 // This function largely overlaps with parent_aid in parent_aid.rs; differences ---highlighted--- below
-pub fn ancestor_aid_selective_pairs(truth: &PDAG, guess: &PDAG, t_y_pairs_to_grade : Vec<(usize, usize)>) -> (f64, usize) {
+pub fn ancestor_aid_selected_pairs(truth: &PDAG, guess: &PDAG, t_y_pairs_to_grade : Vec<(usize, usize)>) -> (f64, usize) {
     assert!(
         guess.n_nodes == truth.n_nodes,
         "both graphs must contain the same number of nodes"

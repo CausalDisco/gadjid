@@ -40,7 +40,7 @@ def one_empty_leads_to_zero_distance():
             edge_direction=FROM_COL_TO_ROW,
         ) == (0.0, 0)
 
-        assert gadjid.parent_aid_selective_pairs(
+        assert gadjid.parent_aid_selected_pairs(
             truth_dag.T,
             guess_dag.T,
             treatments=list(range(size)),

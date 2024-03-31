@@ -15,7 +15,7 @@ pub(crate) mod ruletables;
 pub use ancestor_aid::ancestor_aid;
 pub use oset_aid::oset_aid;
 pub use parent_aid::parent_aid;
-pub use parent_aid::parent_aid_selective_pairs;
+pub use parent_aid::parent_aid_selected_pairs;
 pub use shd::shd;
 pub use sid::sid;
 

@@ -11,7 +11,7 @@ use pyo3::prelude::*;
 use ::gadjid::graph_operations::ancestor_aid as rust_ancestor_aid;
 use ::gadjid::graph_operations::oset_aid as rust_oset_aid;
 use ::gadjid::graph_operations::parent_aid as rust_parent_aid;
-use ::gadjid::graph_operations::parent_aid_selective_pairs as rust_parent_aid_selective_pairs;
+use ::gadjid::graph_operations::parent_aid_selected_pairs as rust_parent_aid_selected_pairs;
 use ::gadjid::graph_operations::shd as rust_shd;
 use ::gadjid::graph_operations::sid as rust_sid;
 use ::gadjid::EdgelistIterator;
@@ -151,7 +151,7 @@ pub fn parent_aid_selective_pairs(
         .flat_map(|t| effects.iter().map(move |e| (*t, *e)))
         .collect();
     let (normalized_distance, n_errors) =
-        rust_parent_aid_selective_pairs(&graph_truth, &graph_guess, cartesian_prod);
+        rust_parent_aid_selected_pairs(&graph_truth, &graph_guess, cartesian_prod);
     Ok((normalized_distance, n_errors))
 }
 

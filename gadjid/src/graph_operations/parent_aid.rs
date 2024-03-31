@@ -18,7 +18,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     let t_y_pairs_to_grade: Vec<(usize, usize)> = (0..truth.n_nodes)
         .flat_map(|t| (0..truth.n_nodes).map(move |e| (t, e)))
         .collect();
-    parent_aid_selective_pairs(truth, guess, t_y_pairs_to_grade)
+    parent_aid_selected_pairs(truth, guess, t_y_pairs_to_grade)
 }
 
 /// Computes the parent adjustment intervention distance
@@ -29,7 +29,7 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 /// 
 /// Will additionally take a list of pairs of treatments and effects, and grade only these pairs of nodes
 // This function largely overlaps with ancestor_aid_selective_pairs in ancestor_aid.rs; differences ---highlighted--- below
-pub fn parent_aid_selective_pairs(
+pub fn parent_aid_selected_pairs(
     truth: &PDAG,
     guess: &PDAG,
     t_y_pairs_to_grade: Vec<(usize, usize)>,

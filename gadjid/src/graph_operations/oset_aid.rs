@@ -36,7 +36,7 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     let t_y_pairs_to_grade: Vec<(usize, usize)> = (0..truth.n_nodes)
         .flat_map(|t| (0..truth.n_nodes).map(move |e| (t, e)))
         .collect();
-    oset_aid_selective_pairs(truth, guess, t_y_pairs_to_grade)
+    oset_aid_selected_pairs(truth, guess, t_y_pairs_to_grade)
 }
 
 
@@ -45,7 +45,7 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
 ///  currently distances between general PDAGs are not implemented)
 /// Returns a tuple of (normalized error (in \[0,1]), total number of errors)
-pub fn oset_aid_selective_pairs(truth: &PDAG, guess: &PDAG, t_y_pairs_to_grade: Vec<(usize, usize)>) -> (f64, usize) {
+pub fn oset_aid_selected_pairs(truth: &PDAG, guess: &PDAG, t_y_pairs_to_grade: Vec<(usize, usize)>) -> (f64, usize) {
     assert!(
         guess.n_nodes == truth.n_nodes,
         "both graphs must contain the same number of nodes"
