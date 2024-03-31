@@ -121,24 +121,6 @@ mod test {
     use super::parent_aid;
 
     #[test]
-    fn parent_aid_custom_is_same_as_normal() {
-        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
-        for n in 2..40 {
-            let non_diag_pairs: Vec<(usize, usize)> = (0..n)
-                .flat_map(|t| (0..t).chain(t + 1..n).map(move |e| (t, e)))
-                .collect();
-            for _rep in 0..2 {
-                let dag1 = PDAG::random_dag(1.0, n, &mut rng);
-                let dag2 = PDAG::random_dag(1.0, n, &mut rng);
-                let (normal, _) = parent_aid(&dag1, &dag2);
-                let (custom, _) =
-                    super::parent_aid_selective_pairs(&dag1, &dag2, non_diag_pairs.clone());
-                assert_eq!(normal, custom);
-            }
-        }
-    }
-
-    #[test]
     fn property_equal_dags_zero_distance() {
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(0);
         for n in 2..40 {

@@ -2,7 +2,7 @@
 //! Implements the Optimal Adjustment Intervention Distance (Oset-AID) algorithm
 
 use rayon::prelude::*;
-use rustc_hash::FxHashSet;
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::{
     graph_operations::{
@@ -26,21 +26,43 @@ pub fn optimal_adjustment_set_given_descendants(
     FxHashSet::from_iter(causal_nodes_parents.difference(t_descendants).copied())
 }
 
+
 /// Computes the oset adjustment intervention distance
 /// between an estimated `guess` DAG or CPDAG and the true `truth` DAG or CPDAG
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
 ///  currently distances between general PDAGs are not implemented)
 /// Returns a tuple of (normalized error (in \[0,1]), total number of errors)
 pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
+    let t_y_pairs_to_grade: Vec<(usize, usize)> = (0..truth.n_nodes)
+        .flat_map(|t| (0..truth.n_nodes).map(move |e| (t, e)))
+        .collect();
+    oset_aid_selective_pairs(truth, guess, t_y_pairs_to_grade)
+}
+
+
+/// Computes the oset adjustment intervention distance
+/// between an estimated `guess` DAG or CPDAG and the true `truth` DAG or CPDAG
+/// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
+///  currently distances between general PDAGs are not implemented)
+/// Returns a tuple of (normalized error (in \[0,1]), total number of errors)
+pub fn oset_aid_selective_pairs(truth: &PDAG, guess: &PDAG, t_y_pairs_to_grade: Vec<(usize, usize)>) -> (f64, usize) {
     assert!(
         guess.n_nodes == truth.n_nodes,
         "both graphs must contain the same number of nodes"
     );
     assert!(guess.n_nodes >= 2, "graph must contain at least 2 nodes");
 
-    let verifier_mistakes_found = (0..guess.n_nodes)
+    let mut groups: FxHashMap<usize, Vec<usize>> = FxHashMap::default();
+    for (treatment, effect) in t_y_pairs_to_grade {
+        let group = groups.entry(treatment).or_default();
+        if !group.contains(&effect) {
+            group.push(effect);
+        }
+    }
+
+    let verifier_mistakes_found = groups
         .into_par_iter()
-        .map(|treatment| {
+        .map(|(treatment, effects)| {
             // precomputed once for each T because we use it for the optimal adjustment set.
             let (t_desc_in_guess, claim_possible_effect, nam_in_guess) =
                 get_d_pd_nam(guess, &[treatment]);
@@ -48,7 +70,7 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             let (t_poss_desc_in_truth, nam_in_true) = get_pd_nam(truth, &[treatment]);
 
             let mut mistakes = 0;
-            for y in 0..guess.n_nodes {
+            for y in effects {
                 if y == treatment {
                     continue; // this case is always correct
                 }
