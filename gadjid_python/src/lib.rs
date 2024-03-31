@@ -9,7 +9,9 @@ use anyhow::bail;
 use pyo3::prelude::*;
 
 use ::gadjid::graph_operations::ancestor_aid as rust_ancestor_aid;
+use ::gadjid::graph_operations::ancestor_aid_selected_pairs as rust_ancestor_aid_selected_pairs;
 use ::gadjid::graph_operations::oset_aid as rust_oset_aid;
+use ::gadjid::graph_operations::oset_aid_selected_pairs as rust_oset_aid_selected_pairs;
 use ::gadjid::graph_operations::parent_aid as rust_parent_aid;
 use ::gadjid::graph_operations::parent_aid_selected_pairs as rust_parent_aid_selected_pairs;
 use ::gadjid::graph_operations::shd as rust_shd;
@@ -76,9 +78,11 @@ print(shd(Gtrue, Gguess))
 #[pymodule]
 fn gadjid(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(crate::ancestor_aid, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::ancestor_aid_selected_pairs, m)?)?;
     m.add_function(wrap_pyfunction!(crate::oset_aid, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::oset_aid_selected_pairs, m)?)?;
     m.add_function(wrap_pyfunction!(crate::parent_aid, m)?)?;
-    m.add_function(wrap_pyfunction!(crate::parent_aid_selective_pairs, m)?)?;
+    m.add_function(wrap_pyfunction!(crate::parent_aid_selected_pairs, m)?)?;
     m.add_function(wrap_pyfunction!(crate::shd, m)?)?;
     m.add_function(wrap_pyfunction!(crate::sid, m)?)?;
     Ok(())
@@ -112,6 +116,30 @@ pub fn ancestor_aid(
     Ok((normalized_distance, n_errors))
 }
 
+/// Ancestor Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
+/// Will additionally take two lists of treatments and effects, and grade only the pairs of nodes
+/// generated from the cartesian product of these two lists.
+#[pyfunction]
+pub fn ancestor_aid_selected_pairs(
+    g_true: &PyAny,
+    g_guess: &PyAny,
+    treatments: Vec<usize>,
+    effects: Vec<usize>,
+    edge_direction: &str,
+) -> PyResult<(f64, usize)> {
+    let row_to_col = edge_direction_is_row_to_col(edge_direction)?;
+    let graph_truth = graph_from_pyobject(g_true, row_to_col)?;
+    let graph_guess = graph_from_pyobject(g_guess, row_to_col)?;
+    let cartesian_prod = treatments
+        .iter()
+        .flat_map(|t| effects.iter().map(move |e| (*t, *e)))
+        .collect();
+    let (normalized_distance, n_errors) =
+        rust_ancestor_aid_selected_pairs(&graph_truth, &graph_guess, cartesian_prod);
+    Ok((normalized_distance, n_errors))
+}
+
+
 /// Optimal Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
 #[pyfunction]
 pub fn oset_aid(g_true: &PyAny, g_guess: &PyAny, edge_direction: &str) -> PyResult<(f64, usize)> {
@@ -119,6 +147,29 @@ pub fn oset_aid(g_true: &PyAny, g_guess: &PyAny, edge_direction: &str) -> PyResu
     let graph_truth = graph_from_pyobject(g_true, row_to_col)?;
     let graph_guess = graph_from_pyobject(g_guess, row_to_col)?;
     let (normalized_distance, n_errors) = rust_oset_aid(&graph_truth, &graph_guess);
+    Ok((normalized_distance, n_errors))
+}
+
+/// Optimal Adjustment Identification Distance between two DAG / CPDAG adjacency matrices (sparse or dense)
+/// Will additionally take two lists of treatments and effects, and grade only the pairs of nodes
+/// generated from the cartesian product of these two lists.
+#[pyfunction]
+pub fn oset_aid_selected_pairs(
+    g_true: &PyAny,
+    g_guess: &PyAny,
+    treatments: Vec<usize>,
+    effects: Vec<usize>,
+    edge_direction: &str,
+) -> PyResult<(f64, usize)> {
+    let row_to_col = edge_direction_is_row_to_col(edge_direction)?;
+    let graph_truth = graph_from_pyobject(g_true, row_to_col)?;
+    let graph_guess = graph_from_pyobject(g_guess, row_to_col)?;
+    let cartesian_prod = treatments
+        .iter()
+        .flat_map(|t| effects.iter().map(move |e| (*t, *e)))
+        .collect();
+    let (normalized_distance, n_errors) =
+        rust_oset_aid_selected_pairs(&graph_truth, &graph_guess, cartesian_prod);
     Ok((normalized_distance, n_errors))
 }
 
@@ -136,7 +187,7 @@ pub fn parent_aid(g_true: &PyAny, g_guess: &PyAny, edge_direction: &str) -> PyRe
 /// Will additionally take two lists of treatments and effects, and grade only the pairs of nodes
 /// generated from the cartesian product of these two lists.
 #[pyfunction]
-pub fn parent_aid_selective_pairs(
+pub fn parent_aid_selected_pairs(
     g_true: &PyAny,
     g_guess: &PyAny,
     treatments: Vec<usize>,
