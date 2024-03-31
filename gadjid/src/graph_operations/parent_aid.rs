@@ -14,76 +14,11 @@ use crate::{
 /// (a PDAG is used for internal representation, but every PDAG is assumed either a DAG or a CPDAG
 ///  currently distances between general PDAGs are not implemented)
 /// Returns a tuple of (normalized error (in \[0,1]), total number of errors)
-// This function largely overlaps with ancestor_aid in ancestor_aid.rs; differences ---highlighted--- below
 pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
-    assert!(
-        guess.n_nodes == truth.n_nodes,
-        "both graphs must contain the same number of nodes"
-    );
-    assert!(guess.n_nodes >= 2, "graph must contain at least 2 nodes");
-
-    let verifier_mistakes_found = (0..guess.n_nodes)
-        .into_par_iter()
-        .map(|treatment| {
-            // --- this function differs from ancestor_aid.rs only in the imports and from here
-
-            // parent adjustment
-            let adjustment_set = FxHashSet::from_iter(guess.parents_of(treatment).to_vec());
-
-            // in line with the original SID, claim all NonParents may be effects
-            // (this is a larger set than the NonDescendants in ancestor_aid and oset_aid;
-            //  that is, the validity of the adjustment set is also checked
-            //  for the additional non-effect nodes in NonParents\NonDescendants)
-            let claim_possible_effect =
-                FxHashSet::from_iter((0..truth.n_nodes).filter(|v| !adjustment_set.contains(v)));
-            let nam_in_guess = get_nam(guess, &[treatment]);
-            // --- to here
-
-            // now we take a look at the nodes in the true graph for which the adj.set. was not valid.
-            let (t_poss_desc_in_truth, nam_in_true, nva_in_true) =
-                get_pd_nam_nva(truth, &[treatment], &adjustment_set);
-
-            let mut mistakes = 0;
-            for y in 0..truth.n_nodes {
-                if y == treatment {
-                    continue; // this case is always correct
-                }
-                // if y is not claimed to be effect of t based on the guess graph
-                if !claim_possible_effect.contains(&y) {
-                    // but possibly a descendant of t in the truth graph.
-                    if t_poss_desc_in_truth.contains(&y) {
-                        // the ancestral order might be wrong, so
-                        // we count a mistake
-                        mistakes += 1;
-                    }
-                } else {
-                    let y_nam_in_guess = nam_in_guess.contains(&y);
-                    let y_nam_in_true = nam_in_true.contains(&y);
-
-                    #[allow(clippy::if_same_then_else)]
-                    // if they disagree on amenability:
-                    if y_nam_in_guess != y_nam_in_true {
-                        mistakes += 1;
-                    }
-                    // if we reach this point, (t,y) is either amenable or non-amenable in both graphs;
-                    // now, if it is amenable but the adjustment set is not valid in the true graph (only in the guess graph)
-                    else if !y_nam_in_true && nva_in_true.contains(&y) {
-                        // we count a mistake
-                        mistakes += 1;
-                    }
-                }
-            }
-
-            mistakes
-        })
-        .sum();
-
-    let n = guess.n_nodes;
-    let comparisons = n * n - n;
-    (
-        verifier_mistakes_found as f64 / comparisons as f64,
-        verifier_mistakes_found,
-    )
+    let t_y_pairs_to_grade: Vec<(usize, usize)> = (0..truth.n_nodes)
+        .flat_map(|t| (0..truth.n_nodes).map(move |e| (t, e)))
+        .collect();
+    parent_aid_selective_pairs(truth, guess, t_y_pairs_to_grade)
 }
 
 /// Computes the parent adjustment intervention distance
