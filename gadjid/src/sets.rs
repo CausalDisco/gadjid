@@ -2,14 +2,15 @@
 //! Sets of nodes (Node≡usize)
 
 use core::hash::{BuildHasherDefault, Hasher};
-use rustc_hash::FxHasher;
+// use rustc_hash::FxHasher;
 use std::collections::HashSet;
 
 type Node = usize;
 
-// pub type NodeSet = HashSet<Node, BuildHasherDefault<FibonacciUsizeHasher>>;
-pub type NodeSet = HashSet<Node, BuildHasherDefault<FxHasher>>;
+pub type NodeSet = HashSet<Node, BuildHasherDefault<FibonacciUsizeHasher>>;
+// pub type NodeSet = HashSet<Node, BuildHasherDefault<FxHasher>>;
 
+#[derive(Default)]
 pub struct FibonacciUsizeHasher {
     hash: usize,
 }
@@ -22,7 +23,7 @@ impl Hasher for FibonacciUsizeHasher {
     }
 
     fn write_usize(&mut self, n: usize) {
-        self.hash = C.wrapping_add(n);
+        self.hash = C.wrapping_mul(n);
     }
 
     fn finish(&self) -> u64 {
