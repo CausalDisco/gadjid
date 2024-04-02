@@ -20,7 +20,7 @@ const C: u64 = 11400714819323198485;
 
 impl Hasher for FibonacciU64Hasher {
     fn write(&mut self, _: &[u8]) {
-        unreachable!("FibonacciUsizeHasher accepts only exactly one call to write_{{u64, usize}}.")
+        unreachable!("FibonacciU64Hasher accepts only exactly one call to write_{{u64, usize}}.")
     }
 
     fn write_u64(&mut self, n: u64) {
