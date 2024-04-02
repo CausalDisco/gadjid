@@ -7,14 +7,14 @@
 pub(crate) fn get_possible_descendants<'a>(
     pdag: &crate::PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
-) -> rustc_hash::FxHashSet<usize> {
-    use rustc_hash::FxHashSet;
+) -> crate::sets::NodeSet {
+    use crate::sets::NodeSet;
 
     let mut to_visit_stack = Vec::from_iter(starting_vertices.copied());
 
-    let mut result = FxHashSet::from_iter(to_visit_stack.iter().copied());
+    let mut result = NodeSet::from_iter(to_visit_stack.iter().copied());
 
-    let mut visited = FxHashSet::default();
+    let mut visited = NodeSet::default();
 
     while let Some(current_node) = to_visit_stack.pop() {
         visited.insert(current_node);
@@ -32,9 +32,7 @@ pub(crate) fn get_possible_descendants<'a>(
 
 #[cfg(test)]
 mod test {
-    use rustc_hash::FxHashSet;
-
-    use crate::PDAG;
+    use crate::{sets::NodeSet, PDAG};
 
     #[test]
     pub fn test_possible_descendants() {
@@ -49,7 +47,7 @@ mod test {
         ];
         let cpdag = PDAG::from_row_to_column_vecvec(cpdag);
         let result = super::get_possible_descendants(&cpdag, [0].iter());
-        assert_eq!(result, FxHashSet::from_iter(vec![0, 1, 2, 3]));
+        assert_eq!(result, NodeSet::from_iter(vec![0, 1, 2, 3]));
 
         // 5 -> 4 -- 0 -> 1 -- 2
         //           |
@@ -64,6 +62,6 @@ mod test {
         ];
         let cpdag = PDAG::from_row_to_column_vecvec(cpdag);
         let result = super::get_possible_descendants(&cpdag, [4].iter());
-        assert_eq!(result, FxHashSet::from_iter(vec![0, 1, 2, 3, 4]));
+        assert_eq!(result, NodeSet::from_iter(vec![0, 1, 2, 3, 4]));
     }
 }

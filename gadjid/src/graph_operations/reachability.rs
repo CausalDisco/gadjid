@@ -3,7 +3,7 @@
 
 use rustc_hash::FxHashSet;
 
-use crate::{partially_directed_acyclic_graph::Edge, PDAG};
+use crate::{partially_directed_acyclic_graph::Edge, sets::NodeSet, PDAG};
 
 /*
 Developer's guide to the functions in this file (see also Appendix D of https://doi.org/10.48550/arXiv.2402.08616)
@@ -106,10 +106,7 @@ fn get_next_steps(graph: &PDAG, t: &[usize], v: usize) -> Vec<(Edge, usize)> {
 /// - Set D of descendants of T in G
 /// - Set PD of possible descendants of T in G
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
-pub fn get_d_pd_nam(
-    graph: &PDAG,
-    t: &[usize],
-) -> (FxHashSet<usize>, FxHashSet<usize>, FxHashSet<usize>) {
+pub fn get_d_pd_nam(graph: &PDAG, t: &[usize]) -> (NodeSet, NodeSet, NodeSet) {
     #[allow(non_camel_case_types)]
     #[allow(clippy::upper_case_acronyms)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
@@ -124,9 +121,9 @@ pub fn get_d_pd_nam(
         Init,
     }
 
-    let mut desc = FxHashSet::from_iter(t.iter().copied());
+    let mut desc = NodeSet::from_iter(t.iter().copied());
     let mut poss_desc = desc.clone();
-    let mut not_amenable = FxHashSet::<usize>::default();
+    let mut not_amenable = NodeSet::default();
 
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
@@ -184,7 +181,7 @@ pub fn get_d_pd_nam(
 /// Returns tuple of:<br>
 /// - Set PD of possible descendants of T in G
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
-pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usize>) {
+pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (NodeSet, NodeSet) {
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum WalkStatus {
@@ -196,8 +193,8 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
         Init,
     }
 
-    let mut poss_de = FxHashSet::from_iter(t.iter().copied());
-    let mut not_amenable = FxHashSet::<usize>::default();
+    let mut poss_de = NodeSet::from_iter(t.iter().copied());
+    let mut not_amenable = NodeSet::default();
 
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
@@ -247,10 +244,10 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
 /// Returns set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 ///
 /// Follows Algorithm 2 in https://doi.org/10.48550/arXiv.2402.08616
-pub fn get_nam(graph: &PDAG, t: &[usize]) -> FxHashSet<usize> {
-    let mut not_amenable = FxHashSet::<usize>::default();
+pub fn get_nam(graph: &PDAG, t: &[usize]) -> NodeSet {
+    let mut not_amenable = NodeSet::default();
 
-    let mut visited = FxHashSet::<usize>::default();
+    let mut visited = NodeSet::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v)));
 
     while let Some((arrived_by, node)) = to_visit_stack.pop() {
@@ -335,11 +332,7 @@ fn get_next_steps_conditioned(
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
 ///   This includes all NAM, so NAM is a subset NVA.
-pub fn get_pd_nam_nva(
-    graph: &PDAG,
-    t: &[usize],
-    z: &FxHashSet<usize>,
-) -> (FxHashSet<usize>, FxHashSet<usize>, FxHashSet<usize>) {
+pub fn get_pd_nam_nva(graph: &PDAG, t: &[usize], z: &NodeSet) -> (NodeSet, NodeSet, NodeSet) {
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum WalkStatus {
@@ -357,8 +350,8 @@ pub fn get_pd_nam_nva(
         Init,
     }
 
-    let mut poss_de = FxHashSet::from_iter(t.iter().copied());
-    let mut not_amenable = FxHashSet::<usize>::default();
+    let mut poss_de = NodeSet::from_iter(t.iter().copied());
+    let mut not_amenable = NodeSet::default();
     let mut not_vas = z.clone();
 
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
@@ -446,11 +439,7 @@ pub fn get_pd_nam_nva(
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
 ///   This includes all NAM, so NAM is a subset NVA.
 #[cfg(test)]
-pub fn get_nam_nva(
-    graph: &PDAG,
-    t: &[usize],
-    z: &FxHashSet<usize>,
-) -> (FxHashSet<usize>, FxHashSet<usize>) {
+pub fn get_nam_nva(graph: &PDAG, t: &[usize], z: &NodeSet) -> (NodeSet, NodeSet) {
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum WalkStatus {
@@ -468,7 +457,7 @@ pub fn get_nam_nva(
         Init,
     }
 
-    let mut not_amenable = FxHashSet::<usize>::default();
+    let mut not_amenable = NodeSet::default();
     let mut not_vas = z.clone();
 
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
@@ -547,11 +536,7 @@ pub fn get_nam_nva(
 /// instead, NVA contains Y for which condition 2. or 3.
 /// of the modified adjustment criterion for walk-based verification
 /// in https://doi.org/10.48550/arXiv.2402.08616 are violated
-pub fn get_invalidly_un_blocked(
-    graph: &PDAG,
-    t: &[usize],
-    z: &FxHashSet<usize>,
-) -> FxHashSet<usize> {
+pub fn get_invalidly_un_blocked(graph: &PDAG, t: &[usize], z: &NodeSet) -> NodeSet {
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
     enum WalkStatus {
@@ -621,12 +606,12 @@ pub fn get_invalidly_un_blocked(
 #[cfg(test)]
 mod test {
     use rand::SeedableRng;
-    use rustc_hash::FxHashSet;
 
     use crate::graph_operations::{
         ancestor_aid, gensearch, get_descendants, get_nam_nva, get_possible_descendants, oset_aid,
         parent_aid, ruletables,
     };
+    use crate::sets::NodeSet;
     use crate::PDAG;
 
     use super::get_nam;
@@ -645,7 +630,7 @@ mod test {
         ];
         let cpdag = PDAG::from_row_to_column_vecvec(cpdag);
 
-        assert!(get_nam(&cpdag, &[0]) == FxHashSet::from_iter([3]));
+        assert!(get_nam(&cpdag, &[0]) == NodeSet::from_iter([3]));
     }
 
     #[test]
