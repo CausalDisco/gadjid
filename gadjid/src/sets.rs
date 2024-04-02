@@ -2,21 +2,19 @@
 //! Sets of nodes (Node≡usize)
 
 use core::hash::BuildHasherDefault;
-// use rustc_hash::FxHasher;
 use std::{collections::HashSet, hash::Hasher};
 
-use rustc_hash::FxHasher;
 
 type Node = usize;
 
-// pub type FibSet<T> = HashSet<T, BuildHasherDefault<FxHasher>>;
 pub type FibSet<T> = HashSet<T, BuildHasherDefault<FibonacciU64Hasher>>;
 pub type NodeSet = FibSet<Node>;
-// pub type NodeSet = HashSet<Node, BuildHasherDefault<FxHasher>>;
 
 #[derive(Default)]
 pub struct FibonacciU64Hasher {
     hash: u64,
+    // default is false
+    has_been_applied: bool,
 }
 
 // floor(2^64 / GoldenRatio)
@@ -24,11 +22,15 @@ const C: u64 = 11400714819323198485;
 
 impl Hasher for FibonacciU64Hasher {
     fn write(&mut self, _: &[u8]) {
-        unreachable!("FibonacciU64Hasher accepts only exactly one call to write_{{u64, usize}}.")
+        panic!("FibonacciU64Hasher accepts only exactly one call to write_{{u64, usize}}.")
     }
 
     fn write_u64(&mut self, n: u64) {
+        if self.has_been_applied {
+            panic!("FibonacciU64Hasher accepts only exactly one call to write_{{u64, usize}}.")
+        }
         self.hash = C.wrapping_mul(n);
+        self.has_been_applied = true;
     }
 
     fn write_usize(&mut self, n: usize) {
