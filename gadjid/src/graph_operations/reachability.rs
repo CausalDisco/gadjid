@@ -3,7 +3,7 @@
 
 use rustc_hash::FxHashSet;
 
-use crate::{partially_directed_acyclic_graph::Edge, sets::NodeSet, PDAG};
+use crate::{partially_directed_acyclic_graph::Edge, sets::{NodeSet, WalkTriple}, PDAG};
 
 /*
 Developer's guide to the functions in this file (see also Appendix D of https://doi.org/10.48550/arXiv.2402.08616)
@@ -78,6 +78,34 @@ The following reachability algorithms take a graph, a set of nodes t, and a set 
       (which is why here the walk status does not track whether a walk started T→ or T–)
 */
 
+/// test
+macro_rules! define_walkstatus_enum {
+    (
+        $enum_name:ident {
+            $(
+                $(#[$attr:meta])*
+                $variant:ident,
+            )*
+        }
+    ) => {
+        #[allow(non_camel_case_types)]
+        #[allow(clippy::upper_case_acronyms)]
+        #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+        enum $enum_name {
+            $(
+                $(#[$attr])*
+                $variant,
+            )*
+        }
+
+        impl Into<u64> for $enum_name {
+            fn into(self) -> u64 {
+                self as u64
+            }
+        }
+    };
+}
+
 /// Returns possible children of the node `v` and the shared edge. `v (-> c)` or `v (-- c)`. See the [`Edge`] enum for a more detailed explanation of this notation.
 /// Will not return treatment nodes.
 fn get_next_steps(graph: &PDAG, t: &[usize], v: usize) -> Vec<(Edge, usize)> {
@@ -107,29 +135,30 @@ fn get_next_steps(graph: &PDAG, t: &[usize], v: usize) -> Vec<(Edge, usize)> {
 /// - Set PD of possible descendants of T in G
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 pub fn get_d_pd_nam(graph: &PDAG, t: &[usize]) -> (NodeSet, NodeSet, NodeSet) {
-    #[allow(non_camel_case_types)]
-    #[allow(clippy::upper_case_acronyms)]
-    #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-    enum WalkStatus {
-        /// Descendant / Directed (always amenable)
-        D,
-        /// Possible Descendant / Possibly Directed, Amenable (starts T→)
-        PD_AM,
-        /// Possible Descendant / Possibly Directed, Not Amenable (starts T—)
-        PD_NAM,
-        /// Initial status
-        Init,
-    }
 
+    define_walkstatus_enum! {
+        WalkStatus {
+            /// Descendant / Directed (always amenable)
+            D,
+            ///Possible Descendant / Possibly Directed, Amenable (starts T→)
+            PD_AM,
+            ///Possible Descendant / Possibly Directed, Not Amenable (starts T—)
+            PD_NAM,
+            ///Initial status
+            Init,
+        }
+    }
+    
     let mut desc = NodeSet::from_iter(t.iter().copied());
     let mut poss_desc = desc.clone();
     let mut not_amenable = NodeSet::default();
 
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    let mut visited = FxHashSet::<(WalkTriple<WalkStatus>)>::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
-        visited.insert((arrived_by, node, walkstatus));
+        visited.insert((arrived_by, node, walkstatus).into());
 
         match walkstatus {
             WalkStatus::PD_NAM => {
@@ -165,7 +194,7 @@ pub fn get_d_pd_nam(graph: &PDAG, t: &[usize]) -> (NodeSet, NodeSet, NodeSet) {
             };
 
             if let Some(next) = next {
-                if !visited.contains(&next) {
+                if !visited.contains(&next.into()) {
                     to_visit_stack.push(next);
                 }
             }
