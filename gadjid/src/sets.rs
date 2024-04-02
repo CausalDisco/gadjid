@@ -7,26 +7,31 @@ use std::collections::HashSet;
 
 type Node = usize;
 
-pub type NodeSet = HashSet<Node, BuildHasherDefault<FibonacciUsizeHasher>>;
+pub type NodeSet = HashSet<Node, BuildHasherDefault<FibonacciU64Hasher>>;
 // pub type NodeSet = HashSet<Node, BuildHasherDefault<FxHasher>>;
 
 #[derive(Default)]
-pub struct FibonacciUsizeHasher {
-    hash: usize,
+pub struct FibonacciU64Hasher {
+    hash: u64,
 }
 
-const C: usize = 11400714819323198485;
+// floor(2^64 / GoldenRatio)
+const C: u64 = 11400714819323198485;
 
-impl Hasher for FibonacciUsizeHasher {
+impl Hasher for FibonacciU64Hasher {
     fn write(&mut self, _: &[u8]) {
-        unreachable!("FibonacciUsizeHasher accepts only exactly one call to write_usize.")
+        unreachable!("FibonacciUsizeHasher accepts only exactly one call to write_{{u64, usize}}.")
     }
 
-    fn write_usize(&mut self, n: usize) {
+    fn write_u64(&mut self, n: u64) {
         self.hash = C.wrapping_mul(n);
     }
 
+    fn write_usize(&mut self, n: usize) {
+        self.write_u64(n as u64);
+    }
+
     fn finish(&self) -> u64 {
-        self.hash as u64
+        self.hash
     }
 }
