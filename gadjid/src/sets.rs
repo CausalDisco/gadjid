@@ -15,7 +15,7 @@ pub struct FibonacciUsizeHasher {
     hash: usize,
 }
 
-// const C: usize = 11400714819323198485;
+const C: usize = 11400714819323198485;
 
 impl Hasher for FibonacciUsizeHasher {
     fn write(&mut self, _: &[u8]) {
@@ -23,8 +23,7 @@ impl Hasher for FibonacciUsizeHasher {
     }
 
     fn write_usize(&mut self, n: usize) {
-        self.hash = n;
-        // self.hash = C.wrapping_mul(n);
+        self.hash = C.wrapping_mul(n);
     }
 
     fn finish(&self) -> u64 {
