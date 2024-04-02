@@ -1,33 +1,17 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Sets of nodes (Node≡usize)
 
-use core::hash::{BuildHasherDefault, Hash};
+use core::hash::BuildHasherDefault;
 // use rustc_hash::FxHasher;
 use std::{collections::HashSet, hash::Hasher};
 
-use crate::partially_directed_acyclic_graph::Edge;
+use rustc_hash::FxHasher;
 
 type Node = usize;
 
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct WalkTriple<WS>(Edge, usize, WS);
-
-
-impl<WS : Into<u64> + Copy> Hash for WalkTriple<WS> {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        state.write_u64(((self.0 as u64) << 62) | ((self.2.into()) << 59) | (self.1 as u64));
-    }
-}
-
-impl<S> From<(Edge, usize, S)> for WalkTriple<S> {
-    fn from(tuple: (Edge, usize, S)) -> Self {
-        WalkTriple(tuple.0, tuple.1, tuple.2)
-    }
-}
-
-
-pub type NodeSet = HashSet<Node, BuildHasherDefault<FibonacciU64Hasher>>;
+// pub type FibSet<T> = HashSet<T, BuildHasherDefault<FxHasher>>;
+pub type FibSet<T> = HashSet<T, BuildHasherDefault<FibonacciU64Hasher>>;
+pub type NodeSet = FibSet<Node>;
 // pub type NodeSet = HashSet<Node, BuildHasherDefault<FxHasher>>;
 
 #[derive(Default)]
@@ -53,5 +37,48 @@ impl Hasher for FibonacciU64Hasher {
 
     fn finish(&self) -> u64 {
         self.hash
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use rand::SeedableRng;
+
+    use super::*;
+
+    #[test]
+    fn speedtest_hash() {
+        let reps = 100;
+        let mut total_time_nanos = 0;
+
+        for _ in 0..reps {
+            let start = std::time::Instant::now();
+            let mut set = NodeSet::default();
+            for i in 0..1000 {
+                set.insert(i);
+            }
+            let elapsed = start.elapsed().as_nanos();
+            total_time_nanos += elapsed;
+        }
+        println!("Elapsed: {} ns", total_time_nanos);
+    }
+    
+    #[test]
+    fn speedtest_algos() {
+        let reps = 100;
+        let mut total_time_nanos = 0;
+        let mut rng = &mut rand_chacha::ChaCha8Rng::seed_from_u64(0);
+
+        let truth = crate::PDAG::random_pdag(0.3, 100, &mut rng);
+
+        for _ in 0..reps {
+            let guess  = crate::PDAG::random_pdag(0.3, 100, &mut rng);
+            
+            let start = std::time::Instant::now();
+            let _ = crate::graph_operations::oset_aid(&truth, &guess);
+            let elapsed = start.elapsed().as_nanos();
+            total_time_nanos += elapsed;
+        }
+        println!("Elapsed: {} ns", total_time_nanos);
     }
 }
