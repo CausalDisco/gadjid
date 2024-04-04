@@ -4,7 +4,6 @@
 use core::hash::BuildHasherDefault;
 use std::{collections::HashSet, hash::Hasher};
 
-
 type Node = usize;
 
 pub type FibSet<T> = HashSet<T, BuildHasherDefault<FibonacciU64Hasher>>;
@@ -64,7 +63,7 @@ mod tests {
         }
         println!("Elapsed: {} ns", total_time_nanos);
     }
-    
+
     #[test]
     fn speedtest_algos() {
         let reps = 100;
@@ -74,8 +73,8 @@ mod tests {
         let truth = crate::PDAG::random_pdag(0.3, 100, &mut rng);
 
         for _ in 0..reps {
-            let guess  = crate::PDAG::random_pdag(0.3, 100, &mut rng);
-            
+            let guess = crate::PDAG::random_pdag(0.3, 100, &mut rng);
+
             let start = std::time::Instant::now();
             let _ = crate::graph_operations::oset_aid(&truth, &guess);
             let elapsed = start.elapsed().as_nanos();
