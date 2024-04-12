@@ -2,13 +2,13 @@
 
 use gadjid::PDAG;
 use numpy::ndarray::ArrayView2;
-use numpy::PyReadonlyArray2;
-use pyo3::PyAny;
+use numpy::{PyReadonlyArray2, PyUntypedArrayMethods};
+use pyo3::{prelude::PyAnyMethods, Bound, PyAny};
 
 use crate::graph_from_iterator;
 
 /// Load a PDAG from a numpy ndarray
-pub fn try_from(ob: &PyAny, row_to_col: bool) -> anyhow::Result<PDAG> {
+pub fn try_from(ob: &Bound<'_, PyAny>, row_to_col: bool) -> anyhow::Result<PDAG> {
     let ndarray = ob.extract::<PyReadonlyArray2<i8>>()?;
     let shape = ndarray.shape();
     let graph_size = shape[0];

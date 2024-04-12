@@ -12,8 +12,8 @@ crate-type = ["cdylib"]
 [dependencies]
 gadjid = { path = "../gadjid" }
 anyhow = "1.0"
-numpy = "0.20"
-pyo3 = { version = "0.20", features = ["abi3-py38", "anyhow"] }
+numpy = "0.21"
+pyo3 = { version = "0.21", features = ["abi3-py38", "anyhow"] }
 
 [profile.release]
 codegen-units = 1
