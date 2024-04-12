@@ -24,9 +24,7 @@ pub fn ancestor_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
     );
     assert!(guess.n_nodes >= 2, "graph must contain at least 2 nodes");
 
-    let _ = rayon::ThreadPoolBuilder::new()
-        .num_threads(num_cpus::get_physical())
-        .build_global();
+    crate::rayon::build_global();
 
     let verifier_mistakes_found = (0..guess.n_nodes)
         .into_par_iter()
