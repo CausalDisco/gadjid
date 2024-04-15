@@ -3,7 +3,7 @@
 use anyhow::bail;
 use gadjid::PDAG;
 use numpy::PyReadonlyArray1;
-use pyo3::{intern, PyAny};
+use pyo3::{prelude::PyAnyMethods, Bound, PyAny};
 use std::slice::Iter;
 
 use crate::graph_from_iterator;
@@ -39,10 +39,11 @@ impl Iterator for CSMatrix<'_> {
 }
 
 /// Load a PDAG from a scipy sparse matrix in csr or csc format.
-pub fn try_from(ob: &PyAny, row_to_col: bool) -> anyhow::Result<PDAG> {
+pub fn try_from(ob: &Bound<'_, PyAny>, row_to_col: bool) -> anyhow::Result<PDAG> {
     // get the encoding format
-    let format = ob.getattr(intern!(ob.py(), "format"))?;
-    let format = format.extract()?;
+    let format = ob.getattr("format")?;
+    let format = format.extract::<String>()?;
+    let format = format.as_str();
 
     // determine whether the matrix is row or column major
     let row_major_iteration = match format {
@@ -59,7 +60,7 @@ pub fn try_from(ob: &PyAny, row_to_col: bool) -> anyhow::Result<PDAG> {
     let interpret_as_row_major = row_to_col == row_major_iteration;
 
     // get the shape to make sure it is square and for later CSR / CSC iteration
-    let shape = ob.getattr(intern!(ob.py(), "shape"))?;
+    let shape = ob.getattr("shape")?;
     let shape = shape.extract::<(usize, usize)>()?;
     anyhow::ensure!(shape.0 == shape.1, "Matrix must be square");
 
@@ -71,24 +72,24 @@ pub fn try_from(ob: &PyAny, row_to_col: bool) -> anyhow::Result<PDAG> {
 }
 
 fn graph_from_csc_or_csr(
-    ob: &PyAny,
+    ob: &Bound<'_, PyAny>,
     interpret_as_row_major: bool,
     shape: usize,
 ) -> anyhow::Result<PDAG> {
     // these explanations assume a csr matrix
     // element at index `r` and `r+1` hold the indices of the first (inclusive) and last
     // (exclusive) nonzero entries in row `r`
-    let indptr = ob.getattr(intern!(ob.py(), "indptr"))?;
+    let indptr = ob.getattr("indptr")?;
     let indptr = indptr.extract::<PyReadonlyArray1<i32>>()?;
     let indptr = indptr.as_slice()?;
 
     // element at index `i` holds the column index `c` of the i-th nonzero entry
-    let indices = ob.getattr(intern!(ob.py(), "indices"))?;
+    let indices = ob.getattr("indices")?;
     let indices = indices.extract::<PyReadonlyArray1<i32>>()?;
     let indices = indices.as_slice()?;
 
     // element at index `i` holds the value `v` of the i-th nonzero entry
-    let data = ob.getattr(intern!(ob.py(), "data"))?;
+    let data = ob.getattr("data")?;
     let data = data.extract::<PyReadonlyArray1<i8>>()?;
     let data = data.as_slice()?;
 
