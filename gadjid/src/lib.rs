@@ -5,6 +5,7 @@
 mod ascending_list_utils;
 mod graph_loading;
 mod partially_directed_acyclic_graph;
+mod rayon;
 mod sets;
 
 pub mod graph_operations;
@@ -12,6 +13,7 @@ pub mod graph_operations;
 pub use graph_loading::constructor::EdgelistIterator;
 pub use partially_directed_acyclic_graph::LoadError;
 pub use partially_directed_acyclic_graph::PDAG;
+pub use rayon::build_global;
 
 #[cfg(test)]
 #[allow(non_snake_case)]
