@@ -6,6 +6,7 @@ mod ascending_list_utils;
 mod graph_loading;
 mod partially_directed_acyclic_graph;
 mod rayon;
+mod sets;
 
 pub mod graph_operations;
 
@@ -18,7 +19,8 @@ pub use rayon::build_global;
 #[allow(non_snake_case)]
 mod test {
     use rand::{Rng, SeedableRng};
-    use rustc_hash::{FxHashSet, FxHasher};
+    use rustc_hash::FxHasher;
+    use std::collections::HashSet;
     use std::hash::{Hash, Hasher};
 
     use crate::{
@@ -26,6 +28,7 @@ mod test {
             ancestor_aid, gensearch, get_nam, get_nam_nva, get_possible_descendants,
             get_proper_ancestors, optimal_adjustment_set, oset_aid, parent_aid, ruletables, shd,
         },
+        sets::NodeSet,
         PDAG,
     };
 
@@ -72,13 +75,13 @@ mod test {
         PDAG::from_row_to_column_vecvec(adj)
     }
 
-    fn hashset_to_sorted_vec<V: std::cmp::Ord + Copy>(set: &FxHashSet<V>) -> Vec<V> {
+    fn hashset_to_sorted_vec<V: Copy + Ord, B>(set: &HashSet<V, B>) -> Vec<V> {
         let mut vec = Vec::from_iter(set.iter().copied());
         vec.sort();
         vec
     }
 
-    fn get_nva_sorted_vec(graph: &PDAG, t: &[usize], z: &FxHashSet<usize>) -> Vec<usize> {
+    fn get_nva_sorted_vec(graph: &PDAG, t: &[usize], z: &NodeSet) -> Vec<usize> {
         let (_, nva) = get_nam_nva(graph, t, z);
         hashset_to_sorted_vec(&nva)
     }
@@ -179,12 +182,12 @@ mod test {
             not_validly_adjusted_for_in_g_guess_by_empty_set: get_nva_sorted_vec(
                 &g_guess,
                 &t,
-                &FxHashSet::default(),
+                &NodeSet::default(),
             ),
             not_validly_adjusted_for_in_g_guess_by_z: get_nva_sorted_vec(
                 &g_guess,
                 &t,
-                &FxHashSet::from_iter(random_z),
+                &NodeSet::from_iter(random_z),
             ),
         }
     }

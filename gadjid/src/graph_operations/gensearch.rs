@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Implements the generalized graph search algorithm and other search algorithms using it.
 
-use rustc_hash::FxHashSet;
-
 use crate::{
-    graph_operations::ruletables::RuleTable, partially_directed_acyclic_graph::Edge, PDAG,
+    graph_operations::ruletables::RuleTable, partially_directed_acyclic_graph::Edge, sets::NodeSet,
+    PDAG,
 };
 
 /// General reachability graph search algorithm, Algorithm 6 in https://doi.org/10.48550/arXiv.2211.16468
@@ -13,11 +12,11 @@ pub fn gensearch<'a>(
     ruletable: impl RuleTable,
     starting_vertices: impl Iterator<Item = &'a usize>,
     yield_starting_vertices: bool,
-) -> FxHashSet<usize> {
+) -> NodeSet {
     // Holds the edge traversed to get to some node and the node itself
     let mut to_visit_stack = Vec::<(Edge, usize)>::new();
 
-    let mut result = FxHashSet::default();
+    let mut result = NodeSet::default();
 
     for s in starting_vertices {
         to_visit_stack.push((Edge::Init, *s));
@@ -27,8 +26,8 @@ pub fn gensearch<'a>(
     }
 
     // initialize all edges to visited=false for incoming and outgoing
-    let mut visited_in = FxHashSet::default();
-    let mut visited_out = FxHashSet::default();
+    let mut visited_in = NodeSet::default();
+    let mut visited_out = NodeSet::default();
 
     while let Some((current_edge, current_node)) = to_visit_stack.pop() {
         match current_edge {
