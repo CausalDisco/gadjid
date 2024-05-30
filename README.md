@@ -89,6 +89,15 @@ and can conveniently be called from Python via our Python wrapper
 structural intervention distance for directed acyclic graphs as a special case. We use this framework to develop improved adjustment-based distances as well as extensions to completed partially directed acyclic graphs and causal orders. We develop polynomial-time reachability algorithms to compute the distances efficiently. In our package 𝚐𝚊𝚍𝚓𝚒𝚍, we provide implementations of our distances; they are orders of magnitude faster than the structural intervention distance and thereby provide a success metric for causal discovery that scales to graph sizes that were previously prohibitive.
 
 
+### Parallelism – setting the number of threads
+
+𝚐𝚊𝚍𝚓𝚒𝚍 uses [rayon](https://docs.rs/rayon/latest/rayon/) for parallelism
+using, per default, as many threads as there are physical CPU cores.
+The number of threads to use can be set via the environment variable `RAYON_NUM_THREADS`.
+We recommend to do so and to set the number of threads manually,
+not least to be explicit and to avoid the small runtime overhead for determining the number of physical CPU cores.
+
+
 ## This is an Early Release 🐥
 
 * Feedback is very welcome! Just [open an issue](https://github.com/CausalDisco/gadjid/issues/new/choose) on here.

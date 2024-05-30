@@ -18,6 +18,8 @@ pub fn shd(g_truth: &PDAG, g_guess: &PDAG) -> (f64, usize) {
         return (0f64, 0);
     }
 
+    crate::rayon::build_global();
+
     let dist = (0..g_truth.n_nodes)
         .into_par_iter()
         .map(|node| {
