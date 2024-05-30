@@ -539,7 +539,7 @@ pub fn get_nam_nva(
 }
 
 /// Validate Z as adjustment set relative to (T, Y) for a given set T of treatment
-/// nodes and all possible Y in G.
+/// nodes and all possible Y in G (or optionally only all y_of_interest).
 ///
 /// Returns tuple of:<br>
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
@@ -551,7 +551,7 @@ pub fn get_invalidly_un_blocked(
     graph: &PDAG,
     t: &[usize],
     z: &FxHashSet<usize>,
-    early_stop_when_determined: Option<usize>,
+    y_of_interest: Option<&FxHashSet<usize>>,
 ) -> FxHashSet<usize> {
     #[allow(non_camel_case_types)]
     #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
@@ -566,6 +566,8 @@ pub fn get_invalidly_un_blocked(
         Init,
     }
 
+    let mut y_of_interest = y_of_interest.cloned();
+
     let mut ivb = z.clone();
 
     let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
@@ -577,11 +579,17 @@ pub fn get_invalidly_un_blocked(
         match walkstatus {
             // when the node is reached on a causal path but blocked, or an unblocked non-causal path
             WalkStatus::PD_BLOCKED | WalkStatus::NON_CAUSAL_OPEN => {
-                ivb.insert(node);
-                if let Some(early_stop) = early_stop_when_determined {
-                    if node == early_stop {
-                        return ivb;
+                // if only interested in some y
+                if let Some(ref mut still_to_be_determined_y) = y_of_interest {
+                    if still_to_be_determined_y.remove(&node) {
+                        ivb.insert(node);
+                        // and all y are determined, stop early
+                        if still_to_be_determined_y.is_empty() {
+                            return ivb;
+                        }
                     }
+                } else {
+                    ivb.insert(node);
                 }
             }
             _ => (),
