@@ -1,6 +1,6 @@
 [package]
 name = "gadjid"
-version = "0.1.0-a.2"
+version = "0.1.0-a.3"
 edition = "2021"
 license = "MPL-2.0"
 authors = ["Theo Würtzen", "Sebastian Weichwald", "Leonard Henckel"]
@@ -25,5 +25,5 @@ inherits = "test"
 opt-level = 3
 
 [dev-dependencies]
-insta = { version = "1.38", features = ["yaml"] }
+insta = { version = "1.39", features = ["yaml"] }
 serde = { version = "1.0", features = ["derive"] }
