@@ -160,23 +160,23 @@ __Maximum graph size feasible within 1 minute__
 
 | Method       | sparse | dense |
 |--------------|-------:|------:|
-| Parent-AID   |  13005 |   960 |
-| Ancestor-AID |   8200 |   932 |
-| Oset-AID     |    546 |   250 |
-| SID in R     |    255 |   239 |
+| Parent-AID   |  13601 |   962 |
+| Ancestor-AID |   8211 |   932 |
+| Oset-AID     |   1105 |   508 |
+| SID in R     |    256 |   239 |
 
-Results obtained with 𝚐𝚊𝚍𝚓𝚒𝚍 v0.0.1 using the Python interface
+Results obtained with 𝚐𝚊𝚍𝚓𝚒𝚍 v0.1.0 using the Python interface
 and the SID R package v1.1 from CRAN.
 
 __Average runtime__
 | Method       | x-sparse ($p=1000$) | sparse ($p=256$) | dense ($p=239$) |
 |--------------|--------------------:|-----------------:|----------------:|
-| Parent-AID   |              6.3 ms |          22.8 ms |          189 ms |
-| Ancestor-AID |              2.7 ms |          38.7 ms |          226 ms |
-| Oset-AID     |              3.2 ms |          4.69 s  |         47.3 s  |
+| Parent-AID   |              7.3 ms |          30.5 ms |          173 ms |
+| Ancestor-AID |              3.4 ms |          40.9 ms |          207 ms |
+| Oset-AID     |              5.0 ms |           567 ms |         1.68 s  |
 | SID in R     |             ~1–2 h  |           ~60 s  |          ~60 s  |
 
-Results obtained with 𝚐𝚊𝚍𝚓𝚒𝚍 v0.0.1 using the Python interface
+Results obtained with 𝚐𝚊𝚍𝚓𝚒𝚍 v0.1.0 using the Python interface
 and the SID R package v1.1 from CRAN.
 
 
