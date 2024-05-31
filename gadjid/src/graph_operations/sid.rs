@@ -12,7 +12,7 @@ use crate::PDAG;
 pub enum SIDError {
     /// The truth graph is not a DAG
     TruthNotDAG,
-    ///
+    /// The guess graph is not a DAG
     GuessNotDAG,
     /// The two input graphs are not the same size
     NotSameSize,
