@@ -33,6 +33,7 @@ manifest-path = "gadjid_python/Cargo.toml"
 python-source = "gadjid_python/python"
 exclude = [
     "**/.gitignore",
+    "gadjid/src/snapshots/**/*",
     "gadjid_python/tests/**/*",
     "gadjid_python/README.md",
 ]
