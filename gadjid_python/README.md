@@ -58,8 +58,16 @@ print(shd(Gtrue, Gguess))
 and can conveniently be called from Python via our Python wrapper
 (implemented using [maturin](https://www.maturin.rs/) and [PyO3](https://pyo3.rs/)).
 
-> Evaluating graphs learned by causal discovery algorithms is difficult: The number of edges that differ between two graphs does not reflect how the graphs differ with respect to the identifying formulas they suggest for causal effects. We introduce a framework for developing causal distances between graphs which includes the
-structural intervention distance for directed acyclic graphs as a special case. We use this framework to develop improved adjustment-based distances as well as extensions to completed partially directed acyclic graphs and causal orders. We develop polynomial-time reachability algorithms to compute the distances efficiently. In our package 𝚐𝚊𝚍𝚓𝚒𝚍, we provide implementations of our distances; they are orders of magnitude faster than the structural intervention distance and thereby provide a success metric for causal discovery that scales to graph sizes that were previously prohibitive.
+> Evaluating graphs learned by causal discovery algorithms is difficult: The number of edges that differ between two graphs does not reflect how the graphs differ with respect to the identifying formulas they suggest for causal effects. We introduce a framework for developing causal distances between graphs which includes the structural intervention distance for directed acyclic graphs as a special case. We use this framework to develop improved adjustment-based distances as well as extensions to completed partially directed acyclic graphs and causal orders. We develop new reachability algorithms to compute the distances efficiently and to prove their low polynomial time complexity. In our package gadjid, we provide implementations of our distances; they are orders of magnitude faster with proven lower time complexity than the structural intervention distance and thereby provide a success metric for causal discovery that scales to graph sizes that were previously prohibitive.
+
+
+### Parallelism – setting the number of threads
+
+𝚐𝚊𝚍𝚓𝚒𝚍 uses [rayon](https://docs.rs/rayon/latest/rayon/) for parallelism
+using, per default, as many threads as there are physical CPU cores.
+The number of threads to use can be set via the environment variable `RAYON_NUM_THREADS`.
+We recommend to do so and to set the number of threads manually,
+not least to be explicit and to avoid the small runtime overhead for determining the number of physical CPU cores.
 
 
 ## Implemented Distances
@@ -117,23 +125,23 @@ __Maximum graph size feasible within 1 minute__
 
 | Method       | sparse | dense |
 |--------------|-------:|------:|
-| Parent-AID   |  13005 |   960 |
-| Ancestor-AID |   8200 |   932 |
-| Oset-AID     |    546 |   250 |
-| SID in R     |    255 |   239 |
+| Parent-AID   |  13601 |   962 |
+| Ancestor-AID |   8211 |   932 |
+| Oset-AID     |   1105 |   508 |
+| SID in R     |    256 |   239 |
 
-Results obtained with 𝚐𝚊𝚍𝚓𝚒𝚍 v0.0.1 using the Python interface
+Results obtained with 𝚐𝚊𝚍𝚓𝚒𝚍 v0.1.0 using the Python interface
 and the SID R package v1.1 from CRAN.
 
 __Average runtime__
 | Method       | x-sparse ($p=1000$) | sparse ($p=256$) | dense ($p=239$) |
 |--------------|--------------------:|-----------------:|----------------:|
-| Parent-AID   |              6.3 ms |          22.8 ms |          189 ms |
-| Ancestor-AID |              2.7 ms |          38.7 ms |          226 ms |
-| Oset-AID     |              3.2 ms |          4.69 s  |         47.3 s  |
+| Parent-AID   |              7.3 ms |          30.5 ms |          173 ms |
+| Ancestor-AID |              3.4 ms |          40.9 ms |          207 ms |
+| Oset-AID     |              5.0 ms |           567 ms |         1.68 s  |
 | SID in R     |             ~1–2 h  |           ~60 s  |          ~60 s  |
 
-Results obtained with 𝚐𝚊𝚍𝚓𝚒𝚍 v0.0.1 using the Python interface
+Results obtained with 𝚐𝚊𝚍𝚓𝚒𝚍 v0.1.0 using the Python interface
 and the SID R package v1.1 from CRAN.
 
 

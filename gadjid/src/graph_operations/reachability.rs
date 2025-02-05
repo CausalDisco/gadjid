@@ -116,23 +116,23 @@ macro_rules! define_walkstatus_enum {
 
 /// Returns possible children of the node `v` and the shared edge. `v (-> c)` or `v (-- c)`. See the [`Edge`] enum for a more detailed explanation of this notation.
 /// Will not return treatment nodes.
-fn get_next_steps(graph: &PDAG, t: &[usize], v: usize) -> Vec<(Edge, usize)> {
-    let mut next = Vec::<(Edge, usize)>::new();
+fn get_next_steps<'a>(
+    graph: &'a PDAG,
+    t: &'a [usize],
+    v: usize,
+) -> impl Iterator<Item = (Edge, usize)> + 'a {
     graph
         .adjacent_undirected_of(v)
         .iter()
         .filter(|u| !t.contains(*u))
-        .for_each(|u| {
-            next.push((Edge::Undirected, *u));
-        });
-    graph
-        .children_of(v)
-        .iter()
-        .filter(|c| !t.contains(*c))
-        .for_each(|c| {
-            next.push((Edge::Incoming, *c));
-        });
-    next
+        .map(|u| (Edge::Undirected, *u))
+        .chain(
+            graph
+                .children_of(v)
+                .iter()
+                .filter(|c| !t.contains(*c))
+                .map(|c| (Edge::Incoming, *c)),
+        )
 }
 
 /// Checks amenability of a (CP)DAG relative to (T, Y) for a given set T of treatment
@@ -299,63 +299,65 @@ pub fn get_nam(graph: &PDAG, t: &[usize]) -> NodeSet {
             // Edge::Incoming | Edge::Outgoing | Edge::Undirected
             _ => {
                 not_amenable.insert(node);
-                get_next_steps(graph, t, node)
-                    .into_iter()
-                    .for_each(|(move_on_by, w)| {
-                        if !visited.contains(&w) {
-                            to_visit_stack.push((move_on_by, w));
-                        }
-                    });
+                get_next_steps(graph, t, node).for_each(|(move_on_by, w)| {
+                    if !visited.contains(&w) {
+                        to_visit_stack.push((move_on_by, w));
+                    }
+                });
             }
         }
     }
     not_amenable
 }
 
-fn get_next_steps_conditioned(
-    graph: &PDAG,
-    t: &[usize],
+fn get_next_steps_conditioned<'a>(
+    graph: &'a PDAG,
+    t: &'a [usize],
     arrived_by: Edge,
     v: usize,
     node_is_adjustment: bool,
-) -> Vec<(Edge, usize, bool)> {
-    let mut next = Vec::<(Edge, usize, bool)>::new();
+) -> impl Iterator<Item = (Edge, usize, bool)> + 'a {
+    let mut parents_collider = None;
+    let mut parents_noncollider = None;
+
     match arrived_by {
         Edge::Incoming => {
-            graph
-                .parents_of(v)
-                .iter()
-                .filter(|p| !t.contains(*p))
-                .for_each(|p| {
-                    next.push((Edge::Outgoing, *p, !node_is_adjustment));
-                });
+            parents_collider = Some(
+                graph
+                    .parents_of(v)
+                    .iter()
+                    .filter(|p| !t.contains(*p))
+                    .map(move |p| (Edge::Outgoing, *p, !node_is_adjustment)),
+            );
         }
         Edge::Init | Edge::Outgoing => {
-            graph
-                .parents_of(v)
-                .iter()
-                .filter(|p| !t.contains(*p))
-                .for_each(|p| {
-                    next.push((Edge::Outgoing, *p, node_is_adjustment));
-                });
+            parents_noncollider = Some(
+                graph
+                    .parents_of(v)
+                    .iter()
+                    .filter(|p| !t.contains(*p))
+                    .map(move |p| (Edge::Outgoing, *p, node_is_adjustment)),
+            );
         }
         _ => (),
     }
-    graph
+
+    let siblings = graph
         .adjacent_undirected_of(v)
         .iter()
         .filter(|u| !t.contains(*u))
-        .for_each(|u| {
-            next.push((Edge::Undirected, *u, node_is_adjustment));
-        });
-    graph
+        .map(move |u| (Edge::Undirected, *u, node_is_adjustment));
+
+    let children = graph
         .children_of(v)
         .iter()
         .filter(|c| !t.contains(*c))
-        .for_each(|c| {
-            next.push((Edge::Incoming, *c, node_is_adjustment));
-        });
-    next
+        .map(move |c| (Edge::Incoming, *c, node_is_adjustment));
+
+    (parents_collider.into_iter().flatten())
+        .chain(parents_noncollider.into_iter().flatten())
+        .chain(siblings)
+        .chain(children)
 }
 
 /// Validate Z as adjustment set relative to (T, Y) for a given set T of treatment
@@ -560,7 +562,7 @@ pub fn get_nam_nva(graph: &PDAG, t: &[usize], z: &NodeSet) -> (NodeSet, NodeSet)
 }
 
 /// Validate Z as adjustment set relative to (T, Y) for a given set T of treatment
-/// nodes and all possible Y in G.
+/// nodes and all possible Y in G (or optionally only all y_of_interest).
 ///
 /// Returns tuple of:<br>
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
@@ -568,7 +570,12 @@ pub fn get_nam_nva(graph: &PDAG, t: &[usize], z: &NodeSet) -> (NodeSet, NodeSet)
 /// instead, NVA contains Y for which condition 2. or 3.
 /// of the modified adjustment criterion for walk-based verification
 /// in https://doi.org/10.48550/arXiv.2402.08616 are violated
-pub fn get_invalidly_un_blocked(graph: &PDAG, t: &[usize], z: &NodeSet) -> NodeSet {
+pub fn get_invalidly_un_blocked(
+    graph: &PDAG,
+    t: &[usize],
+    z: &NodeSet,
+    y_of_interest: Option<&NodeSet>,
+) -> NodeSet {
     define_walkstatus_enum! {
         WalkStatus {
             /// Possible Descendant / Possibly Directed, and Open Walk
@@ -582,6 +589,8 @@ pub fn get_invalidly_un_blocked(graph: &PDAG, t: &[usize], z: &NodeSet) -> NodeS
         }
     }
 
+    let mut y_of_interest = y_of_interest.cloned();
+
     let mut ivb = z.clone();
 
     let mut visited = FibSet::<WalkstepTriple>::default();
@@ -593,7 +602,18 @@ pub fn get_invalidly_un_blocked(graph: &PDAG, t: &[usize], z: &NodeSet) -> NodeS
         match walkstatus {
             // when the node is reached on a causal path but blocked, or an unblocked non-causal path
             WalkStatus::PD_BLOCKED | WalkStatus::NON_CAUSAL_OPEN => {
-                ivb.insert(node);
+                // if only interested in some y
+                if let Some(ref mut still_to_be_determined_y) = y_of_interest {
+                    if still_to_be_determined_y.remove(&node) {
+                        ivb.insert(node);
+                        // and all y are determined, stop early
+                        if still_to_be_determined_y.is_empty() {
+                            return ivb;
+                        }
+                    }
+                } else {
+                    ivb.insert(node);
+                }
             }
             _ => (),
         }
@@ -752,7 +772,7 @@ mod test {
         assert_eq!(nam_expected, nam);
         assert_eq!(nva_expected, nva);
 
-        let ivb = super::get_invalidly_un_blocked(pdag, &t, &adjust);
+        let ivb = super::get_invalidly_un_blocked(pdag, &t, &adjust, None);
         assert!(ivb.is_subset(&nva_expected));
         assert_eq!(nva_expected, &ivb | &nam_expected);
     }
