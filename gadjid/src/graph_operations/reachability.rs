@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Walk-status-aware reachability algorithms for calculating the AID efficiently.
 
-use rustc_hash::FxHashSet;
-
-use crate::{partially_directed_acyclic_graph::Edge, PDAG};
+use crate::{
+    partially_directed_acyclic_graph::Edge,
+    sets::{FibSet, NodeSet},
+    PDAG,
+};
 
 /*
 Developer's guide to the functions in this file (see also Appendix D of https://doi.org/10.48550/arXiv.2402.08616)
@@ -78,25 +80,59 @@ The following reachability algorithms take a graph, a set of nodes t, and a set 
       (which is why here the walk status does not track whether a walk started T→ or T–)
 */
 
+use core::hash::Hash;
+use std::hash::Hasher;
+
+/// add good doc
+macro_rules! define_walkstatus_enum {
+    (
+        $enum_name:ident {
+            $(
+                $(#[$attr:meta])*
+                $variant:ident,
+            )*
+        }
+    ) => {
+        #[allow(non_camel_case_types)]
+        #[allow(clippy::upper_case_acronyms)]
+        #[derive(Debug, PartialEq, Eq, Clone, Copy)]
+        enum $enum_name {
+            $(
+                $(#[$attr])*
+                $variant,
+            )*
+        }
+
+        #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+        struct WalkstepTriple(Edge, usize, $enum_name);
+
+        impl Hash for WalkstepTriple {
+            fn hash<H: Hasher>(&self, state: &mut H) {
+                state.write_u64(((self.0 as u64) << 62) | ((self.2 as u64) << 59) | (self.1 as u64));
+            }
+        }
+    };
+}
+
 /// Returns possible children of the node `v` and the shared edge. `v (-> c)` or `v (-- c)`. See the [`Edge`] enum for a more detailed explanation of this notation.
 /// Will not return treatment nodes.
-fn get_next_steps(graph: &PDAG, t: &[usize], v: usize) -> Vec<(Edge, usize)> {
-    let mut next = Vec::<(Edge, usize)>::new();
+fn get_next_steps<'a>(
+    graph: &'a PDAG,
+    t: &'a [usize],
+    v: usize,
+) -> impl Iterator<Item = (Edge, usize)> + 'a {
     graph
         .adjacent_undirected_of(v)
         .iter()
         .filter(|u| !t.contains(*u))
-        .for_each(|u| {
-            next.push((Edge::Undirected, *u));
-        });
-    graph
-        .children_of(v)
-        .iter()
-        .filter(|c| !t.contains(*c))
-        .for_each(|c| {
-            next.push((Edge::Incoming, *c));
-        });
-    next
+        .map(|u| (Edge::Undirected, *u))
+        .chain(
+            graph
+                .children_of(v)
+                .iter()
+                .filter(|c| !t.contains(*c))
+                .map(|c| (Edge::Incoming, *c)),
+        )
 }
 
 /// Checks amenability of a (CP)DAG relative to (T, Y) for a given set T of treatment
@@ -106,33 +142,29 @@ fn get_next_steps(graph: &PDAG, t: &[usize], v: usize) -> Vec<(Edge, usize)> {
 /// - Set D of descendants of T in G
 /// - Set PD of possible descendants of T in G
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
-pub fn get_d_pd_nam(
-    graph: &PDAG,
-    t: &[usize],
-) -> (FxHashSet<usize>, FxHashSet<usize>, FxHashSet<usize>) {
-    #[allow(non_camel_case_types)]
-    #[allow(clippy::upper_case_acronyms)]
-    #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-    enum WalkStatus {
-        /// Descendant / Directed (always amenable)
-        D,
-        /// Possible Descendant / Possibly Directed, Amenable (starts T→)
-        PD_AM,
-        /// Possible Descendant / Possibly Directed, Not Amenable (starts T—)
-        PD_NAM,
-        /// Initial status
-        Init,
+pub fn get_d_pd_nam(graph: &PDAG, t: &[usize]) -> (NodeSet, NodeSet, NodeSet) {
+    define_walkstatus_enum! {
+        WalkStatus {
+            /// Descendant / Directed (always amenable)
+            D,
+            ///Possible Descendant / Possibly Directed, Amenable (starts T→)
+            PD_AM,
+            ///Possible Descendant / Possibly Directed, Not Amenable (starts T—)
+            PD_NAM,
+            ///Initial status
+            Init,
+        }
     }
 
-    let mut desc = FxHashSet::from_iter(t.iter().copied());
+    let mut desc = NodeSet::from_iter(t.iter().copied());
     let mut poss_desc = desc.clone();
-    let mut not_amenable = FxHashSet::<usize>::default();
+    let mut not_amenable = NodeSet::default();
 
-    let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    let mut visited = FibSet::<WalkstepTriple>::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
-        visited.insert((arrived_by, node, walkstatus));
+        visited.insert(WalkstepTriple(arrived_by, node, walkstatus));
 
         match walkstatus {
             WalkStatus::PD_NAM => {
@@ -168,7 +200,7 @@ pub fn get_d_pd_nam(
             };
 
             if let Some(next) = next {
-                if !visited.contains(&next) {
+                if !visited.contains(&WalkstepTriple(next.0, next.1, next.2)) {
                     to_visit_stack.push(next);
                 }
             }
@@ -184,26 +216,25 @@ pub fn get_d_pd_nam(
 /// Returns tuple of:<br>
 /// - Set PD of possible descendants of T in G
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
-pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usize>) {
-    #[allow(non_camel_case_types)]
-    #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-    enum WalkStatus {
+pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (NodeSet, NodeSet) {
+    define_walkstatus_enum! {
+    WalkStatus {
         /// Possible Descendant / Possibly Directed, Amenable (starts T→)
         PD_AM,
         /// Possible Descendant / Possibly Directed, Not Amenable (starts T—)
         PD_NAM,
         /// Initial status
         Init,
-    }
+    }}
 
-    let mut poss_de = FxHashSet::from_iter(t.iter().copied());
-    let mut not_amenable = FxHashSet::<usize>::default();
+    let mut poss_de = NodeSet::from_iter(t.iter().copied());
+    let mut not_amenable = NodeSet::default();
 
-    let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    let mut visited = FibSet::<WalkstepTriple>::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
-        visited.insert((arrived_by, node, walkstatus));
+        visited.insert(WalkstepTriple(arrived_by, node, walkstatus));
 
         match walkstatus {
             WalkStatus::PD_NAM => {
@@ -231,7 +262,7 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
             };
 
             if let Some(next) = next {
-                if !visited.contains(&next) {
+                if !visited.contains(&WalkstepTriple(next.0, next.1, next.2)) {
                     to_visit_stack.push(next);
                 }
             }
@@ -247,10 +278,10 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
 /// Returns set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 ///
 /// Follows Algorithm 2 in https://doi.org/10.48550/arXiv.2402.08616
-pub fn get_nam(graph: &PDAG, t: &[usize]) -> FxHashSet<usize> {
-    let mut not_amenable = FxHashSet::<usize>::default();
+pub fn get_nam(graph: &PDAG, t: &[usize]) -> NodeSet {
+    let mut not_amenable = NodeSet::default();
 
-    let mut visited = FxHashSet::<usize>::default();
+    let mut visited = NodeSet::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v)));
 
     while let Some((arrived_by, node)) = to_visit_stack.pop() {
@@ -268,63 +299,65 @@ pub fn get_nam(graph: &PDAG, t: &[usize]) -> FxHashSet<usize> {
             // Edge::Incoming | Edge::Outgoing | Edge::Undirected
             _ => {
                 not_amenable.insert(node);
-                get_next_steps(graph, t, node)
-                    .into_iter()
-                    .for_each(|(move_on_by, w)| {
-                        if !visited.contains(&w) {
-                            to_visit_stack.push((move_on_by, w));
-                        }
-                    });
+                get_next_steps(graph, t, node).for_each(|(move_on_by, w)| {
+                    if !visited.contains(&w) {
+                        to_visit_stack.push((move_on_by, w));
+                    }
+                });
             }
         }
     }
     not_amenable
 }
 
-fn get_next_steps_conditioned(
-    graph: &PDAG,
-    t: &[usize],
+fn get_next_steps_conditioned<'a>(
+    graph: &'a PDAG,
+    t: &'a [usize],
     arrived_by: Edge,
     v: usize,
     node_is_adjustment: bool,
-) -> Vec<(Edge, usize, bool)> {
-    let mut next = Vec::<(Edge, usize, bool)>::new();
+) -> impl Iterator<Item = (Edge, usize, bool)> + 'a {
+    let mut parents_collider = None;
+    let mut parents_noncollider = None;
+
     match arrived_by {
         Edge::Incoming => {
-            graph
-                .parents_of(v)
-                .iter()
-                .filter(|p| !t.contains(*p))
-                .for_each(|p| {
-                    next.push((Edge::Outgoing, *p, !node_is_adjustment));
-                });
+            parents_collider = Some(
+                graph
+                    .parents_of(v)
+                    .iter()
+                    .filter(|p| !t.contains(*p))
+                    .map(move |p| (Edge::Outgoing, *p, !node_is_adjustment)),
+            );
         }
         Edge::Init | Edge::Outgoing => {
-            graph
-                .parents_of(v)
-                .iter()
-                .filter(|p| !t.contains(*p))
-                .for_each(|p| {
-                    next.push((Edge::Outgoing, *p, node_is_adjustment));
-                });
+            parents_noncollider = Some(
+                graph
+                    .parents_of(v)
+                    .iter()
+                    .filter(|p| !t.contains(*p))
+                    .map(move |p| (Edge::Outgoing, *p, node_is_adjustment)),
+            );
         }
         _ => (),
     }
-    graph
+
+    let siblings = graph
         .adjacent_undirected_of(v)
         .iter()
         .filter(|u| !t.contains(*u))
-        .for_each(|u| {
-            next.push((Edge::Undirected, *u, node_is_adjustment));
-        });
-    graph
+        .map(move |u| (Edge::Undirected, *u, node_is_adjustment));
+
+    let children = graph
         .children_of(v)
         .iter()
         .filter(|c| !t.contains(*c))
-        .for_each(|c| {
-            next.push((Edge::Incoming, *c, node_is_adjustment));
-        });
-    next
+        .map(move |c| (Edge::Incoming, *c, node_is_adjustment));
+
+    (parents_collider.into_iter().flatten())
+        .chain(parents_noncollider.into_iter().flatten())
+        .chain(siblings)
+        .chain(children)
 }
 
 /// Validate Z as adjustment set relative to (T, Y) for a given set T of treatment
@@ -335,14 +368,9 @@ fn get_next_steps_conditioned(
 /// - Set NAM (Not AMenable) of nodes Y \notin T in G such that G is not amenable relative to (T, Y)
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
 ///   This includes all NAM, so NAM is a subset NVA.
-pub fn get_pd_nam_nva(
-    graph: &PDAG,
-    t: &[usize],
-    z: &FxHashSet<usize>,
-) -> (FxHashSet<usize>, FxHashSet<usize>, FxHashSet<usize>) {
-    #[allow(non_camel_case_types)]
-    #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-    enum WalkStatus {
+pub fn get_pd_nam_nva(graph: &PDAG, t: &[usize], z: &NodeSet) -> (NodeSet, NodeSet, NodeSet) {
+    define_walkstatus_enum! {
+    WalkStatus {
         /// Possible Descendant / Possibly Directed, Amenable (starts T→), and Open Walk
         PD_OPEN_AM,
         /// Possible Descendant / Possibly Directed, Amenable (starts T→), and Blocked Walk
@@ -355,17 +383,17 @@ pub fn get_pd_nam_nva(
         NON_CAUSAL_OPEN,
         /// Initial status
         Init,
-    }
+    }}
 
-    let mut poss_de = FxHashSet::from_iter(t.iter().copied());
-    let mut not_amenable = FxHashSet::<usize>::default();
+    let mut poss_de = NodeSet::from_iter(t.iter().copied());
+    let mut not_amenable = NodeSet::default();
     let mut not_vas = z.clone();
 
-    let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    let mut visited = FibSet::<WalkstepTriple>::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
-        visited.insert((arrived_by, node, walkstatus));
+        visited.insert(WalkstepTriple(arrived_by, node, walkstatus));
 
         match walkstatus {
             WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCKED_NAM => {
@@ -426,7 +454,7 @@ pub fn get_pd_nam_nva(
             };
 
             if let Some(next) = next {
-                if !visited.contains(&next) {
+                if !visited.contains(&WalkstepTriple(next.0, next.1, next.2)) {
                     to_visit_stack.push(next);
                 }
             }
@@ -446,14 +474,9 @@ pub fn get_pd_nam_nva(
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
 ///   This includes all NAM, so NAM is a subset NVA.
 #[cfg(test)]
-pub fn get_nam_nva(
-    graph: &PDAG,
-    t: &[usize],
-    z: &FxHashSet<usize>,
-) -> (FxHashSet<usize>, FxHashSet<usize>) {
-    #[allow(non_camel_case_types)]
-    #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-    enum WalkStatus {
+pub fn get_nam_nva(graph: &PDAG, t: &[usize], z: &NodeSet) -> (NodeSet, NodeSet) {
+    define_walkstatus_enum! {
+     WalkStatus {
         /// Possible Descendant / Possibly Directed, Amenable (starts T→), and Open Walk
         PD_OPEN_AM,
         /// Possible Descendant / Possibly Directed, Amenable (starts T→), and Blocked Walk
@@ -466,16 +489,16 @@ pub fn get_nam_nva(
         NON_CAUSAL_OPEN,
         /// Initial status
         Init,
-    }
+    }}
 
-    let mut not_amenable = FxHashSet::<usize>::default();
+    let mut not_amenable = NodeSet::default();
     let mut not_vas = z.clone();
 
-    let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    let mut visited = FibSet::<WalkstepTriple>::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
-        visited.insert((arrived_by, node, walkstatus));
+        visited.insert(WalkstepTriple(arrived_by, node, walkstatus));
 
         match walkstatus {
             WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCKED_NAM => {
@@ -528,7 +551,7 @@ pub fn get_nam_nva(
             };
 
             if let Some(next) = next {
-                if !visited.contains(&next) {
+                if !visited.contains(&WalkstepTriple(next.0, next.1, next.2)) {
                     to_visit_stack.push(next);
                 }
             }
@@ -550,31 +573,31 @@ pub fn get_nam_nva(
 pub fn get_invalidly_un_blocked(
     graph: &PDAG,
     t: &[usize],
-    z: &FxHashSet<usize>,
-    y_of_interest: Option<&FxHashSet<usize>>,
-) -> FxHashSet<usize> {
-    #[allow(non_camel_case_types)]
-    #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-    enum WalkStatus {
-        /// Possible Descendant / Possibly Directed, and Open Walk
-        PD_OPEN,
-        /// Possible Descendant / Possibly Directed, and Blocked Walk
-        PD_BLOCKED,
-        /// Non-Causal walk that has not been blocked
-        NON_CAUSAL_OPEN,
-        /// Initial status
-        Init,
+    z: &NodeSet,
+    y_of_interest: Option<&NodeSet>,
+) -> NodeSet {
+    define_walkstatus_enum! {
+        WalkStatus {
+            /// Possible Descendant / Possibly Directed, and Open Walk
+            PD_OPEN,
+            /// Possible Descendant / Possibly Directed, and Blocked Walk
+            PD_BLOCKED,
+            /// Non-Causal walk that has not been blocked
+            NON_CAUSAL_OPEN,
+            /// Initial status
+            Init,
+        }
     }
 
     let mut y_of_interest = y_of_interest.cloned();
 
     let mut ivb = z.clone();
 
-    let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    let mut visited = FibSet::<WalkstepTriple>::default();
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
-        visited.insert((arrived_by, node, walkstatus));
+        visited.insert(WalkstepTriple(arrived_by, node, walkstatus));
 
         match walkstatus {
             // when the node is reached on a causal path but blocked, or an unblocked non-causal path
@@ -622,7 +645,7 @@ pub fn get_invalidly_un_blocked(
             };
 
             if let Some(next) = next {
-                if !visited.contains(&next) {
+                if !visited.contains(&WalkstepTriple(next.0, next.1, next.2)) {
                     to_visit_stack.push(next);
                 }
             }
@@ -635,12 +658,12 @@ pub fn get_invalidly_un_blocked(
 #[cfg(test)]
 mod test {
     use rand::SeedableRng;
-    use rustc_hash::FxHashSet;
 
     use crate::graph_operations::{
         ancestor_aid, gensearch, get_descendants, get_nam_nva, get_possible_descendants, oset_aid,
         parent_aid, ruletables,
     };
+    use crate::sets::NodeSet;
     use crate::PDAG;
 
     use super::get_nam;
@@ -659,7 +682,7 @@ mod test {
         ];
         let cpdag = PDAG::from_row_to_column_vecvec(cpdag);
 
-        assert!(get_nam(&cpdag, &[0]) == FxHashSet::from_iter([3]));
+        assert!(get_nam(&cpdag, &[0]) == NodeSet::from_iter([3]));
     }
 
     #[test]

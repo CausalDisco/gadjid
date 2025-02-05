@@ -2,12 +2,12 @@
 //! Implements the Optimal Adjustment Intervention Distance (Oset-AID) algorithm
 
 use rayon::prelude::*;
-use rustc_hash::FxHashSet;
 
 use crate::{
     graph_operations::{
         get_d_pd_nam, get_invalidly_un_blocked, get_parents, get_pd_nam, get_proper_ancestors,
     },
+    sets::NodeSet,
     PDAG,
 };
 
@@ -17,13 +17,13 @@ pub fn optimal_adjustment_set_given_descendants(
     dag: &PDAG,
     treatments: &[usize],
     responses: &[usize],
-    t_descendants: &FxHashSet<usize>,
-) -> FxHashSet<usize> {
+    t_descendants: &NodeSet,
+) -> NodeSet {
     let response_ancestors = get_proper_ancestors(dag, treatments.iter(), responses.iter());
-    let response_and_anc_hash = FxHashSet::from_iter(response_ancestors);
+    let response_and_anc_hash = NodeSet::from_iter(response_ancestors);
     let causal_nodes = response_and_anc_hash.intersection(t_descendants);
     let causal_nodes_parents = get_parents(dag, causal_nodes);
-    FxHashSet::from_iter(causal_nodes_parents.difference(t_descendants).copied())
+    NodeSet::from_iter(causal_nodes_parents.difference(t_descendants).copied())
 }
 
 /// Computes the oset adjustment intervention distance
@@ -85,7 +85,7 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
                             truth,
                             &[treatment],
                             &o_set_adjustment,
-                            Some(&FxHashSet::from_iter([y])),
+                            Some(&NodeSet::from_iter([y])),
                         )
                         .contains(&y)
                         {
@@ -109,11 +109,7 @@ pub fn oset_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
 }
 
 #[cfg(test)]
-pub fn optimal_adjustment_set(
-    dag: &PDAG,
-    treatments: &[usize],
-    responses: &[usize],
-) -> FxHashSet<usize> {
+pub fn optimal_adjustment_set(dag: &PDAG, treatments: &[usize], responses: &[usize]) -> NodeSet {
     let t_descendants = crate::graph_operations::get_descendants(dag, treatments.iter());
     optimal_adjustment_set_given_descendants(dag, treatments, responses, &t_descendants)
 }
@@ -121,9 +117,8 @@ pub fn optimal_adjustment_set(
 #[cfg(test)]
 mod test {
     use rand::SeedableRng;
-    use rustc_hash::FxHashSet;
 
-    use crate::PDAG;
+    use crate::{sets::NodeSet, PDAG};
 
     use super::{optimal_adjustment_set, oset_aid};
 
@@ -177,31 +172,31 @@ mod test {
         let dag = PDAG::from_row_to_column_vecvec(v_dag);
 
         assert_eq!(
-            FxHashSet::from_iter([7]),
+            NodeSet::from_iter([7]),
             optimal_adjustment_set(&dag, &[1], &[5])
         );
         assert_eq!(
-            FxHashSet::from_iter([7]),
+            NodeSet::from_iter([7]),
             optimal_adjustment_set(&dag, &[0, 2], &[4])
         );
         assert_eq!(
-            FxHashSet::from_iter([7]),
+            NodeSet::from_iter([7]),
             optimal_adjustment_set(&dag, &[0, 2], &[6])
         );
         assert_eq!(
-            FxHashSet::from_iter([7]),
+            NodeSet::from_iter([7]),
             optimal_adjustment_set(&dag, &[1], &[6])
         );
         assert_eq!(
-            FxHashSet::from_iter([7]),
+            NodeSet::from_iter([7]),
             optimal_adjustment_set(&dag, &[2], &[5])
         );
         assert_eq!(
-            FxHashSet::from_iter([7]),
+            NodeSet::from_iter([7]),
             optimal_adjustment_set(&dag, &[2], &[6])
         );
         assert_eq!(
-            FxHashSet::from_iter([2]),
+            NodeSet::from_iter([2]),
             optimal_adjustment_set(&dag, &[7], &[5])
         );
 
@@ -229,12 +224,12 @@ mod test {
         let dag = PDAG::from_row_to_column_vecvec(v_dag);
 
         assert_eq!(
-            FxHashSet::from_iter([5]),
-            FxHashSet::from_iter(optimal_adjustment_set(&dag, &[0], &[3]))
+            NodeSet::from_iter([5]),
+            NodeSet::from_iter(optimal_adjustment_set(&dag, &[0], &[3]))
         );
         assert_eq!(
-            FxHashSet::from_iter([1, 7]),
-            FxHashSet::from_iter(optimal_adjustment_set(&dag, &[5], &[3]))
+            NodeSet::from_iter([1, 7]),
+            NodeSet::from_iter(optimal_adjustment_set(&dag, &[5], &[3]))
         );
     }
 }
