@@ -16,8 +16,8 @@ pub struct FibonacciU64Hasher {
     has_been_written_to: bool,
 }
 
-// floor(2^64 / GoldenRatio)
-const C: u64 = 11400714819323198485;
+// prime nearest to (2^64 / GoldenRatio)
+const C: u64 = 11400714819323198393;
 
 impl Hasher for FibonacciU64Hasher {
     fn write(&mut self, _: &[u8]) {
