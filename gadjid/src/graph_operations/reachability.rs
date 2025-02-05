@@ -80,23 +80,23 @@ The following reachability algorithms take a graph, a set of nodes t, and a set 
 
 /// Returns possible children of the node `v` and the shared edge. `v (-> c)` or `v (-- c)`. See the [`Edge`] enum for a more detailed explanation of this notation.
 /// Will not return treatment nodes.
-fn get_next_steps(graph: &PDAG, t: &[usize], v: usize) -> Vec<(Edge, usize)> {
-    let mut next = Vec::<(Edge, usize)>::new();
+fn get_next_steps<'a>(
+    graph: &'a PDAG,
+    t: &'a [usize],
+    v: usize,
+) -> impl Iterator<Item = (Edge, usize)> + 'a {
     graph
         .adjacent_undirected_of(v)
         .iter()
         .filter(|u| !t.contains(*u))
-        .for_each(|u| {
-            next.push((Edge::Undirected, *u));
-        });
-    graph
-        .children_of(v)
-        .iter()
-        .filter(|c| !t.contains(*c))
-        .for_each(|c| {
-            next.push((Edge::Incoming, *c));
-        });
-    next
+        .map(|u| (Edge::Undirected, *u))
+        .chain(
+            graph
+                .children_of(v)
+                .iter()
+                .filter(|c| !t.contains(*c))
+                .map(|c| (Edge::Incoming, *c)),
+        )
 }
 
 /// Checks amenability of a (CP)DAG relative to (T, Y) for a given set T of treatment
@@ -268,63 +268,65 @@ pub fn get_nam(graph: &PDAG, t: &[usize]) -> FxHashSet<usize> {
             // Edge::Incoming | Edge::Outgoing | Edge::Undirected
             _ => {
                 not_amenable.insert(node);
-                get_next_steps(graph, t, node)
-                    .into_iter()
-                    .for_each(|(move_on_by, w)| {
-                        if !visited.contains(&w) {
-                            to_visit_stack.push((move_on_by, w));
-                        }
-                    });
+                get_next_steps(graph, t, node).for_each(|(move_on_by, w)| {
+                    if !visited.contains(&w) {
+                        to_visit_stack.push((move_on_by, w));
+                    }
+                });
             }
         }
     }
     not_amenable
 }
 
-fn get_next_steps_conditioned(
-    graph: &PDAG,
-    t: &[usize],
+fn get_next_steps_conditioned<'a>(
+    graph: &'a PDAG,
+    t: &'a [usize],
     arrived_by: Edge,
     v: usize,
     node_is_adjustment: bool,
-) -> Vec<(Edge, usize, bool)> {
-    let mut next = Vec::<(Edge, usize, bool)>::new();
+) -> impl Iterator<Item = (Edge, usize, bool)> + 'a {
+    let mut parents_collider = None;
+    let mut parents_noncollider = None;
+
     match arrived_by {
         Edge::Incoming => {
-            graph
-                .parents_of(v)
-                .iter()
-                .filter(|p| !t.contains(*p))
-                .for_each(|p| {
-                    next.push((Edge::Outgoing, *p, !node_is_adjustment));
-                });
+            parents_collider = Some(
+                graph
+                    .parents_of(v)
+                    .iter()
+                    .filter(|p| !t.contains(*p))
+                    .map(move |p| (Edge::Outgoing, *p, !node_is_adjustment)),
+            );
         }
         Edge::Init | Edge::Outgoing => {
-            graph
-                .parents_of(v)
-                .iter()
-                .filter(|p| !t.contains(*p))
-                .for_each(|p| {
-                    next.push((Edge::Outgoing, *p, node_is_adjustment));
-                });
+            parents_noncollider = Some(
+                graph
+                    .parents_of(v)
+                    .iter()
+                    .filter(|p| !t.contains(*p))
+                    .map(move |p| (Edge::Outgoing, *p, node_is_adjustment)),
+            );
         }
         _ => (),
     }
-    graph
+
+    let siblings = graph
         .adjacent_undirected_of(v)
         .iter()
         .filter(|u| !t.contains(*u))
-        .for_each(|u| {
-            next.push((Edge::Undirected, *u, node_is_adjustment));
-        });
-    graph
+        .map(move |u| (Edge::Undirected, *u, node_is_adjustment));
+
+    let children = graph
         .children_of(v)
         .iter()
         .filter(|c| !t.contains(*c))
-        .for_each(|c| {
-            next.push((Edge::Incoming, *c, node_is_adjustment));
-        });
-    next
+        .map(move |c| (Edge::Incoming, *c, node_is_adjustment));
+
+    (parents_collider.into_iter().flatten())
+        .chain(parents_noncollider.into_iter().flatten())
+        .chain(siblings)
+        .chain(children)
 }
 
 /// Validate Z as adjustment set relative to (T, Y) for a given set T of treatment
