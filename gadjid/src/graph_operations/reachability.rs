@@ -128,11 +128,15 @@ pub fn get_d_pd_nam(
     let mut poss_desc = desc.clone();
     let mut not_amenable = FxHashSet::<usize>::default();
 
-    let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    // TODO
+    // let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    // 4 edge types, and no more than 6 walk statii
+    let mut visited = vec![false; 4 * graph.n_nodes * 6];
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
-        visited.insert((arrived_by, node, walkstatus));
+        // visited.insert((arrived_by, node, walkstatus));
+        visited[arrived_by as usize * graph.n_nodes * 6 + node * 6 + walkstatus as usize] = true;
 
         match walkstatus {
             WalkStatus::PD_NAM => {
@@ -168,7 +172,8 @@ pub fn get_d_pd_nam(
             };
 
             if let Some(next) = next {
-                if !visited.contains(&next) {
+                // if !visited.contains(&next) {
+                if !visited[next.0 as usize * graph.n_nodes * 6 + next.1 * 6 + next.2 as usize] {
                     to_visit_stack.push(next);
                 }
             }
@@ -199,11 +204,14 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
     let mut poss_de = FxHashSet::from_iter(t.iter().copied());
     let mut not_amenable = FxHashSet::<usize>::default();
 
-    let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    // TODO
+    // let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    let mut visited = vec![false; 4 * graph.n_nodes * 6];
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
-        visited.insert((arrived_by, node, walkstatus));
+        // visited.insert((arrived_by, node, walkstatus));
+        visited[arrived_by as usize * graph.n_nodes * 6 + node * 6 + walkstatus as usize] = true;
 
         match walkstatus {
             WalkStatus::PD_NAM => {
@@ -231,7 +239,8 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
             };
 
             if let Some(next) = next {
-                if !visited.contains(&next) {
+                // if !visited.contains(&next) {
+                if !visited[next.0 as usize * graph.n_nodes * 6 + next.1 * 6 + next.2 as usize] {
                     to_visit_stack.push(next);
                 }
             }
@@ -250,17 +259,21 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
 pub fn get_nam(graph: &PDAG, t: &[usize]) -> FxHashSet<usize> {
     let mut not_amenable = FxHashSet::<usize>::default();
 
-    let mut visited = FxHashSet::<usize>::default();
+    // TODO
+    // let mut visited = FxHashSet::<usize>::default();
+    let mut visited = vec![false; graph.n_nodes];
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v)));
 
     while let Some((arrived_by, node)) = to_visit_stack.pop() {
-        visited.insert(node);
+        // visited.insert(node);
+        visited[node] = true;
         match arrived_by {
             Edge::Init => {
                 graph
                     .adjacent_undirected_of(node)
                     .iter()
-                    .filter(|p| !visited.contains(p) && !t.contains(p))
+                    // .filter(|p| !visited.contains(p) && !t.contains(p))
+                    .filter(|p| !visited[**p] && !t.contains(p))
                     .for_each(|p| {
                         to_visit_stack.push((Edge::Undirected, *p));
                     });
@@ -269,7 +282,8 @@ pub fn get_nam(graph: &PDAG, t: &[usize]) -> FxHashSet<usize> {
             _ => {
                 not_amenable.insert(node);
                 get_next_steps(graph, t, node).for_each(|(move_on_by, w)| {
-                    if !visited.contains(&w) {
+                    // if !visited.contains(&w) {
+                    if !visited[w] {
                         to_visit_stack.push((move_on_by, w));
                     }
                 });
@@ -350,11 +364,14 @@ pub fn get_pd_nam_nva(
     let mut not_amenable = FxHashSet::<usize>::default();
     let mut not_vas = z.clone();
 
-    let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    // TODO
+    // let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    let mut visited = vec![false; 4 * graph.n_nodes * 6];
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
-        visited.insert((arrived_by, node, walkstatus));
+        // visited.insert((arrived_by, node, walkstatus));
+        visited[arrived_by as usize * graph.n_nodes * 6 + node * 6 + walkstatus as usize] = true;
 
         match walkstatus {
             WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCKED_NAM => {
@@ -415,7 +432,8 @@ pub fn get_pd_nam_nva(
             };
 
             if let Some(next) = next {
-                if !visited.contains(&next) {
+                // if !visited.contains(&next) {
+                if !visited[next.0 as usize * graph.n_nodes * 6 + next.1 * 6 + next.2 as usize] {
                     to_visit_stack.push(next);
                 }
             }
@@ -460,11 +478,14 @@ pub fn get_nam_nva(
     let mut not_amenable = FxHashSet::<usize>::default();
     let mut not_vas = z.clone();
 
-    let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    // TODO
+    // let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    let mut visited = vec![false; 4 * graph.n_nodes * 6];
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
-        visited.insert((arrived_by, node, walkstatus));
+        // visited.insert((arrived_by, node, walkstatus));
+        visited[arrived_by as usize * graph.n_nodes * 6 + node * 6 + walkstatus as usize] = true;
 
         match walkstatus {
             WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCKED_NAM => {
@@ -517,7 +538,8 @@ pub fn get_nam_nva(
             };
 
             if let Some(next) = next {
-                if !visited.contains(&next) {
+                // if !visited.contains(&next) {
+                if !visited[next.0 as usize * graph.n_nodes * 6 + next.1 * 6 + next.2 as usize] {
                     to_visit_stack.push(next);
                 }
             }
@@ -559,11 +581,14 @@ pub fn get_invalidly_un_blocked(
 
     let mut ivb = z.clone();
 
-    let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    // TODO
+    // let mut visited = FxHashSet::<(Edge, usize, WalkStatus)>::default();
+    let mut visited = vec![false; 4 * graph.n_nodes * 6];
     let mut to_visit_stack = Vec::from_iter(t.iter().map(|v| (Edge::Init, *v, WalkStatus::Init)));
 
     while let Some((arrived_by, node, walkstatus)) = to_visit_stack.pop() {
-        visited.insert((arrived_by, node, walkstatus));
+        // visited.insert((arrived_by, node, walkstatus));
+        visited[arrived_by as usize * graph.n_nodes * 6 + node * 6 + walkstatus as usize] = true;
 
         match walkstatus {
             // when the node is reached on a causal path but blocked, or an unblocked non-causal path
@@ -611,7 +636,8 @@ pub fn get_invalidly_un_blocked(
             };
 
             if let Some(next) = next {
-                if !visited.contains(&next) {
+                // if !visited.contains(&next) {
+                if !visited[next.0 as usize * graph.n_nodes * 6 + next.1 * 6 + next.2 as usize] {
                     to_visit_stack.push(next);
                 }
             }
