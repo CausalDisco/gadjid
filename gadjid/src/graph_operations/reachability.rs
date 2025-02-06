@@ -153,7 +153,7 @@ pub fn get_d_pd_nam(
             _ => (),
         }
 
-        for (move_on_by, w) in get_next_steps(graph, t, node) {
+        get_next_steps(graph, t, node).for_each(|(move_on_by, w)| {
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
                     Edge::Incoming => Some((move_on_by, w, WalkStatus::D)),
@@ -177,7 +177,7 @@ pub fn get_d_pd_nam(
                     to_visit_stack.push(next);
                 }
             }
-        }
+        });
     }
 
     (desc, poss_desc, not_amenable)
@@ -225,7 +225,7 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
             _ => (),
         }
 
-        for (move_on_by, w) in get_next_steps(graph, t, node) {
+        get_next_steps(graph, t, node).for_each(|(move_on_by, w)| {
             let next = match walkstatus {
                 WalkStatus::Init => match move_on_by {
                     Edge::Incoming => Some((move_on_by, w, WalkStatus::PD_AM)),
@@ -244,7 +244,7 @@ pub fn get_pd_nam(graph: &PDAG, t: &[usize]) -> (FxHashSet<usize>, FxHashSet<usi
                     to_visit_stack.push(next);
                 }
             }
-        }
+        });
     }
 
     (poss_de, not_amenable)
@@ -395,49 +395,54 @@ pub fn get_pd_nam_nva(
         }
         let node_is_adjustment = z.contains(&node);
 
-        for (move_on_by, w, blocked) in
-            get_next_steps_conditioned(graph, t, arrived_by, node, node_is_adjustment)
-        {
-            let next = match walkstatus {
-                WalkStatus::Init => match move_on_by {
-                    Edge::Incoming => Some((move_on_by, w, WalkStatus::PD_OPEN_AM)),
-                    Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
-                    Edge::Undirected => Some((move_on_by, w, WalkStatus::PD_OPEN_NAM)),
-                    _ => None,
-                },
-                WalkStatus::PD_OPEN_AM | WalkStatus::PD_BLOCKED_AM => match move_on_by {
-                    Edge::Incoming | Edge::Undirected => match blocked {
-                        false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, WalkStatus::PD_BLOCKED_AM)),
+        get_next_steps_conditioned(graph, t, arrived_by, node, node_is_adjustment).for_each(
+            |(move_on_by, w, blocked)| {
+                let next = match walkstatus {
+                    WalkStatus::Init => match move_on_by {
+                        Edge::Incoming => Some((move_on_by, w, WalkStatus::PD_OPEN_AM)),
+                        Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
+                        Edge::Undirected => Some((move_on_by, w, WalkStatus::PD_OPEN_NAM)),
+                        _ => None,
                     },
-                    Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_AM) => {
+                    WalkStatus::PD_OPEN_AM | WalkStatus::PD_BLOCKED_AM => match move_on_by {
+                        Edge::Incoming | Edge::Undirected => match blocked {
+                            false => Some((move_on_by, w, walkstatus)),
+                            true => Some((move_on_by, w, WalkStatus::PD_BLOCKED_AM)),
+                        },
+                        Edge::Outgoing
+                            if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_AM) =>
+                        {
+                            Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
+                        }
+                        _ => None,
+                    },
+                    WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCKED_NAM => match move_on_by {
+                        Edge::Incoming | Edge::Undirected => match blocked {
+                            false => Some((move_on_by, w, walkstatus)),
+                            true => Some((move_on_by, w, WalkStatus::PD_BLOCKED_NAM)),
+                        },
+                        Edge::Outgoing
+                            if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_NAM) =>
+                        {
+                            Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
+                        }
+                        _ => None,
+                    },
+                    WalkStatus::NON_CAUSAL_OPEN if !blocked => {
                         Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
                     }
                     _ => None,
-                },
-                WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCKED_NAM => match move_on_by {
-                    Edge::Incoming | Edge::Undirected => match blocked {
-                        false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, WalkStatus::PD_BLOCKED_NAM)),
-                    },
-                    Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_NAM) => {
-                        Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
-                    }
-                    _ => None,
-                },
-                WalkStatus::NON_CAUSAL_OPEN if !blocked => {
-                    Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
-                }
-                _ => None,
-            };
+                };
 
-            if let Some(next) = next {
-                // if !visited.contains(&next) {
-                if !visited[next.0 as usize * graph.n_nodes * 6 + next.1 * 6 + next.2 as usize] {
-                    to_visit_stack.push(next);
+                if let Some(next) = next {
+                    // if !visited.contains(&next) {
+                    if !visited[next.0 as usize * graph.n_nodes * 6 + next.1 * 6 + next.2 as usize]
+                    {
+                        to_visit_stack.push(next);
+                    }
                 }
-            }
-        }
+            },
+        );
     }
 
     (poss_de, not_amenable, not_vas)
@@ -501,49 +506,54 @@ pub fn get_nam_nva(
         }
         let node_is_adjustment = z.contains(&node);
 
-        for (move_on_by, w, blocked) in
-            get_next_steps_conditioned(graph, t, arrived_by, node, node_is_adjustment)
-        {
-            let next = match walkstatus {
-                WalkStatus::Init => match move_on_by {
-                    Edge::Incoming => Some((move_on_by, w, WalkStatus::PD_OPEN_AM)),
-                    Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
-                    Edge::Undirected => Some((move_on_by, w, WalkStatus::PD_OPEN_NAM)),
-                    _ => None,
-                },
-                WalkStatus::PD_OPEN_AM | WalkStatus::PD_BLOCKED_AM => match move_on_by {
-                    Edge::Incoming | Edge::Undirected => match blocked {
-                        false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, WalkStatus::PD_BLOCKED_AM)),
+        get_next_steps_conditioned(graph, t, arrived_by, node, node_is_adjustment).for_each(
+            |(move_on_by, w, blocked)| {
+                let next = match walkstatus {
+                    WalkStatus::Init => match move_on_by {
+                        Edge::Incoming => Some((move_on_by, w, WalkStatus::PD_OPEN_AM)),
+                        Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
+                        Edge::Undirected => Some((move_on_by, w, WalkStatus::PD_OPEN_NAM)),
+                        _ => None,
                     },
-                    Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_AM) => {
+                    WalkStatus::PD_OPEN_AM | WalkStatus::PD_BLOCKED_AM => match move_on_by {
+                        Edge::Incoming | Edge::Undirected => match blocked {
+                            false => Some((move_on_by, w, walkstatus)),
+                            true => Some((move_on_by, w, WalkStatus::PD_BLOCKED_AM)),
+                        },
+                        Edge::Outgoing
+                            if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_AM) =>
+                        {
+                            Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
+                        }
+                        _ => None,
+                    },
+                    WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCKED_NAM => match move_on_by {
+                        Edge::Incoming | Edge::Undirected => match blocked {
+                            false => Some((move_on_by, w, walkstatus)),
+                            true => Some((move_on_by, w, WalkStatus::PD_BLOCKED_NAM)),
+                        },
+                        Edge::Outgoing
+                            if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_NAM) =>
+                        {
+                            Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
+                        }
+                        _ => None,
+                    },
+                    WalkStatus::NON_CAUSAL_OPEN if !blocked => {
                         Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
                     }
                     _ => None,
-                },
-                WalkStatus::PD_OPEN_NAM | WalkStatus::PD_BLOCKED_NAM => match move_on_by {
-                    Edge::Incoming | Edge::Undirected => match blocked {
-                        false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, WalkStatus::PD_BLOCKED_NAM)),
-                    },
-                    Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN_NAM) => {
-                        Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
-                    }
-                    _ => None,
-                },
-                WalkStatus::NON_CAUSAL_OPEN if !blocked => {
-                    Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
-                }
-                _ => None,
-            };
+                };
 
-            if let Some(next) = next {
-                // if !visited.contains(&next) {
-                if !visited[next.0 as usize * graph.n_nodes * 6 + next.1 * 6 + next.2 as usize] {
-                    to_visit_stack.push(next);
+                if let Some(next) = next {
+                    // if !visited.contains(&next) {
+                    if !visited[next.0 as usize * graph.n_nodes * 6 + next.1 * 6 + next.2 as usize]
+                    {
+                        to_visit_stack.push(next);
+                    }
                 }
-            }
-        }
+            },
+        );
     }
 
     (not_amenable, not_vas)
@@ -610,38 +620,41 @@ pub fn get_invalidly_un_blocked(
         }
         let node_is_adjustment = z.contains(&node);
 
-        for (move_on_by, w, blocked) in
-            get_next_steps_conditioned(graph, t, arrived_by, node, node_is_adjustment)
-        {
-            let next = match walkstatus {
-                WalkStatus::Init => match move_on_by {
-                    Edge::Incoming | Edge::Undirected => Some((move_on_by, w, WalkStatus::PD_OPEN)),
-                    Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
-                    _ => None,
-                },
-                WalkStatus::PD_OPEN | WalkStatus::PD_BLOCKED => match move_on_by {
-                    Edge::Incoming | Edge::Undirected => match blocked {
-                        false => Some((move_on_by, w, walkstatus)),
-                        true => Some((move_on_by, w, WalkStatus::PD_BLOCKED)),
+        get_next_steps_conditioned(graph, t, arrived_by, node, node_is_adjustment).for_each(
+            |(move_on_by, w, blocked)| {
+                let next = match walkstatus {
+                    WalkStatus::Init => match move_on_by {
+                        Edge::Incoming | Edge::Undirected => {
+                            Some((move_on_by, w, WalkStatus::PD_OPEN))
+                        }
+                        Edge::Outgoing => Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN)),
+                        _ => None,
                     },
-                    Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN) => {
+                    WalkStatus::PD_OPEN | WalkStatus::PD_BLOCKED => match move_on_by {
+                        Edge::Incoming | Edge::Undirected => match blocked {
+                            false => Some((move_on_by, w, walkstatus)),
+                            true => Some((move_on_by, w, WalkStatus::PD_BLOCKED)),
+                        },
+                        Edge::Outgoing if !blocked && matches!(walkstatus, WalkStatus::PD_OPEN) => {
+                            Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
+                        }
+                        _ => None,
+                    },
+                    WalkStatus::NON_CAUSAL_OPEN if !blocked => {
                         Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
                     }
                     _ => None,
-                },
-                WalkStatus::NON_CAUSAL_OPEN if !blocked => {
-                    Some((move_on_by, w, WalkStatus::NON_CAUSAL_OPEN))
-                }
-                _ => None,
-            };
+                };
 
-            if let Some(next) = next {
-                // if !visited.contains(&next) {
-                if !visited[next.0 as usize * graph.n_nodes * 6 + next.1 * 6 + next.2 as usize] {
-                    to_visit_stack.push(next);
+                if let Some(next) = next {
+                    // if !visited.contains(&next) {
+                    if !visited[next.0 as usize * graph.n_nodes * 6 + next.1 * 6 + next.2 as usize]
+                    {
+                        to_visit_stack.push(next);
+                    }
                 }
-            }
-        }
+            },
+        );
     }
 
     ivb
