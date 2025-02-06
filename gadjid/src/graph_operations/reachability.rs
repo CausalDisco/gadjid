@@ -286,30 +286,20 @@ fn get_next_steps_conditioned<'a>(
     v: usize,
     node_is_adjustment: bool,
 ) -> impl Iterator<Item = (Edge, usize, bool)> + 'a {
-    let mut parents_collider = None;
-    let mut parents_noncollider = None;
-
-    match arrived_by {
-        Edge::Incoming => {
-            parents_collider = Some(
-                graph
-                    .parents_of(v)
-                    .iter()
-                    .filter(|p| !t.contains(*p))
-                    .map(move |p| (Edge::Outgoing, *p, !node_is_adjustment)),
-            );
-        }
-        Edge::Init | Edge::Outgoing => {
-            parents_noncollider = Some(
-                graph
-                    .parents_of(v)
-                    .iter()
-                    .filter(|p| !t.contains(*p))
-                    .map(move |p| (Edge::Outgoing, *p, node_is_adjustment)),
-            );
-        }
-        _ => (),
-    }
+    let parents = graph
+        .parents_of(v)
+        .iter()
+        // skip parents if arrived_by == Edge::Undirected
+        .filter(move |p| !t.contains(*p) & !matches!(arrived_by, Edge::Undirected))
+        .map(move |p| {
+            (
+                Edge::Outgoing,
+                *p,
+                // blocked collider or blocked non-collider
+                (matches!(arrived_by, Edge::Incoming) & !node_is_adjustment)
+                    | (!matches!(arrived_by, Edge::Incoming) & node_is_adjustment),
+            )
+        });
 
     let siblings = graph
         .adjacent_undirected_of(v)
@@ -323,10 +313,7 @@ fn get_next_steps_conditioned<'a>(
         .filter(|c| !t.contains(*c))
         .map(move |c| (Edge::Incoming, *c, node_is_adjustment));
 
-    (parents_collider.into_iter().flatten())
-        .chain(parents_noncollider.into_iter().flatten())
-        .chain(siblings)
-        .chain(children)
+    parents.chain(siblings).chain(children)
 }
 
 /// Validate Z as adjustment set relative to (T, Y) for a given set T of treatment
