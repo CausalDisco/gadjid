@@ -1,0 +1,8 @@
+bibentry(
+  bibtype    = "InProceedings",
+  title      = "{Adjustment Identification Distance: A gadjid for Causal Structure Learning}",
+  author     = "Leonard Henckel and Theo Würtzen and Sebastian Weichwald",
+  booktitle  = "Proceedings of the Fortieth Conference on Uncertainty in Artificial Intelligence (UAI)",
+  year       = 2024,
+  doi        = "10.48550/arXiv.2402.08616",
+)

@@ -1,0 +1,155 @@
+This package contains the source code of the dependency Rust crates in src/rust/vendor.tar.xz
+with licenses as listed below.
+
+When Cargo (Rust’s build system and package manager) is not installed,
+the pre-compiled binary will be downloaded.
+
+Crate:   anyhow (version 1.0.98)
+License: MIT OR Apache-2.0
+Authors: David Tolnay
+Files:   src/rust/vendor.tar.xz:vendor/anyhow-1.0.98/*
+
+Crate:   build-print (version 0.1.1)
+License: MIT
+Authors: sam0x17
+Files:   src/rust/vendor.tar.xz:vendor/build-print-0.1.1/*
+
+Crate:   cfg-if (version 1.0.1)
+License: MIT OR Apache-2.0
+Authors: Alex Crichton
+Files:   src/rust/vendor.tar.xz:vendor/cfg-if-1.0.1/*
+
+Crate:   crossbeam-deque (version 0.8.6)
+License: MIT OR Apache-2.0
+Authors: The Crossbeam Project Developers
+Files:   src/rust/vendor.tar.xz:vendor/crossbeam-deque-0.8.6/*
+
+Crate:   crossbeam-epoch (version 0.9.18)
+License: MIT OR Apache-2.0
+Authors: The Crossbeam Project Developers
+Files:   src/rust/vendor.tar.xz:vendor/crossbeam-epoch-0.9.18/*
+
+Crate:   crossbeam-utils (version 0.8.21)
+License: MIT OR Apache-2.0
+Authors: The Crossbeam Project Developers
+Files:   src/rust/vendor.tar.xz:vendor/crossbeam-utils-0.8.21/*
+
+Crate:   either (version 1.15.0)
+License: MIT OR Apache-2.0
+Authors: bluss
+Files:   src/rust/vendor.tar.xz:vendor/either-1.15.0/*
+
+Crate:   extendr-api (version 0.8.0)
+License: MIT
+Authors: andy-thomason, Thomas Down, Mossa Merhi Reimert, Josiah Parry, Claus O. Wilke, Hiroaki Yutani, Ilia A. Kosenkov, Michael Milton
+Files:   src/rust/vendor.tar.xz:vendor/extendr-api-0.8.0/*
+
+Crate:   extendr-ffi (version 0.8.0)
+License: MIT
+Authors: andy-thomason, Thomas Down, Mossa Merhi Reimert, Josiah Parry, Claus O. Wilke, Hiroaki Yutani, Ilia A. Kosenkov, Michael Milton
+Files:   src/rust/vendor.tar.xz:vendor/extendr-ffi-0.8.0/*
+
+Crate:   extendr-macros (version 0.8.0)
+License: MIT
+Authors: andy-thomason, Thomas Down, Mossa Merhi Reimert, Josiah Parry, Claus O. Wilke, Hiroaki Yutani, Ilia A. Kosenkov, Michael Milton
+Files:   src/rust/vendor.tar.xz:vendor/extendr-macros-0.8.0/*
+
+Crate:   getrandom (version 0.2.16)
+License: MIT OR Apache-2.0
+Authors: The Rand Project Developers
+Files:   src/rust/vendor.tar.xz:vendor/getrandom-0.2.16/*
+
+Crate:   hermit-abi (version 0.5.2)
+License: MIT OR Apache-2.0
+Authors: Stefan Lankes
+Files:   src/rust/vendor.tar.xz:vendor/hermit-abi-0.5.2/*
+
+Crate:   libc (version 0.2.174)
+License: MIT OR Apache-2.0
+Authors: The Rust Project Developers
+Files:   src/rust/vendor.tar.xz:vendor/libc-0.2.174/*
+
+Crate:   num_cpus (version 1.17.0)
+License: MIT OR Apache-2.0
+Authors: Sean McArthur
+Files:   src/rust/vendor.tar.xz:vendor/num_cpus-1.17.0/*
+
+Crate:   once_cell (version 1.21.3)
+License: MIT OR Apache-2.0
+Authors: Aleksey Kladov
+Files:   src/rust/vendor.tar.xz:vendor/once_cell-1.21.3/*
+
+Crate:   paste (version 1.0.15)
+License: MIT OR Apache-2.0
+Authors: David Tolnay
+Files:   src/rust/vendor.tar.xz:vendor/paste-1.0.15/*
+
+Crate:   ppv-lite86 (version 0.2.21)
+License: MIT OR Apache-2.0
+Authors: The CryptoCorrosion Contributors
+Files:   src/rust/vendor.tar.xz:vendor/ppv-lite86-0.2.21/*
+
+Crate:   proc-macro2 (version 1.0.95)
+License: MIT OR Apache-2.0
+Authors: David Tolnay, Alex Crichton
+Files:   src/rust/vendor.tar.xz:vendor/proc-macro2-1.0.95/*
+
+Crate:   quote (version 1.0.40)
+License: MIT OR Apache-2.0
+Authors: David Tolnay
+Files:   src/rust/vendor.tar.xz:vendor/quote-1.0.40/*
+
+Crate:   rand_chacha (version 0.3.1)
+License: MIT OR Apache-2.0
+Authors: The Rand Project Developers, The Rust Project Developers, The CryptoCorrosion Contributors
+Files:   src/rust/vendor.tar.xz:vendor/rand_chacha-0.3.1/*
+
+Crate:   rand_core (version 0.6.4)
+License: MIT OR Apache-2.0
+Authors: The Rand Project Developers, The Rust Project Developers
+Files:   src/rust/vendor.tar.xz:vendor/rand_core-0.6.4/*
+
+Crate:   rand (version 0.8.5)
+License: MIT OR Apache-2.0
+Authors: The Rand Project Developers, The Rust Project Developers
+Files:   src/rust/vendor.tar.xz:vendor/rand-0.8.5/*
+
+Crate:   rayon (version 1.10.0)
+License: MIT OR Apache-2.0
+Authors: Niko Matsakis, Josh Stone
+Files:   src/rust/vendor.tar.xz:vendor/rayon-1.10.0/*
+
+Crate:   rayon-core (version 1.12.1)
+License: MIT OR Apache-2.0
+Authors: Niko Matsakis, Josh Stone
+Files:   src/rust/vendor.tar.xz:vendor/rayon-core-1.12.1/*
+
+Crate:   rustc-hash (version 1.1.0)
+License: Apache-2.0/MIT
+Authors: The Rust Project Developers
+Files:   src/rust/vendor.tar.xz:vendor/rustc-hash-1.1.0/*
+
+Crate:   syn (version 2.0.104)
+License: MIT OR Apache-2.0
+Authors: David Tolnay
+Files:   src/rust/vendor.tar.xz:vendor/syn-2.0.104/*
+
+Crate:   unicode-ident (version 1.0.18)
+License: (MIT OR Apache-2.0) AND Unicode-3.0
+Authors: David Tolnay
+Files:   src/rust/vendor.tar.xz:vendor/unicode-ident-1.0.18/*
+
+Crate:   wasi (version 0.11.1+wasi-snapshot-preview1)
+License: Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT
+Authors: The Cranelift Project Developers
+Files:   src/rust/vendor.tar.xz:vendor/wasi-0.11.1+wasi-snapshot-preview1/*
+
+Crate:   zerocopy (version 0.8.26)
+License: BSD-2-Clause OR Apache-2.0 OR MIT
+Authors: Joshua Liebow-Feeser, Jack Wrenn
+Files:   src/rust/vendor.tar.xz:vendor/zerocopy-0.8.26/*
+
+Crate:   zerocopy-derive (version 0.8.26)
+License: BSD-2-Clause OR Apache-2.0 OR MIT
+Authors: Joshua Liebow-Feeser, Jack Wrenn
+Files:   src/rust/vendor.tar.xz:vendor/zerocopy-derive-0.8.26/*
