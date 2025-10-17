@@ -14,6 +14,7 @@ authors =  [{name = "Theo Würtzen"}, {name = "Sebastian Weichwald"}, {name = "L
 description = "Adjustment Identification Distance: A 𝚐𝚊𝚍𝚓𝚒𝚍 for Causal Structure Learning"
 keywords = ["causality", "causal structure learning", "graph distance", "adjustment"]
 dependencies = ["numpy"]
+dynamic = ["version"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/CausalDisco/gadjid/issues"
