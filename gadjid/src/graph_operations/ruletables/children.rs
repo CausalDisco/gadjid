@@ -6,6 +6,7 @@ use crate::partially_directed_acyclic_graph::Edge;
 use super::ruletable::RuleTable;
 
 /// Implements a ruletable to get children of a set of nodes
+#[allow(dead_code)]
 pub struct Children {}
 
 impl RuleTable for Children {

@@ -1,0 +1,34 @@
+Authors of gadjid: Sebastian Weichwald, Theo Würtzen, Leonard Henckel
+
+Authors of the dependency Rust crates:
+
+- anyhow (version 1.0.98): David Tolnay
+- build-print (version 0.1.1): sam0x17
+- cfg-if (version 1.0.1): Alex Crichton
+- crossbeam-deque (version 0.8.6): The Crossbeam Project Developers
+- crossbeam-epoch (version 0.9.18): The Crossbeam Project Developers
+- crossbeam-utils (version 0.8.21): The Crossbeam Project Developers
+- either (version 1.15.0): bluss
+- extendr-api (version 0.8.0): andy-thomason, Thomas Down, Mossa Merhi Reimert, Josiah Parry, Claus O. Wilke, Hiroaki Yutani, Ilia A. Kosenkov, Michael Milton
+- extendr-ffi (version 0.8.0): andy-thomason, Thomas Down, Mossa Merhi Reimert, Josiah Parry, Claus O. Wilke, Hiroaki Yutani, Ilia A. Kosenkov, Michael Milton
+- extendr-macros (version 0.8.0): andy-thomason, Thomas Down, Mossa Merhi Reimert, Josiah Parry, Claus O. Wilke, Hiroaki Yutani, Ilia A. Kosenkov, Michael Milton
+- getrandom (version 0.2.16): The Rand Project Developers
+- hermit-abi (version 0.5.2): Stefan Lankes
+- libc (version 0.2.174): The Rust Project Developers
+- num_cpus (version 1.17.0): Sean McArthur
+- once_cell (version 1.21.3): Aleksey Kladov
+- paste (version 1.0.15): David Tolnay
+- ppv-lite86 (version 0.2.21): The CryptoCorrosion Contributors
+- proc-macro2 (version 1.0.95): David Tolnay, Alex Crichton
+- quote (version 1.0.40): David Tolnay
+- rand_chacha (version 0.3.1): The Rand Project Developers, The Rust Project Developers, The CryptoCorrosion Contributors
+- rand_core (version 0.6.4): The Rand Project Developers, The Rust Project Developers
+- rand (version 0.8.5): The Rand Project Developers, The Rust Project Developers
+- rayon (version 1.10.0): Niko Matsakis, Josh Stone
+- rayon-core (version 1.12.1): Niko Matsakis, Josh Stone
+- rustc-hash (version 1.1.0): The Rust Project Developers
+- syn (version 2.0.104): David Tolnay
+- unicode-ident (version 1.0.18): David Tolnay
+- wasi (version 0.11.1+wasi-snapshot-preview1): The Cranelift Project Developers
+- zerocopy (version 0.8.26): Joshua Liebow-Feeser, Jack Wrenn
+- zerocopy-derive (version 0.8.26): Joshua Liebow-Feeser, Jack Wrenn

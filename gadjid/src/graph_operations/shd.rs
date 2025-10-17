@@ -108,8 +108,7 @@ mod test {
             assert_eq!(
                 g_truth[i].len(),
                 g_guess[i].len(),
-                "matrix dimension mismatch at inner index {}",
-                i
+                "matrix dimension mismatch at inner index {i}"
             );
 
             for j in (i + 1)..dim {

@@ -101,7 +101,7 @@ impl fmt::Display for PDAG {
         for row in adjacency {
             writeln!(f)?;
             for val in row {
-                write!(f, "{} ", val)?;
+                write!(f, "{val} ")?;
             }
         }
         Ok(())
@@ -937,9 +937,7 @@ mod test {
                 assert_eq!(
                     children,
                     cpdag.children_of(n).to_vec(),
-                    "cpdag {}: children of node {} are not sorted",
-                    i,
-                    n
+                    "cpdag {i}: children of node {n} are not sorted"
                 );
             }
 
@@ -949,9 +947,7 @@ mod test {
                 assert_eq!(
                     children,
                     cpdag.parents_of(n).to_vec(),
-                    "cpdag {}: parents of node {} are not sorted",
-                    i,
-                    n
+                    "cpdag {i}: parents of node {n} are not sorted"
                 );
             }
             for n in 0..cpdag.n_nodes {
@@ -960,9 +956,7 @@ mod test {
                 assert_eq!(
                     siblings,
                     cpdag.adjacent_undirected_of(n).to_vec(),
-                    "cpdag {}: parents of node {} are not sorted",
-                    i,
-                    n
+                    "cpdag {i}: parents of node {n} are not sorted"
                 );
             }
         }

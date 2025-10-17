@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-//! Ruletable for getting all ancestors of a set of nodes. Unused for now, but kept in the codebase for convenience.
+//! Ruletable for getting all ancestors of a set of nodes
 
 use crate::partially_directed_acyclic_graph::Edge;
 

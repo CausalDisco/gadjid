@@ -1,0 +1,27 @@
+Package: gadjid
+Title: Graph Adjustment Identification Distances for Causal Graphs
+Version: 0.1.0
+Authors@R: c(
+    person("Sebastian", "Weichwald", email = "sweichwald@math.ku.dk", role = c("aut", "cph", "cre")),
+    person("Theo", "Würtzen", role = "aut"),
+    person("Leonard", "Henckel", role = "aut"),
+    person("Authors of the dependency Rust crates", role = c("ctb"), comment = "see inst/AUTHORS file for details"))
+Description: Make efficient Rust implementations of graph adjustment
+    identification distances available in R. These distances (based on ancestor,
+    optimal, and parent adjustment) count how often the respective adjustment
+    identification strategy leads to causal inferences that are incorrect
+    relative to a ground-truth graph when applied to a candidate graph instead.
+    See also Henckel, Würtzen, Weichwald (2024) <doi:10.48550/arXiv.2402.08616>.
+License: MPL
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Config/rextendr/version: 0.4.1
+SystemRequirements: Cargo (Rust's package manager), rustc
+Depends: 
+    R (>= 4.2)
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+URL: https://github.com/CausalDisco/gadjid
+BugReports: https://github.com/CausalDisco/gadjid/issues

@@ -1,26 +1,36 @@
 [![test & lint](https://github.com/CausalDisco/gadjid/actions/workflows/test-lint.yml/badge.svg?branch=main)](https://github.com/CausalDisco/gadjid/actions/workflows/test-lint.yml?query=branch%3Amain)
 [![PyPi](https://badgen.net/pypi/v/gadjid/?icon=pypi&label=PyPI)](https://pypi.org/project/gadjid)
+[![CRAN](https://badgen.net/cran/v/gadjid/?icon=https://cran.r-project.org/Rlogo.svg&label=CRAN)](https://cran.r-project.org/package=gadjid)
 [![read](https://badgen.net/badge/read/arXiv/b31b1b)](https://doi.org/10.48550/arXiv.2402.08616)
 
 
 # Adjustment Identification Distance: A 𝚐𝚊𝚍𝚓𝚒𝚍 for Causal Structure Learning
 
-[This is an early release of 𝚐𝚊𝚍𝚓𝚒𝚍 🐥](#this-is-an-early-release-) and feedback is very welcome!
-
 If you publish research using 𝚐𝚊𝚍𝚓𝚒𝚍, please cite
-[our article](https://doi.org/10.48550/arXiv.2402.08616)
+[our UAI paper](https://doi.org/10.48550/arXiv.2402.08616)
 ```bibtex
-@article{henckel2024adjustment,
+@inproceedings{henckel2024adjustment,
     title = {{Adjustment Identification Distance: A gadjid for Causal Structure Learning}},
     author = {Leonard Henckel and Theo Würtzen and Sebastian Weichwald},
-    journal = {{arXiv preprint arXiv:2402.08616}},
+    booktitle = {{Proceedings of the Fortieth Conference on Uncertainty in Artificial Intelligence (UAI)}},
     year = {2024},
     doi = {10.48550/arXiv.2402.08616},
-}
+} 
 ```
+
+Feedback is very welcome! Just [open an issue](https://github.com/CausalDisco/gadjid/issues/new/choose) on here.
 
 
 ## Get Started Real Quick 🚀
+
+𝚐𝚊𝚍𝚓𝚒𝚍 is implemented in Rust
+and can conveniently be installed
+from [PyPI](https://pypi.org/project/gadjid) (`pip install gadjid`) to be used from Python
+and
+from [CRAN](https://cran.r-project.org/package=gadjid) (`install.packages("gadjid")`) to be used from R.
+
+> Evaluating graphs learned by causal discovery algorithms is difficult: The number of edges that differ between two graphs does not reflect how the graphs differ with respect to the identifying formulas they suggest for causal effects. We introduce a framework for developing causal distances between graphs which includes the structural intervention distance for directed acyclic graphs as a special case. We use this framework to develop improved adjustment-based distances as well as extensions to completed partially directed acyclic graphs and causal orders. We develop new reachability algorithms to compute the distances efficiently and to prove their low polynomial time complexity. In our package 𝚐𝚊𝚍𝚓𝚒𝚍, we provide implementations of our distances; they are orders of magnitude faster with proven lower time complexity than the structural intervention distance and thereby provide a success metric for causal discovery that scales to graph sizes that were previously prohibitive.
+
 
 ### Installation – Python
 
@@ -47,7 +57,7 @@ or \
 `maturin develop --manifest-path ./gadjid_python/Cargo.toml --release` (optimized release compile).
 
 
-### Introductory Example – Python
+#### Introductory Example – Python
 
 ```python
 import gadjid
@@ -78,14 +88,37 @@ print(shd(Gtrue, Gguess))
 ```
 
 
----
+### Installation – R
+
+``` r
+install.packages("gadjid")
+```
+
+A source package install requires the [rust toolchain to be installed](https://rustup.rs/).
 
 
-𝚐𝚊𝚍𝚓𝚒𝚍 is implemented in Rust
-and can conveniently be called from Python via our Python wrapper
-(implemented using [maturin](https://www.maturin.rs/) and [PyO3](https://pyo3.rs/)).
+#### Introductory Example – R
 
-> Evaluating graphs learned by causal discovery algorithms is difficult: The number of edges that differ between two graphs does not reflect how the graphs differ with respect to the identifying formulas they suggest for causal effects. We introduce a framework for developing causal distances between graphs which includes the structural intervention distance for directed acyclic graphs as a special case. We use this framework to develop improved adjustment-based distances as well as extensions to completed partially directed acyclic graphs and causal orders. We develop new reachability algorithms to compute the distances efficiently and to prove their low polynomial time complexity. In our package 𝚐𝚊𝚍𝚓𝚒𝚍, we provide implementations of our distances; they are orders of magnitude faster with proven lower time complexity than the structural intervention distance and thereby provide a success metric for causal discovery that scales to graph sizes that were previously prohibitive.
+``` r
+library(gadjid)
+
+?ancestor_aid
+
+g_true <- rbind(c(0, 1, 1, 1),
+                c(0, 0, 1, 1),
+                c(0, 0, 0, 1),
+                c(0, 0, 0, 0))
+g_guess <- rbind(c(0, 1, 0, 0),
+                 c(0, 0, 1, 0),
+                 c(0, 0, 0, 1),
+                 c(0, 0, 0, 0))
+
+ancestor_aid(g_true, g_guess, edge_direction = "from row to column")
+oset_aid(g_true, g_guess, edge_direction = "from row to column")
+parent_aid(g_true, g_guess, edge_direction = "from row to column")
+shd(g_true, g_guess)
+sid(g_true, g_guess, edge_direction = "from row to column")
+```
 
 
 ### Parallelism – setting the number of threads
@@ -95,13 +128,6 @@ using, per default, as many threads as there are physical CPU cores.
 The number of threads to use can be set via the environment variable `RAYON_NUM_THREADS`.
 We recommend to do so and to set the number of threads manually,
 not least to be explicit and to avoid the small runtime overhead for determining the number of physical CPU cores.
-
-
-## This is an Early Release 🐥
-
-* Feedback is very welcome! Just [open an issue](https://github.com/CausalDisco/gadjid/issues/new/choose) on here.
-* We are working on making 𝚐𝚊𝚍𝚓𝚒𝚍 available also for R.
-* The code is well documented. We plan on making a user and developer documentation available. 📃
 
 
 ## Implemented Distances
@@ -128,7 +154,7 @@ and we define normalisation as  `normalised_distance = mistake_count / p(p-1)`.
 
 You may also calculate the SID between DAGs via `parent_aid(DAGtrue, DAGguess, edge_direction)`,
 but we recommend `ancestor_aid` and `oset_aid` and for CPDAG inputs the `parent_aid` does not coincide with the SID
-(see also our accompanying article).
+(see also [our UAI paper](https://doi.org/10.48550/arXiv.2402.08616)).
 
 If `edge_direction="from row to column"`, then
 a `1` in row `r` and column `c` codes a directed edge `r → c`;
@@ -198,7 +224,8 @@ and the SID R package v1.1 from CRAN.
         2. tests `parent_aid` against the R implementation of the SID on pairs of DAG inputs;
         since in the special case of DAG inputs the Parent-AID coincides with the SID,
         this end-to-end tests the check for validity of adjustment sets implemented via new reachability algorithms
-* [gadjid_r/](./gadjid_r/) – placeholder for the R wrapper to come!
+* [gadjid_r/](./gadjid_r/)
+    R wrapper that accepts graph adjacency matrices
 * [testgraphs/](./testgraphs/) – testgraphs in .mtx files (Matrix Market Exchange Format), csv files with the SHD/SID between the testgraphs to test against, checksums
 
 

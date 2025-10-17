@@ -1,0 +1,21 @@
+[package]
+name = "gadjid_r"
+version = "0.1.0"
+edition = "2021"
+license = "MPL-2.0"
+publish = false
+rust-version = "1.78"
+
+[lib]
+name = "gadjid"
+crate-type = [ "staticlib" ]
+
+[dependencies]
+gadjid = { path = "./gadjid" }
+anyhow = "1.0"
+extendr-api = "0.8"
+
+[profile.release]
+codegen-units = 1
+lto = "fat"
+opt-level = 3
