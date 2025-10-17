@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MPL-2.0
-//! Ruletable for getting all descendants of a set of nodes
+//! Ruletable for getting all descendants of a set of nodes. Unused for now, but kept in the codebase for convenience.
 
 use crate::partially_directed_acyclic_graph::Edge;
 
@@ -16,6 +16,7 @@ use super::ruletable::RuleTable;
 /// | <-           | V            | ->        | W         | -        | -       |
 /// ````
 /// Implements a ruletable to get descendants
+#[allow(dead_code)]
 pub struct Descendants {}
 
 impl RuleTable for Descendants {

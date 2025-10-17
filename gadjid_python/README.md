@@ -56,7 +56,7 @@ print(shd(Gtrue, Gguess))
 ```
 
 
-## Parallelism – setting the number of threads
+### Parallelism – setting the number of threads
 
 𝚐𝚊𝚍𝚓𝚒𝚍 uses [rayon](https://docs.rs/rayon/latest/rayon/) for parallelism
 using, per default, as many threads as there are physical CPU cores.
