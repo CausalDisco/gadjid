@@ -2,9 +2,9 @@
 //! This module contains the Edgelist struct, which is an iterator over the edges of a graph.
 
 /// An iterator over the edges of a graph, yielding `(from, to, edgetype)` tuples.
-
+///
 /// Example yield: `(4, 7, 1)`, which is to be interpreted as `4 -> 7`.
-
+///
 /// Will skip over all 0's in the inner iterator, yielding only nonzero entries.
 /// Will panic during load if the inner iterator yields edges in a non-row-by-row or non-column-by-column order.
 pub struct Edgelist<Order: IterationLayoutTag, I>

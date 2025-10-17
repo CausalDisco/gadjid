@@ -90,8 +90,7 @@ fn edge_direction_is_row_to_col(edge_direction: &str) -> PyResult<bool> {
         ROW_TO_COL => Ok(true),
         COL_TO_ROW => Ok(false),
         _ => Err(PyErr::new::<pyo3::exceptions::PyTypeError, _>(format!(
-            r#"edge_direction string argument must be either "{}" or "{}""#,
-            ROW_TO_COL, COL_TO_ROW
+            r#"edge_direction string argument must be either "{ROW_TO_COL}" or "{COL_TO_ROW}""#
         ))),
     }
 }
@@ -178,8 +177,8 @@ fn graph_from_pyobject(ob: &Bound<'_, PyAny>, is_row_to_col: bool) -> anyhow::Re
                 let msg = format!(
                     "Errors occured when loading adjacency matrix. Did not succeed trying to load data
 as np ndarray or scipy sparse matrix.
-\nAttempt to load from numpy ndarray:\n\"{}\"
-\nAttempt to load from scipy sparse :\n\"{}\"", e1, e2);
+\nAttempt to load from numpy ndarray:\n\"{e1}\"
+\nAttempt to load from scipy sparse :\n\"{e2}\"");
                 anyhow::bail!(msg)
             }
         },

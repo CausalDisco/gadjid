@@ -543,6 +543,7 @@ pub fn get_nam_nva(
 ///
 /// Returns tuple of:<br>
 /// - Set NVA (Not Validly Adjusted) of nodes Y \notin T in G such that Z is not a valid adjustment set for (T, Y) in G.
+///
 /// Here, amenability (condition 1.) is not verified, that is, NVA is not a superset of NAM;
 /// instead, NVA contains Y for which condition 2. or 3.
 /// of the modified adjustment criterion for walk-based verification
@@ -708,7 +709,7 @@ mod test {
             // load the cpdag
             let cpdag = crate::test::load_pdag_from_mtx(
                 testgraphs
-                    .join(format!("100-node-CPDAG-{}.mtx", graph_id))
+                    .join(format!("100-node-CPDAG-{graph_id}.mtx"))
                     .to_str()
                     .unwrap(),
             );

@@ -109,8 +109,7 @@ mod test {
                 assert_eq!(
                     (0.0, 0),
                     ancestor_aid(&dag, &dag),
-                    "ancestor_aid between same dags of size {n} must be zero, dag: {}",
-                    dag
+                    "ancestor_aid between same dags of size {n} must be zero, dag: {dag}"
                 );
             }
         }

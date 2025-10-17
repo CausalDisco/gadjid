@@ -136,8 +136,7 @@ mod test {
                 assert_eq!(
                     (0.0, 0),
                     oset_aid(&dag, &dag),
-                    "oset_aid between same dags of size {n} must be zero, dag: {}",
-                    dag
+                    "oset_aid between same dags of size {n} must be zero, dag: {dag}"
                 );
             }
         }

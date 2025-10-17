@@ -105,8 +105,7 @@ mod test {
                 assert_eq!(
                     (0.0, 0),
                     parent_aid(&dag, &dag),
-                    "parent_aid between same dags of size {n} must be zero, dag: {}",
-                    dag
+                    "parent_aid between same dags of size {n} must be zero, dag: {dag}"
                 );
             }
         }
@@ -185,8 +184,8 @@ mod test {
         // go through all testcases, load the DAGs from the mtx files and
         // compare the computed Parent-AID=SID with the SID in the csv file (computed via R SID package)
         for (gtrue, gguess, rsid) in tests {
-            let full_path_true = testgraphs.join(format!("100-node-DAG-{}.mtx", gtrue));
-            let full_path_guess = testgraphs.join(format!("100-node-DAG-{}.mtx", gguess));
+            let full_path_true = testgraphs.join(format!("100-node-DAG-{gtrue}.mtx"));
+            let full_path_guess = testgraphs.join(format!("100-node-DAG-{gguess}.mtx"));
             let g_true = crate::test::load_pdag_from_mtx(full_path_true.to_str().unwrap());
             let g_guess = crate::test::load_pdag_from_mtx(full_path_guess.to_str().unwrap());
 
