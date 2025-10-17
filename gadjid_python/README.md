@@ -1,26 +1,31 @@
 # Adjustment Identification Distance: A 𝚐𝚊𝚍𝚓𝚒𝚍 for Causal Structure Learning
 
-This is an early release of 𝚐𝚊𝚍𝚓𝚒𝚍 🐥 and feedback is very welcome!
-Just [open an issue](https://github.com/CausalDisco/gadjid/issues/new/choose) on github.
+The 𝚐𝚊𝚍𝚓𝚒𝚍 Python wrapper package makes efficient Rust implementations of graph adjustment identification distances (AID) available in Python.
+These distances (based on ancestor, optimal, and parent adjustment) count how often the respective adjustment identification strategy leads to causal inferences that are incorrect relative to a ground-truth graph when applied to a candidate graph instead.
+There is also a [𝚐𝚊𝚍𝚓𝚒𝚍 R wrapper package](https://cran.r-project.org/package=gadjid).
 
 If you publish research using 𝚐𝚊𝚍𝚓𝚒𝚍, please cite
-[our article](https://doi.org/10.48550/arXiv.2402.08616)
+[our UAI paper](https://doi.org/10.48550/arXiv.2402.08616)
 ```bibtex
-@article{henckel2024adjustment,
+@inproceedings{henckel2024adjustment,
     title = {{Adjustment Identification Distance: A gadjid for Causal Structure Learning}},
     author = {Leonard Henckel and Theo Würtzen and Sebastian Weichwald},
-    journal = {{arXiv preprint arXiv:2402.08616}},
+    booktitle = {{Proceedings of the Fortieth Conference on Uncertainty in Artificial Intelligence (UAI)}},
     year = {2024},
     doi = {10.48550/arXiv.2402.08616},
-}
+} 
 ```
 
+> Evaluating graphs learned by causal discovery algorithms is difficult: The number of edges that differ between two graphs does not reflect how the graphs differ with respect to the identifying formulas they suggest for causal effects. We introduce a framework for developing causal distances between graphs which includes the structural intervention distance for directed acyclic graphs as a special case. We use this framework to develop improved adjustment-based distances as well as extensions to completed partially directed acyclic graphs and causal orders. We develop new reachability algorithms to compute the distances efficiently and to prove their low polynomial time complexity. In our package 𝚐𝚊𝚍𝚓𝚒𝚍, we provide implementations of our distances; they are orders of magnitude faster with proven lower time complexity than the structural intervention distance and thereby provide a success metric for causal discovery that scales to graph sizes that were previously prohibitive.
 
-## Get Started Real Quick 🚀 – Introductory Example
+
+## Installation
 
 Just `pip install gadjid` to install the latest release of 𝚐𝚊𝚍𝚓𝚒𝚍 \
 and run `python -c "import gadjid; help(gadjid)"` to get started
 (or see [install alternatives](https://github.com/CausalDisco/gadjid#installation--python)).
+
+## Get Started Real Quick 🚀 – Introductory Example
 
 ```python
 import gadjid
@@ -51,17 +56,7 @@ print(shd(Gtrue, Gguess))
 ```
 
 
----
-
-
-𝚐𝚊𝚍𝚓𝚒𝚍 is implemented in Rust
-and can conveniently be called from Python via our Python wrapper
-(implemented using [maturin](https://www.maturin.rs/) and [PyO3](https://pyo3.rs/)).
-
-> Evaluating graphs learned by causal discovery algorithms is difficult: The number of edges that differ between two graphs does not reflect how the graphs differ with respect to the identifying formulas they suggest for causal effects. We introduce a framework for developing causal distances between graphs which includes the structural intervention distance for directed acyclic graphs as a special case. We use this framework to develop improved adjustment-based distances as well as extensions to completed partially directed acyclic graphs and causal orders. We develop new reachability algorithms to compute the distances efficiently and to prove their low polynomial time complexity. In our package gadjid, we provide implementations of our distances; they are orders of magnitude faster with proven lower time complexity than the structural intervention distance and thereby provide a success metric for causal discovery that scales to graph sizes that were previously prohibitive.
-
-
-### Parallelism – setting the number of threads
+## Parallelism – setting the number of threads
 
 𝚐𝚊𝚍𝚓𝚒𝚍 uses [rayon](https://docs.rs/rayon/latest/rayon/) for parallelism
 using, per default, as many threads as there are physical CPU cores.
@@ -94,7 +89,7 @@ and we define normalisation as  `normalised_distance = mistake_count / p(p-1)`.
 
 You may also calculate the SID between DAGs via `parent_aid(DAGtrue, DAGguess, edge_direction)`,
 but we recommend `ancestor_aid` and `oset_aid` and for CPDAG inputs the `parent_aid` does not coincide with the SID
-(see also our accompanying article).
+(see also [our UAI paper](https://doi.org/10.48550/arXiv.2402.08616)).
 
 If `edge_direction="from row to column"`, then
 a `1` in row `r` and column `c` codes a directed edge `r → c`;
