@@ -2,10 +2,10 @@
 //! Implements the Parent Adjustment Intervention Distance (Parent-AID) algorithm
 
 use rayon::prelude::*;
-use rustc_hash::FxHashSet;
 
 use crate::{
     graph_operations::{get_nam, get_pd_nam_nva},
+    sets::NodeSet,
     PDAG,
 };
 
@@ -30,14 +30,14 @@ pub fn parent_aid(truth: &PDAG, guess: &PDAG) -> (f64, usize) {
             // --- this function differs from ancestor_aid.rs only in the imports and from here
 
             // parent adjustment
-            let adjustment_set = FxHashSet::from_iter(guess.parents_of(treatment).to_vec());
+            let adjustment_set = NodeSet::from_iter(guess.parents_of(treatment).to_vec());
 
             // in line with the original SID, claim all NonParents may be effects
             // (this is a larger set than the NonDescendants in ancestor_aid and oset_aid;
             //  that is, the validity of the adjustment set is also checked
             //  for the additional non-effect nodes in NonParents\NonDescendants)
             let claim_possible_effect =
-                FxHashSet::from_iter((0..truth.n_nodes).filter(|v| !adjustment_set.contains(v)));
+                NodeSet::from_iter((0..truth.n_nodes).filter(|v| !adjustment_set.contains(v)));
             let nam_in_guess = get_nam(guess, &[treatment]);
             // --- to here
 

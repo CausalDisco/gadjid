@@ -3,9 +3,7 @@
 //! The real logic is happening in the intersection of `gensearch` and the chosen `ruletables`.
 // (The latter of which also holds the relevant tests.)
 
-use rustc_hash::FxHashSet;
-
-use crate::PDAG;
+use crate::{sets::NodeSet, PDAG};
 
 use super::ruletables::{proper_ancestors::ProperAncestors, Parents};
 
@@ -17,7 +15,7 @@ use super::ruletables::{Ancestors, Children, Descendants};
 pub fn get_ancestors<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
+) -> NodeSet {
     let ruletable = Ancestors {};
     // gensearch yield_starting_vertices 'true' because $a \in Ancestors(a)$
     crate::graph_operations::gensearch(dag, ruletable, starting_vertices, true)
@@ -25,10 +23,7 @@ pub fn get_ancestors<'a>(
 
 /// Gets the union of children of each node. This is more efficient than calling `children_of` for each node and then joining the results.
 #[cfg(test)]
-pub fn get_children<'a>(
-    dag: &PDAG,
-    starting_vertices: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
+pub fn get_children<'a>(dag: &PDAG, starting_vertices: impl Iterator<Item = &'a usize>) -> NodeSet {
     let ruletable = Children {};
     // gensearch yield_starting_vertices 'false' because $a \notin Children(a)$
     crate::graph_operations::gensearch(dag, ruletable, starting_vertices, false)
@@ -39,7 +34,7 @@ pub fn get_children<'a>(
 pub fn get_descendants<'a>(
     dag: &PDAG,
     starting_vertices: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
+) -> NodeSet {
     let start: Vec<usize> = starting_vertices.copied().collect();
     let ruletable = Descendants {};
     // gensearch yield_starting_vertices 'true' because $a \in Descendants(a)$
@@ -47,10 +42,7 @@ pub fn get_descendants<'a>(
 }
 
 /// Gets the union of parents of each node. This is more efficient than calling `parents_of` for each node and then joining the results.
-pub fn get_parents<'a>(
-    dag: &PDAG,
-    starting_vertices: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
+pub fn get_parents<'a>(dag: &PDAG, starting_vertices: impl Iterator<Item = &'a usize>) -> NodeSet {
     let ruletable = Parents {};
     // gensearch yield_starting_vertices 'false' because $a \notin Parents(a)$
     crate::graph_operations::gensearch(dag, ruletable, starting_vertices, false)
@@ -61,8 +53,8 @@ pub fn get_proper_ancestors<'a>(
     dag: &PDAG,
     treatments: impl Iterator<Item = &'a usize>,
     responses: impl Iterator<Item = &'a usize>,
-) -> FxHashSet<usize> {
-    let treatment_hashset = FxHashSet::from_iter(treatments.copied());
+) -> NodeSet {
+    let treatment_hashset = NodeSet::from_iter(treatments.copied());
     let ruletable = ProperAncestors {
         treatments: treatment_hashset,
     };

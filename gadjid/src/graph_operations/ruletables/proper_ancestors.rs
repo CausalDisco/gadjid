@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 //! Ruletable for getting all *proper* ancestors of a set of nodes
 
-use rustc_hash::FxHashSet;
-
-use crate::partially_directed_acyclic_graph::Edge;
+use crate::{partially_directed_acyclic_graph::Edge, sets::NodeSet};
 
 use super::ruletable::RuleTable;
 
@@ -21,7 +19,7 @@ use super::ruletable::RuleTable;
 /// where T is the treatment set
 pub struct ProperAncestors {
     /// The treatment variables T that are the first not to be included as ancestors
-    pub treatments: FxHashSet<usize>,
+    pub treatments: NodeSet,
 }
 
 impl RuleTable for ProperAncestors {
