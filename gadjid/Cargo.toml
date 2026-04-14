@@ -10,7 +10,7 @@ publish = false
 
 [dependencies]
 num_cpus = "1.16"
-rand = "0.8"
+rand = "0.9"
 rand_chacha = "0.3"
 rayon = "1.10"
 rustc-hash = "1.1"
